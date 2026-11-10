@@ -1,0 +1,271 @@
+watch_stylesheet: true
+watch_config: true
+debug: false
+
+komorebi:
+  start_command: "komorebic start --whkd"
+  stop_command: "komorebic stop --whkd"
+  reload_command: "komorebic stop --whkd && komorebic start --whkd"
+
+bars:
+  status-bar:
+    enabled: true
+    screens: ['*']
+    class_name: "yasb-bar"
+    alignment:
+      position: "top"
+      align: "left"
+    blur_effect:
+      enabled: false
+      dark_mode: true
+      round_corners: false
+      border_color: None
+    window_flags:
+      always_on_top: false
+      windows_app_bar: true
+    dimensions:
+      width: "100%"
+      height: 34
+    padding:
+      top: 0
+      left: 0
+      bottom: 0
+      right: 0
+    widgets:
+      left:
+        [
+          "komorebi_control",
+          "komorebi_workspaces",
+          "active_window",
+          "cava"
+        ]
+      center: []
+      right:
+        [
+          "battery",
+          "raycast_search",
+          "clock",
+          "control_center",
+          "power_menu"
+        ]
+    layouts:
+      left:
+        alignment: "left"
+        stretch: true
+      center:
+        alignment: "center"
+        stretch: false
+      right:
+        alignment: "right"
+        stretch: true
+# The patched runtime is pinned to the matching YASB release.
+update_check: false
+
+widgets:
+  cava:
+    type: "yasb.cava.CavaWidget"
+    options:
+      bar_height: 20
+      min_bar_height: 0
+      gradient: 1
+      foreground: "#89b4fa"
+      gradient_color_1: '#74c7ec'
+      gradient_color_2: '#89b4fa'
+      gradient_color_3: '#cba6f7'
+      bars_number: 24
+      bar_spacing: 2
+      bar_width: 3
+      bar_type: "bars"
+      framerate: 144
+      hide_empty: false
+
+  komorebi_control:
+    type: "komorebi.control.KomorebiControlWidget"
+    options:
+      label: "<span>\udb80\uddd9</span>"
+      icons:
+        start: "\uead3"
+        stop: "\uead7"
+        reload: "\uead2"
+      run_ahk: false
+      run_whkd: false
+      run_masir: false
+      show_version: true
+      komorebi_menu:
+        blur: true
+        round_corners: true
+        round_corners_type: 'normal'
+        border_color: 'System'
+        alignment: 'left'
+        direction: 'down'
+        offset_top: 6
+        offset_left: 0
+      label_shadow:
+        enabled: true
+        color: "black"
+        radius: 3
+        offset: [ 1, 1 ]
+
+  komorebi_workspaces:
+    type: "komorebi.workspaces.WorkspaceWidget"
+    options:
+      label_offline: "Komorebi Offline"
+      label_workspace_btn: "\udb81\udc3d"
+      label_workspace_active_btn: "\udb81\udc3e"
+      label_workspace_populated_btn: "\udb81\udc3e"
+      label_default_name: ""
+      label_zero_index: false
+      hide_empty_workspaces: false
+      hide_if_offline: true
+      animation: true
+      toggle_workspace_layer:
+        enabled: false
+        tiling_label: "Tiling"
+        floating_label: "Floating"
+      app_icons:
+        enabled_populated: false
+        enabled_active: false
+        size: 12
+        max_icons: 0
+        hide_label: false
+        hide_duplicates: false
+        hide_floating: false
+      btn_shadow:
+        enabled: true
+        color: "black"
+        radius: 3
+        offset: [ 1, 1 ]
+
+  clock:
+    type: "yasb.clock.ClockWidget"
+    options:
+      label: "{%a, %d %b - %H:%M}"
+      label_alt: "{%A, %d %B %Y - %H:%M}"
+      timezones: []
+      update_interval: 1000
+      calendar:
+        alignment: "right"
+        blur: True
+        round_corners: True
+        round_corners_type: "small"
+        border_color: "System"
+        direction: "down"
+        show_holidays: true
+        show_week_numbers: False
+        holiday_color: "#ff9f00"
+      callbacks:
+        on_left: "toggle_calendar"
+        on_middle: "do_nothing"
+        on_right: "toggle_label"
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 1
+        offset: [ 1, 1 ]
+
+  power_menu:
+      type: "yasb.power_menu.PowerMenuWidget"
+      options:
+        label: "\uf011"
+        uptime: True
+        blur: True
+        blur_background: True
+        animation_duration: 250 # Milisecond
+        button_row: 5 # Number of buttons in row, min 1 max 5
+        buttons:
+          shutdown: ["\uf011","Shut Down"]
+          restart: ["\uead2","Restart"]
+          signout: ["\udb80\udf43","Sign out"]
+          cancel: ["\udb81\udf3a","Cancel"]
+
+  active_window:
+    type: "yasb.active_window.ActiveWindowWidget"
+    options:
+      label: "{win[title]}"
+      label_alt: "[{win[process][name]}]"
+      label_no_window: ""
+      label_icon: true
+      label_icon_size: 14
+      max_length: 30
+      max_length_ellipsis: "..."
+      monitor_exclusive: true
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "do_nothing"
+        on_right: "do_nothing"
+      label_shadow:
+        enabled: true
+        color: "black"
+        radius: 3
+        offset: [ 1, 1 ]
+
+  battery:
+    type: "yasb.battery.BatteryWidget"
+    options:
+      label: "{icon} {percent}%"
+      label_alt: "{icon} {percent}% {time_remaining}"
+      time_remaining_natural: true
+      hide_unsupported: true
+      update_interval: 5000
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "do_nothing"
+        on_right: "exec cmd.exe /c start ms-settings:batterysaver"
+      charging_options:
+        icon_format: "{charging_icon}"
+        blink_charging_icon: true
+        blink_interval: 500
+      status_thresholds:
+        critical: 10
+        low: 25
+        medium: 75
+        high: 95
+        full: 100
+      status_icons:
+        icon_charging: "\udb80\udc84"
+        icon_critical: "\udb80\udc7a"
+        icon_low: "\udb80\udc7c"
+        icon_medium: "\udb80\udc7e"
+        icon_high: "\udb80\udc82"
+        icon_full: "\udb80\udc79"
+      label_shadow:
+        enabled: true
+        color: "black"
+        radius: 3
+        offset: [ 1, 1 ]
+
+  raycast_search:
+    type: "yasb.custom.CustomWidget"
+    options:
+      class_name: "raycast-search"
+      label: "<span>\uf002</span>"
+      tooltip: true
+      tooltip_label: "Raycast"
+      exec_options: {use_shell: false}
+      callbacks:
+        on_left: "open_raycast"
+
+  control_center:
+    type: "yasb.control_center.ControlCenterWidget"
+    options:
+      label: "<span>\uf1de</span>"
+      tooltip: true
+      popup: {blur: true, round_corners: true, border_color: "None", alignment: "right", direction: "down", offset_top: 5}
+      sections_order: ["quick_actions", "sliders"]
+      sections:
+        system_controls: {show: false}
+        power: {show: false}
+        media: {show: false}
+        quick_actions:
+          columns: 3
+          actions:
+            - {id: network, label: "Mạng", icon: "\ue701", command: "ms-settings:network"}
+            - {id: bluetooth, label: "Bluetooth", icon: "\ue702", command: "ms-settings:bluetooth"}
+            - {id: toggle_dnd, label: "Không làm phiền", icon: "\ue7ed"}
+            - {id: toggle_mic_mute, label: "Mic", icon: "\ue720"}
+            - {id: screenshot, label: "Chụp vùng", icon: "\ue91b"}
+            - {id: settings, label: "Cài đặt", icon: "\ue713", command: "ms-settings:"}
+        sliders:
+          brightness: {icon: "\ue706", show_slider: false}
+          microphone: {icon: "\ue720", show_slider: false}
+          volume: {icon: "\ue767", show_source_selector: true, source_selector_icon: "\ue76c"}
