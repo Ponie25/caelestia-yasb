@@ -22,7 +22,15 @@ function Get-VerifiedFile($Artifact, [string]$Destination) {
     if ($LASTEXITCODE -ne 0) {
         throw "Download failed: $($Artifact.name)"
     }
-    if ((Get-FileHash -LiteralPath $Destination -Algorithm SHA256).Hash -ne $Artifact.sha256) {
+    $stream = [IO.File]::OpenRead($Destination)
+    $sha256 = [Security.Cryptography.SHA256]::Create()
+    try {
+        $digest = [BitConverter]::ToString($sha256.ComputeHash($stream)).Replace('-', '')
+    } finally {
+        $stream.Dispose()
+        $sha256.Dispose()
+    }
+    if ($digest -ne $Artifact.sha256) {
         throw "SHA-256 verification failed: $($Artifact.name)"
     }
 }
