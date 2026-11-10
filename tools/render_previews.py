@@ -21,6 +21,7 @@ from PySide6.QtWidgets import QApplication
 
 from audio_mixer import AppVolume, MUTE, VOLUME
 from dashboard import TAB_RECTS
+from activities import CodexTurn
 from media import RepeatMode
 from resources import Sample
 from weather import Forecast, ForecastDay
@@ -146,6 +147,22 @@ def main():
         "browser": AppVolume("Browser", "", 39, False, []),
         "system": AppVolume("Âm thanh hệ thống", "", 18, True, []),
     }
+    now = int(time.time())
+    dashboard.live.turns = (CodexTurn('demo', 'demo', now - 42, 'inProgress'),)
+    dashboard.live.deadline = now + 275
+    dashboard.live.stopwatch_start = time.monotonic() - 34
+    dashboard.live.output = 'Tai nghe USB'
+    dashboard.live.set_notifications(tuple(
+        dict(id=i, app=sender, title=title, body=body, at=now - 180 * i)
+        for i, (sender, title, body) in enumerate((
+            ('Discord', 'Kế hoạch tối nay', 'Mình đã gửi lịch mới trong nhóm.'),
+            ('GitHub', 'Checks completed', 'Tất cả kiểm tra đều đã chạy xong.'),
+            ('Lịch Windows', 'Cuộc họp nhóm', 'Bắt đầu trong 15 phút.'),
+            ('Microsoft Store', 'Cập nhật hoàn tất', 'Các ứng dụng đã sẵn sàng.'),
+            ('Điện thoại', 'Có tin nhắn mới', 'Mở điện thoại để xem cuộc trò chuyện.'),
+            ('Hệ thống', 'Đã kết nối Wi-Fi', 'Bạn đang trực tuyến.'),
+        ))
+    ))
 
     widget.show()
     app.processEvents()
@@ -154,7 +171,7 @@ def main():
         dashboard.tab = tab
         widget.update()
         app.processEvents()
-        capture(widget, out / (tab.lower() + ".png"))
+        capture(widget, out / (tab.lower().replace(' ', '-') + ".png"))
 
     dashboard.tab = "Media"
     left = Qt.MouseButton.LeftButton
@@ -176,7 +193,7 @@ def main():
     capture(widget, out / "closed-island.png", crop_width=142)
     widget.hide()
     metrics.close()
-    print("Captured all four tabs and checked playback, output volume and per-app mixer clicks.")
+    print("Captured all five tabs and checked playback, output volume and per-app mixer clicks.")
 
 
 if __name__ == "__main__":

@@ -1,13 +1,20 @@
+from base64 import b64encode
+import hashlib
+from io import BytesIO
+import json
 import logging
 import os
 import subprocess
 import sys
 import uuid
 from contextlib import suppress
+from functools import lru_cache
 from pathlib import Path
+from types import SimpleNamespace
 
-from PyQt6.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, QThread, QTimer, Qt, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QFontDatabase, QScreen
+from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtWidgets import QApplication
 from qt_css_engine import TransitionEngine, extract_rules
 
@@ -29,9 +36,58 @@ from core.validation.config import YasbConfig
 from settings import DEFAULT_CONFIG_DIRECTORY
 
 
+def _island_logo_png(image):
+    from PIL import Image
+
+    image.thumbnail((48, 48), Image.Resampling.LANCZOS)
+    with BytesIO() as data:
+        image.convert("RGBA").save(data, format="PNG")
+        return b64encode(data.getvalue()).decode("ascii")
+
+
+def _island_local_logo(value):
+    from PIL import Image
+
+    if not value:
+        return ""
+    path = Path(value)
+    roots = tuple(Path(directory).resolve() for key in ("LOCALAPPDATA", "TEMP", "ProgramFiles")
+                  if (directory := os.getenv(key)))
+    if (path.drive.startswith(("\\\\", "//")) or
+        not any(path.is_relative_to(root) for root in roots)):
+        return ""
+    try:
+        if path.stat().st_size > 2 * 1024 * 1024:
+            return ""
+        with Image.open(path) as image:
+            if image.width * image.height <= 4_000_000:
+                return _island_logo_png(image)
+    except (OSError, ValueError, Image.DecompressionBombError):
+        pass
+    return ""
+
+
+@lru_cache(maxsize=48)
+def _island_app_logo(aumid):
+    from comtypes import CoInitialize, CoUninitialize
+    from core.utils.icons.sources import AppIcon, load_icon
+
+    try:
+        CoInitialize()
+        try:
+            image = load_icon(AppIcon(aumid), 48).image
+            return _island_logo_png(image) if image is not None else ""
+        finally:
+            CoUninitialize()
+    except Exception:
+        logging.debug("Could not load Island notification icon", exc_info=True)
+        return ""
+
+
 class BarManager(QObject):
     styles_modified = pyqtSignal()
     config_modified = pyqtSignal()
+    island_notifications = pyqtSignal(object)
 
     def __init__(self, config: YasbConfig, stylesheet: str):
         super().__init__()
@@ -60,6 +116,9 @@ class BarManager(QObject):
             raise RuntimeError("BarManager requires a running QApplication")
         self._app = app
         self._island = None
+        self._island_seen_toasts = None
+        self._island_notification_bridge = False
+        self.island_notifications.connect(self._forward_island_notifications, Qt.ConnectionType.QueuedConnection)
         for font in (Path(DEFAULT_CONFIG_DIRECTORY) / "fonts").glob("*.ttf"):
             if QFontDatabase.addApplicationFont(str(font)) == -1:
                 logging.warning("Could not load bundled font %s", font.name)
@@ -119,6 +178,10 @@ class BarManager(QObject):
             self._threads[listener] = thread
 
     def stop_listener_threads(self):
+        if self._island_notification_bridge:
+            self.event_service.unregister_event("WindowsNotificationsChanged", self.island_notifications)
+            self._island_notification_bridge = False
+            self._island_commands.close()
         # Stop hotkey listener first
         if self._hotkey_listener is not None:
             logging.info("Stopping HotkeyListener...")
@@ -192,10 +255,139 @@ class BarManager(QObject):
         self._initialized_screens = initialized_screens
         self._collect_keybindings()
         self._start_hotkey_listener()
+        if init and self.bars:
+            self._connect_island_notifications()
         self.run_listeners_in_threads()
         self._widget_builder.raise_alerts_if_errors_present()
         if init and self.bars:
             self._start_island()
+
+    def _connect_island_notifications(self):
+        root = Path(DEFAULT_CONFIG_DIRECTORY) / "dynamic-island"
+        if not (root / "activities.py").is_file():
+            return
+        try:
+            from core.widgets.services.notifications.windows_notification import (
+                WindowsNotificationEventListener, _find_image, _get_app_info, _get_image_path,
+                _get_texts, _pop_toast, _read_toast_xml,
+            )
+            from winrt.windows.ui.notifications import NotificationKinds
+            from winrt.windows.ui.notifications.management import UserNotificationListenerAccessStatus
+        except ImportError:
+            logging.warning("The Windows notification listener is unavailable")
+            return
+        if WindowsNotificationEventListener not in self.widget_event_listeners:
+            class IslandToastListener(WindowsNotificationEventListener):
+                async def _read_notifications(self):
+                    listener = self._listener
+                    if listener is None:
+                        return None
+                    try:
+                        if listener.get_access_status() != UserNotificationListenerAccessStatus.ALLOWED:
+                            return None
+                        toasts = await listener.get_notifications_async(NotificationKinds.TOAST)
+                    except OSError:
+                        return None
+                    self._app_info = {toast.id: self._app_info.get(toast.id) or _get_app_info(toast)
+                                      for toast in toasts}
+                    known = {item.id for item in self._items}
+                    items = []
+                    made_icon = False
+                    for toast in sorted(toasts, key=lambda item: item.creation_time, reverse=True):
+                        texts = _get_texts(toast)
+                        title, *body = texts or [""]
+                        aumid, app_name, family = self._app_info[toast.id]
+                        logo = ""
+                        if not made_icon and toast.id not in known and aumid:
+                            made_icon = True
+                            xml = _pop_toast(_read_toast_xml(aumid, 20), texts)
+                            if xml is not None:
+                                path = _get_image_path(_find_image(xml, "appLogoOverride"), aumid, family)
+                                logo = _island_local_logo(path)
+                            logo = logo or _island_app_logo(aumid)
+                        items.append(SimpleNamespace(id=toast.id, aumid=aumid, app_name=app_name, icon=logo,
+                                                     title=title, body="\n".join(body),
+                                                     created_at=toast.creation_time))
+                    return items
+
+            self.widget_event_listeners.add(IslandToastListener)
+        self.event_service.register_event("WindowsNotificationsChanged", self.island_notifications)
+        self._island_notification_bridge = True
+        key = hashlib.sha256(os.fsencode(os.path.normcase(str(root.resolve())))).hexdigest()[:20]
+        self._island_pipe = "caelestia-yasb-" + key
+        self._island_commands = QLocalServer(self)
+        self._island_commands.setSocketOptions(QLocalServer.SocketOption.UserAccessOption)
+        self._island_commands.newConnection.connect(self._accept_island_commands)
+        if not self._island_commands.listen(self._island_pipe + "-commands"):
+            logging.warning("Could not listen for Island notification commands")
+        QTimer.singleShot(800, lambda: self.event_service.emit_event("WindowsNotificationRefresh", "island"))
+
+    def _accept_island_commands(self):
+        while self._island_commands.hasPendingConnections():
+            socket = self._island_commands.nextPendingConnection()
+            socket.setReadBufferSize(256)
+            socket.readyRead.connect(lambda sock=socket: self._read_island_command(sock))
+            socket.disconnected.connect(socket.deleteLater)
+            timer = QTimer(socket, interval=1500, singleShot=True)
+            timer.timeout.connect(socket.abort)
+            timer.start()
+            self._read_island_command(socket)
+
+    def _read_island_command(self, socket):
+        if not socket.canReadLine():
+            if socket.bytesAvailable() >= 256:
+                socket.abort()
+            return
+        try:
+            message = json.loads(bytes(socket.readLine(256)))
+            if message.get("refresh") is True:
+                self.event_service.emit_event("WindowsNotificationRefresh", "island")
+            elif message.get("clear") is True and self._island_seen_toasts:
+                self.event_service.emit_event("WindowsNotificationClear", "island")
+            elif type(message.get("dismiss")) is int and message["dismiss"] in (self._island_seen_toasts or ()):
+                self.event_service.emit_event("WindowsNotificationRemove", message["dismiss"])
+        except (AttributeError, UnicodeError, ValueError):
+            pass
+        socket.disconnectFromServer()
+
+    @pyqtSlot(object)
+    def _forward_island_notifications(self, items):
+        if not self._island_notification_bridge:
+            return
+        previous = self._island_seen_toasts
+        self._island_seen_toasts = None if items is None else {item.id for item in items}
+        rows = None if items is None else [
+            {"id": item.id, "app": item.app_name[:80], "title": item.title[:220],
+             "body": item.body[:900], "at": int(item.created_at.timestamp())}
+            for item in items
+        ]
+        self._send_island_notification({"kind": "snapshot", "items": rows})
+        if previous is None or items is None:
+            return
+        new = [item for item in items if item.id not in previous]
+        if not new:
+            return
+
+        from core.widgets.services.dnd.dnd_api import DndService
+
+        if DndService.get_status() in ("priority", "alarms"):
+            return
+        latest = new[0]
+        self._send_island_notification({"app": latest.app_name[:64], "count": min(999, len(new)),
+                                        "icon": getattr(latest, "icon", "")})
+
+    def _send_island_notification(self, message):
+        payload = json.dumps(message, ensure_ascii=False, separators=(",", ":")).encode("utf-8") + b"\n"
+        socket = QLocalSocket(self)
+
+        def send():
+            socket.write(payload)
+            socket.disconnectFromServer()
+
+        socket.connected.connect(send)
+        socket.disconnected.connect(socket.deleteLater)
+        socket.errorOccurred.connect(socket.deleteLater)
+        socket.connectToServer(self._island_pipe)
 
     def _start_island(self):
         island = Path(DEFAULT_CONFIG_DIRECTORY) / "dynamic-island" / "island.pyw"

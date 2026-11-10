@@ -7,6 +7,7 @@ from PySide6.QtGui import QColor, QFont, QImage, QMovie, QPainter, QPen
 
 from audio_mixer import AudioMixer
 from icons import icon
+from live_activity import LiveActivity, SUMMARY
 from palette import BASE, LAVENDER, MANTLE, MAUVE, MUTED, OVERLAY, PINK, SURFACE, SURFACE2, TEXT
 import player
 from player import pill, text
@@ -18,8 +19,9 @@ from weather import CITY, Weather, condition
 WIDTH = 728
 HEIGHT = 456
 PANEL_WIDTH = 712
-TABS = (('Dashboard', 'grid'), ('Media', 'music'), ('Performance', 'gauge'), ('Weather', 'cloud'))
-TAB_RECTS = {name: QRectF(22 + 163 * i, 12, 157, 47) for i, (name, _) in enumerate(TABS)}
+TABS = (('Dashboard', 'grid'), ('Media', 'music'), ('Performance', 'gauge'),
+        ('Weather', 'cloud'), ('Live Activity', 'activity'))
+TAB_RECTS = {name: QRectF(22 + 130 * i, 12, 124, 47) for i, (name, _) in enumerate(TABS)}
 CLOSE = QRectF(679, 22, 26, 26)
 WEATHER = QRectF(22, 77, 207, 97)
 SYSTEM = QRectF(239, 77, 267, 97)
@@ -28,7 +30,7 @@ CLOCK = QRectF(22, 184, 88, 255)
 CALENDAR = QRectF(120, 184, 288, 255)
 LEVELS = QRectF(418, 184, 88, 255)
 MEDIA = QRectF(516, 77, 190, 362)
-CAT = QRectF(547, 344, 128, 81)
+CAT = QRectF(552, 332, 118, 68)
 MONTH_PREV = QRectF(134, 196, 27, 27)
 MONTH_NEXT = QRectF(367, 196, 27, 27)
 TODAY = QRectF(166, 196, 196, 27)
@@ -81,10 +83,12 @@ class Dashboard:
         self.cat.jumpToFrame(0)
         self.transition = None
         self.audio = AudioMixer()
+        self.live = LiveActivity()
 
     def opened(self):
         self.tab = 'Dashboard'
         self.transition = None
+        self.live.output_open = self.live.confirm_clear = False
         self.sample()
 
     def sample(self):
@@ -110,6 +114,8 @@ class Dashboard:
             return None
         if self.tab == 'Media':
             return tab_views.media_target(point, state) or self.audio.action_at(point)
+        if self.tab == 'Live Activity':
+            return self.live.action_at(point)
         if self.tab == 'Weather' and tab_views.WEATHER_REFRESH.contains(point):
             return 'refresh'
         if self.tab == 'Performance' and len(self.metrics.drives) > 1 and tab_views.DRIVE_SWITCH.contains(point):
@@ -120,6 +126,8 @@ class Dashboard:
                              ('month_next', MONTH_NEXT), ('today', TODAY)):
             if rect.contains(point):
                 return action
+        if SUMMARY.contains(point):
+            return 'Live Activity'
         if MEDIA.contains(point):
             if state.title:
                 for action, x in MINI_TRANSPORT.items():
@@ -150,6 +158,8 @@ class Dashboard:
         direction = 1 if tuple(TAB_RECTS).index(tab) > tuple(TAB_RECTS).index(self.tab) else -1
         from_indicator = self.indicator()
         outgoing = self._snapshot(scale, lambda p: self._page(p, state, art, volume, None, None, None))
+        if self.tab == 'Live Activity':
+            self.live.confirm_clear = False
         self.tab = tab
         if tab == 'Weather':
             self.weather.refresh()
@@ -223,8 +233,10 @@ class Dashboard:
             self.audio.draw(painter, volume, hover, volume_preview, app_drag, app_preview)
         elif self.tab == 'Performance':
             tab_views.performance_view(painter, self.metrics, hover)
-        else:
+        elif self.tab == 'Weather':
             tab_views.weather_view(painter, self.weather, hover, WEEK)
+        else:
+            self.live.draw(painter, hover)
 
     def _overview(self, painter, state, art, hover):
         _card(painter, WEATHER, 28, SURFACE if hover == 'Weather' else BASE)
@@ -313,3 +325,4 @@ class Dashboard:
             rect = QRectF(QPointF(), QSizeF(frame.size()).scaled(CAT.size(), Qt.AspectRatioMode.KeepAspectRatio))
             rect.moveCenter(CAT.center())
             painter.drawImage(rect, frame)
+        self.live.draw_summary(painter, hover == 'Live Activity')

@@ -4,7 +4,7 @@ A horizontal YASB setup for Windows 11 with a Caelestia-inspired Dynamic Island,
 
 [Download the Windows setup](https://github.com/Ponie25/caelestia-yasb/releases/latest) · [Cài đặt tiếng Việt](#cài-đặt-tiếng-việt)
 
-![The expanded Dashboard with calendar, weather, media controls and Bongo Cat](docs/screenshots/dashboard.png)
+![Dynamic Island showcase with all five tabs, the audio output picker and compact activity states](docs/screenshots/dynamic-island-showcase-16x9.png)
 
 ## Install
 
@@ -22,16 +22,17 @@ Requires **Windows 11 x64**, an internet connection for setup, and about **1 GB*
 | **Media** | Playback, seek, shuffle, and repeat when supported by the player. The mixer adjusts or mutes the default output and individual apps with active Windows audio sessions. |
 | **Performance** | CPU, RAM, storage, and network activity. Compatible NVIDIA drivers also expose GPU load and temperature through NVML. |
 | **Weather** | Hanoi conditions, sunrise and sunset, and a seven-day forecast from Open-Meteo. |
+| **Live Activity** | Countdown, stopwatch and laps, active Codex turns, the Windows audio output, and the notifications currently in Windows Notification Center. |
 
-| Media and audio mixer | Performance |
-| --- | --- |
-| ![Media playback and audio mixer](docs/screenshots/media.png) | ![Performance tab](docs/screenshots/performance.png) |
-| **Weather** | **Quick Settings** |
-| ![Hanoi weather and seven-day forecast](docs/screenshots/weather.png) | ![Quick Settings grid and volume control](docs/screenshots/quick-settings.png) |
+The showcase uses sample media, notifications, and device data. The Windows account picture is read locally at runtime.
 
-The screenshots use sample media and device data. The Windows account picture is read locally at runtime.
+### Compact activities
 
-![Closed Island with a thin border and no visible fill](docs/screenshots/closed-island.png)
+Music and an active Codex turn occupy separate parts of the pill. The Codex timer sits at the right edge of its segment. A Windows toast adds a five-second banner with the app icon or a site icon supplied by Windows. Bursts group together. Click anywhere on the collapsed pill to open the Dashboard.
+
+Open **Live Activity** from the tab or the summary beneath Bongo Cat. The countdown supports presets, minute adjustments, pause and reset. The stopwatch can record a lap. Open a notification to read its full preview, dismiss it individually, or confirm **Xóa hết** to clear Windows Notification Center. The audio row opens the device and volume controls. The Mixer button opens per-app audio controls.
+
+The Codex timer counts the entire turn using read-only lifecycle fields in the desktop client's local turn-history database. The notification bridge requires Windows notification access and uses local, per-user IPC. Do Not Disturb suppresses the compact alert while the list stays available.
 
 ## Bar and optional integrations
 
@@ -41,6 +42,8 @@ The screenshots use sample media and device data. The Windows account picture is
 - **Komorebi** keeps the original workspace styling when `komorebic.exe` is available on PATH during setup. The installer omits those widgets on a standard Windows desktop.
 - **Power** opens shutdown, restart, and sign-out actions. The battery indicator hides itself on systems without a battery.
 
+![Quick Settings grid and volume control](docs/screenshots/quick-settings.png)
+
 The bar follows YASB's monitor settings. The Island anchors to the bar on the primary display.
 
 ## Customize or remove
@@ -48,6 +51,7 @@ The bar follows YASB's monitor settings. The Island anchors to the bar on the pr
 - Edit `config\config.yaml` and `config\styles.css` inside the install folder. For a different weather location, edit `CITY`, latitude, longitude and timezone in `config\dynamic-island\weather.py`, then restart the bar.
 - To start at sign-in, press **Win + R**, open `shell:startup`, and put a shortcut to the installed `start.cmd` there.
 - To remove the setup, quit YASB from the tray, remove the **Start Caelestia YASB** shortcut from the Start menu and any startup shortcut you added, and delete the install folder.
+- To install a new release alongside an existing copy, pass a fresh path with `-InstallDir`, for example `install.cmd -InstallDir "%LOCALAPPDATA%\CaelestiaYASB-1.1"` in Command Prompt.
 - To stage a separate test copy, run the following from the extracted folder.
 
 ```powershell
