@@ -1,0 +1,14 @@
+{
+  "CRUST": "#11111b",
+  "MANTLE": "#181825",
+  "BASE": "#1e1e2e",
+  "SURFACE": "#313244",
+  "SURFACE2": "#45475a",
+  "OVERLAY": "#9194a4",
+  "MUTED": "#b6bcd2",
+  "TEXT": "#dbe1f7",
+  "LAVENDER": "#b4befe",
+  "MAUVE": "#cca7f7",
+  "PINK": "#f5c2e7",
+  "ROSEWATER": "#f5e0dc"
+}

@@ -5,3 +5,15 @@ __pycache__/
 *.lock
 *.whl
 config/dynamic-island/runtime/
+config/dynamic-island/backup/
+config/dynamic-island/launcher-apps.json
+config/dynamic-island/launcher-history.json
+config/dynamic-island/material-status.json
+config/settings-backups/
+config/initial-settings-backup.json
+config/komorebi-runtime.json
+config/komorebi-original-colors.json
+config/reopen-bar-settings.json
+*.obj
+*.exp
+*.lib

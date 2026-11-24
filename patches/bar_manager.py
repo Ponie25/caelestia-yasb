@@ -23,7 +23,8 @@ from core.bar_helper import GlobalState
 from core.config import get_config, get_stylesheet
 from core.events.service import EventService
 from core.utils.controller import reload_application
-from core.utils.utilities import get_screen_by_name
+from core.utils.utilities import get_screen_by_name, install_menu_motion
+from core.utils.bar_theme import BarThemeController
 from core.utils.widget_builder import WidgetBuilder
 from core.utils.win32.hotkeys import (
     HotkeyBinding,
@@ -115,6 +116,8 @@ class BarManager(QObject):
         if not isinstance(app, QApplication):
             raise RuntimeError("BarManager requires a running QApplication")
         self._app = app
+        install_menu_motion(app)
+        self._bar_theme = BarThemeController(self)
         self._island = None
         self._island_seen_toasts = None
         self._island_notification_bridge = False

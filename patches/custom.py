@@ -86,6 +86,7 @@ class CustomWidget(BaseWidget):
         self.register_callback("toggle_label", self._toggle_label)
         if config.class_name == "raycast-search":
             self.register_callback("open_raycast", self._open_raycast)
+            self.register_callback("open_launcher", self._open_launcher)
         self.register_callback("exec_custom", self._exec_callback)
 
         self.callback_left = self.config.callbacks.on_left
@@ -98,39 +99,88 @@ class CustomWidget(BaseWidget):
         else:
             self.start_timer()
 
+    def _open_launcher(self):
+        """Open the resident Island without spawning another program."""
+        import hashlib
+        import os
+        from pathlib import Path
+        from ctypes import wintypes
+        from PyQt6.QtCore import QTimer
+        from PyQt6.QtNetwork import QLocalSocket
+        from settings import DEFAULT_CONFIG_DIRECTORY
+        root=Path(DEFAULT_CONFIG_DIRECTORY)/'dynamic-island'
+        key=hashlib.sha256(os.fsencode(os.path.normcase(str(root.resolve())))).hexdigest()[:20]
+        socket=QLocalSocket(self)
+        def send():
+            kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+            server=kernel.GetNamedPipeServerProcessId
+            server.argtypes=[wintypes.HANDLE,ctypes.POINTER(wintypes.DWORD)];server.restype=wintypes.BOOL
+            process=wintypes.DWORD()
+            if server(wintypes.HANDLE(int(socket.socketDescriptor())),ctypes.byref(process)):
+                ctypes.windll.user32.AllowSetForegroundWindow(process.value)
+            socket.write(b'{"kind":"launcher","action":"open"}\n')
+            socket.disconnectFromServer()
+        socket.connected.connect(send)
+        socket.disconnected.connect(socket.deleteLater)
+        socket.errorOccurred.connect(socket.deleteLater)
+        timer=QTimer(socket);timer.setSingleShot(True);timer.setInterval(1200)
+        timer.timeout.connect(socket.abort);timer.start()
+        socket.connectToServer('caelestia-yasb-'+key)
+
+    @staticmethod
+    def _send_raycast_front():
+        """Use the same local IPC message as Raycast's second-instance launch."""
+        import msvcrt
+        from ctypes import wintypes
+
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        wait = kernel.WaitNamedPipeW
+        wait.argtypes = [wintypes.LPCWSTR, wintypes.DWORD]
+        wait.restype = wintypes.BOOL
+        pipe_name = r"\\.\pipe\InterRaycastProductionNamedPipe"
+        if not wait(pipe_name, 100):
+            return False
+        try:
+            with open(pipe_name, "wb", buffering=0) as pipe:
+                server_pid = wintypes.ULONG()
+                server = kernel.GetNamedPipeServerProcessId
+                server.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.ULONG)]
+                server.restype = wintypes.BOOL
+                if server(msvcrt.get_osfhandle(pipe.fileno()), ctypes.byref(server_pid)):
+                    allow = ctypes.WinDLL("user32", use_last_error=True).AllowSetForegroundWindow
+                    allow.argtypes = [wintypes.DWORD]
+                    allow.restype = wintypes.BOOL
+                    allow(server_pid.value)
+                message = {"Type": "Raycast.InterRaycastPipe.BringRaycastToFront, Raycast", "Payload": "{}"}
+                pipe.write((json.dumps(message, separators=(",", ":")) + "\n").encode("utf-8"))
+            return True
+        except OSError:
+            return False
+
     @staticmethod
     def _open_raycast():
-        from core.utils.shell_utils import shell_open
-        from core.utils.win32.bindings.user32 import (
-            GetForegroundWindow, GetWindowText, IsIconic, IsWindowVisible,
-            SetForegroundWindow, enum_windows,
-        )
-        from core.utils.win32.utils import get_process_info, get_window_rect
+        def show_search():
+            import time
+            from core.utils.shell_utils import shell_open
 
-        for hwnd in enum_windows():
-            if not IsWindowVisible(hwnd) or IsIconic(hwnd) or GetWindowText(hwnd) != "Raycast":
-                continue
-            try:
-                bounds = get_window_rect(hwnd)
-            except OSError:
-                continue
-            if bounds["width"] < 160 or bounds["height"] < 50:
-                continue
-            if (get_process_info(hwnd)["name"] or "").casefold() != "raycast.exe":
-                continue
-            if GetForegroundWindow() == hwnd or SetForegroundWindow(hwnd):
+            if CustomWidget._send_raycast_front():
                 return
-
-        family = "Raycast.Raycast_qypenmj9wpt2a"
-        count, length = ctypes.c_uint32(), ctypes.c_uint32()
-        packages = ctypes.windll.kernel32.GetPackagesByPackageFamily
-        packages.argtypes = [ctypes.c_wchar_p, ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p,
-                             ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p]
-        packages(family, ctypes.byref(count), None, ctypes.byref(length), None)
-        if count.value:
+            family = "Raycast.Raycast_qypenmj9wpt2a"
+            count, length = ctypes.c_uint32(), ctypes.c_uint32()
+            packages = ctypes.windll.kernel32.GetPackagesByPackageFamily
+            packages.argtypes = [ctypes.c_wchar_p, ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p,
+                                 ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p]
+            packages(family, ctypes.byref(count), None, ctypes.byref(length), None)
+            if not count.value:
+                return
             shell_open(rf"shell:AppsFolder\{family}!Raycast")
-        else:
-            function_map["search"]()
+            deadline = time.monotonic() + 5
+            while time.monotonic() < deadline:
+                if CustomWidget._send_raycast_front():
+                    return
+                time.sleep(0.04)
+
+        threading.Thread(target=show_search, name="RaycastSearch", daemon=True).start()
 
     def _toggle_label(self):
         self._show_alt_label = not self._show_alt_label

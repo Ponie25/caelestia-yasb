@@ -1,0 +1,32 @@
+{
+  "curves": {
+    "spatial": [
+      0.38,
+      1.21,
+      0.22,
+      1
+    ],
+    "fast": [
+      0.42,
+      1.67,
+      0.21,
+      0.9
+    ],
+    "effects": [
+      0.34,
+      0.8,
+      0.34,
+      1
+    ]
+  },
+  "durations": {
+    "launcher": 560,
+    "popup": 440,
+    "menu": 320,
+    "dialog": 360,
+    "page": 280,
+    "section": 320,
+    "control": 160,
+    "close": 220
+  }
+}

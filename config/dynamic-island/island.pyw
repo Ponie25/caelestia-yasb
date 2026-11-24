@@ -12,7 +12,7 @@ import time
 ROOT = Path(__file__).resolve().parent
 sys.path[:0] = [str(ROOT / 'runtime'), str(ROOT)]
 
-from PySide6.QtCore import QPointF, QRectF, Qt, QLockFile, QTimer, Signal
+from PySide6.QtCore import QEvent, QPointF, QRectF, Qt, QLockFile, QTimer, Signal
 from PySide6.QtGui import QBrush, QColor, QCursor, QFont, QFontMetrics, QImage, QLinearGradient, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QApplication, QWidget
 from winrt.windows.system import User, UserPictureSize
@@ -22,7 +22,12 @@ from audio_mixer import ROWS
 import player
 from dashboard import Dashboard, HEIGHT, PANEL_WIDTH, TAB_RECTS, WIDTH
 import tab_views
-from glass import GlassLayer
+from liquid_glass import MaterialLayer,compact_colors
+from launcher import LauncherMixin
+from launcher_view import curve
+import motion_spec
+import launcher_focus
+from theme_tokens import glass_alpha,is_light
 from icons import icon
 from live_activity import OUTPUT_VOLUME, clock_text
 from media import MediaState, MediaWorker, read_image_bytes
@@ -47,6 +52,7 @@ class Dock:
     def __init__(self):
         self.native = ctypes.WinDLL('user32', use_last_error=True)
         self.bar = None
+        self.bottom = False
         self.native.FindWindowExW.argtypes = [wintypes.HWND, wintypes.HWND, wintypes.LPCWSTR, wintypes.LPCWSTR]
         self.native.FindWindowExW.restype = wintypes.HWND
         self.native.GetWindowRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
@@ -66,14 +72,14 @@ class Dock:
             return bounds
         return None
 
-    def anchor(self, screen):
+    def anchor(self, screen, popup_height=32, allow_fullscreen=False):
         geometry = screen.geometry()
         scale = screen.devicePixelRatio()
         width = round(geometry.width() * scale)
         height = round(geometry.height() * scale)
 
         def is_primary_bar(rect):
-            return rect and rect.top <= 120 * scale and 0 <= rect.bottom <= 160 * scale and rect.left <= width // 2 < rect.right
+            return rect and (rect.top <= 120 * scale or rect.top >= height - 160 * scale) and 0 < rect.bottom - rect.top <= 160 * scale and rect.left <= width // 2 < rect.right
 
         bounds = self._bounds(self.bar)
         if not is_primary_bar(bounds):
@@ -90,7 +96,7 @@ class Dock:
 
         foreground = self.native.GetForegroundWindow()
         active = self._bounds(foreground)
-        if active and not self.native.IsZoomed(foreground) and (
+        if not allow_fullscreen and active and not self.native.IsZoomed(foreground) and (
             active.left <= 2 and active.top <= 2 and active.right >= width - 2 and active.bottom >= height - 2
         ):
             name = ctypes.create_unicode_buffer(96)
@@ -101,7 +107,11 @@ class Dock:
         center = geometry.x() + round((bounds.left + bounds.right) / (2 * scale))
         top = geometry.y() + round(bounds.top / scale)
         bar_height = round((bounds.bottom - bounds.top) / scale)
-        return center, top + max(0, (bar_height - 28) // 2)
+        self.bottom = bounds.top > height // 2
+        y = top + max(0, (bar_height - 28) // 2)
+        if self.bottom:
+            y -= max(0, popup_height - 32)
+        return center, y
 
 
 def rounded(rect, radius):
@@ -110,7 +120,7 @@ def rounded(rect, radius):
     return path
 
 
-class Island(QWidget):
+class Island(LauncherMixin,QWidget):
     refresh_notifications = Signal()
     avatar_loaded = Signal(QImage)
     WIDTH = WIDTH
@@ -126,10 +136,12 @@ class Island(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setMouseTracking(True)
         self.setFixedSize(self.WIDTH, self.PILL_HEIGHT)
+        self.launcher_active = self.launcher_mode = False
+        self.preferences = {}
         self.command = command
         self.release_pause = release_pause
         self.dock = Dock()
-        self.glass = GlassLayer()
+        self.glass = MaterialLayer(ROOT,self)
         self.volume = OutputVolume()
         self.dashboard = Dashboard()
         self.dashboard.weather.changed.connect(self.update)
@@ -194,10 +206,13 @@ class Island(QWidget):
         self.volume.device_changed.connect(self.output_refresh.start, Qt.ConnectionType.QueuedConnection)
         self.pulse = QTimer(self, interval=16)
         self.pulse.timeout.connect(self._step_pulse)
+        self.apply_preferences(follow=False)
+        self._launcher_init(ROOT)
         QTimer.singleShot(180, self._warm_up)
 
     def _warm_up(self):
-        self.glass.prepare()
+        if self.preferences.get('glass', True):
+            self.glass.prepare()
         if self.dashboard.avatar.isNull():
             self._refresh_avatar()
         self.dashboard.metrics.sample(details=True)
@@ -239,7 +254,7 @@ class Island(QWidget):
 
     def follow_bar(self):
         screen = QApplication.primaryScreen()
-        anchor = self.dock.anchor(screen) if screen else None
+        anchor = self.dock.anchor(screen, self.height(), allow_fullscreen=self.launcher_active) if screen and (self.preferences.get('enabled', True) or self.launcher_active) else None
         if anchor:
             center, y = anchor
             self.move(center - self.WIDTH // 2, y)
@@ -254,6 +269,7 @@ class Island(QWidget):
             self._sync_meter()
 
     def hideEvent(self, event):
+        if self.launcher_active and not getattr(self,'launcher_switching_focus',False):self.close_launcher(restore=False)
         self.glass.hide()
         self.dashboard.animate_cat(False)
         self.dashboard_poll.stop()
@@ -261,6 +277,23 @@ class Island(QWidget):
         self.codex_clock.stop()
         self.pulse.stop()
         super().hideEvent(event)
+
+    def nativeEvent(self,event_type,message):
+        native=ctypes.cast(int(message),ctypes.POINTER(wintypes.MSG)).contents
+        if native.message==launcher_focus.TOGGLE_MESSAGE:
+            if not launcher_focus.request_valid(native.wParam):return True,0
+            if native.lParam==1:self.close_launcher()
+            elif native.lParam==0:self.toggle_launcher()
+            else:return True,0
+            confirmed=not self.launcher_active or (
+                launcher_focus.foreground()==int(self.winId()) and self.launcher_view.search.edit.hasFocus())
+            return True,int(confirmed)
+        return super().nativeEvent(event_type,message)
+
+    def changeEvent(self,event):
+        super().changeEvent(event)
+        if event.type()==QEvent.Type.ActivationChange and self.launcher_active and not self.isActiveWindow():
+            QTimer.singleShot(100,self._launcher_focus_lost)
 
     def _sync_meter(self):
         shows_progress = not self.expanded or self.dashboard.tab in ('Dashboard', 'Media')
@@ -377,12 +410,12 @@ class Island(QWidget):
         self.update()
 
     def _slot_widths(self):
-        media = self.state.playing
-        codex = bool(self.codex_turns) or self.codex_done.isActive()
-        countdown = self.dashboard.live.deadline is not None or self.timer_done.isActive()
-        stopwatch = self.dashboard.live.stopwatch_start is not None
-        notice = self.notification.isActive()
-        output = self.output_notice.isActive()
+        media = self.state.playing and self.preferences.get('media', True)
+        codex = (bool(self.codex_turns) or self.codex_done.isActive()) and self.preferences.get('codex', True)
+        countdown = (self.dashboard.live.deadline is not None or self.timer_done.isActive()) and self.preferences.get('timer', True)
+        stopwatch = self.dashboard.live.stopwatch_start is not None and self.preferences.get('stopwatch', True)
+        notice = self.notification.isActive() and self.preferences.get('notifications', True)
+        output = self.output_notice.isActive() and self.preferences.get('output', True)
         count = sum((media, codex, countdown, stopwatch))
         media_width = 152.0 if notice and count > 2 else 186.0 if count > 1 else 250.0
         return (media_width if media else 0.0,
@@ -393,13 +426,15 @@ class Island(QWidget):
 
     def _retarget(self):
         slots = self._slot_widths()
-        if self.expanded:
+        if self.launcher_active:
+            target = (632.0,float(self.launcher_view.preferred_height()),0.0,1.0,0.0)
+        elif self.expanded:
             target = (float(PANEL_WIDTH), float(self.HEIGHT), 0.0, 1.0, 0.0)
         else:
             width = sum(slots)
             lift = 14.0 if width else 12.0
-            target = ((width or 116.0) + lift * self.hovered, 28.0, float(bool(width)), 0.0, float(self.hovered))
-        if target == self.target and (slots == self.slot_target or self.expanded):
+            target = ((width or float(self.preferences.get('idle_width', 116))) + lift * self.hovered, 28.0, float(bool(width)), 0.0, float(self.hovered))
+        if target == self.target and (slots == self.slot_target or self.expanded or self.launcher_mode):
             if self.expanded:
                 self.slot_sizes = self.slot_target = slots
             return
@@ -409,6 +444,10 @@ class Island(QWidget):
             self.duration = 0.23
         else:
             self.duration = 0.16
+        if self.launcher_mode:self.duration = .56 if self.launcher_jolt else .32 if self.launcher_active else .38
+        if not self.launcher_mode and (self.expanded or self.motion[3]>.01):self.duration=.56 if self.expanded else .38
+        self.duration *= getattr(self,'motion_scale',self.preferences.get('speed',1.))
+        if not getattr(self,'animations_enabled',True):self.duration=.001
         self.origin, self.target = self.motion, target
         self.slot_origin, self.slot_target = self.slot_sizes, slots
         self.started = time.perf_counter()
@@ -418,7 +457,8 @@ class Island(QWidget):
             self.motion = target
             self.slot_sizes = slots
             self.animation.stop()
-            if not self.expanded:
+            if not self.expanded and not self.launcher_active:
+                if self.launcher_mode:self._launcher_finished()
                 self.setFixedHeight(self.PILL_HEIGHT)
 
     def _step(self):
@@ -428,28 +468,47 @@ class Island(QWidget):
             self.slot_sizes = self.slot_target
             self.animation.stop()
             self.drawer_frame = None
-            if not self.expanded:
+            if self.launcher_mode:self._launcher_finished()
+            if not self.expanded and not self.launcher_active:
                 self.setFixedHeight(self.PILL_HEIGHT)
+            self.follow_bar()
         else:
-            t = 1.0 - (1.0 - elapsed) ** 4
-            self.motion = tuple(a + (b - a) * t for a, b in zip(self.origin, self.target))
+            t = curve('effects').valueForProgress(elapsed)
+            self.motion = self._launcher_step(elapsed) if self.launcher_mode else self._drawer_step(elapsed) if self.expanded or self.origin[3]>.01 else tuple(a + (b - a) * t for a, b in zip(self.origin, self.target))
             self.slot_sizes = tuple(a + (b - a) * t for a, b in zip(self.slot_origin, self.slot_target))
         self._sync_glass()
         self.update()
 
+    def _drawer_step(self,elapsed):
+        opening=self.target[3]>self.origin[3]
+        closed,opened=(self.origin,self.target) if opening else (self.target,self.origin)
+        t=elapsed if opening else 1-elapsed
+        clamp=lambda x:max(0.,min(1.,x))
+        if opening and t<.08:
+            amount=math.sin(t/.08*math.pi/2)
+            return (closed[0]*(1-.02*amount),closed[1]-.7*amount,closed[2],closed[3],0.)
+        header=clamp(curve('spatial').valueForProgress(clamp((t-.08)/.62)**2))
+        body=clamp(curve('spatial').valueForProgress(clamp((t-.24)/.76)**2))
+        width=closed[0]*(.98 if opening else 1.)+(opened[0]-closed[0]*(.98 if opening else 1.))*header
+        height=closed[1]+(min(56,opened[1])-closed[1])*header+max(0,opened[1]-56)*body
+        progress=clamp(.35*header+.65*body)
+        return (width,height,closed[2]*(1-header),closed[3]+(opened[3]-closed[3])*progress,0.)
+
     def _surface_rect(self):
         width, height = self.motion[:2]
-        return QRectF((self.WIDTH - width) / 2, 0.5, width, height - 1)
+        y = max(0, self.height() - height - 4) if self.dock.bottom else 0
+        return QRectF((self.WIDTH - width) / 2, y + 0.5, width, height - 1)
 
     def _surface(self):
         rect = self._surface_rect()
-        return rounded(rect, min(19, rect.height() / 2))
+        return rounded(rect, self._launcher_radius(rect.height()) if self.launcher_mode else min(19,rect.height()/2))
 
     def _sync_glass(self):
-        if self.isVisible() and self.glass.hwnd and self.motion[3] > 0.92:
+        if self.isVisible() and (self.glass.wants_compact or self.motion[3] > 0.92):
+            self.glass.prepare()
             front = int(self.winId())
             rect = self._surface_rect()
-            self.glass.sync(front, self.dock._bounds(front), rect, min(19, rect.height() / 2), self.devicePixelRatioF())
+            self.glass.sync(front, self.dock._bounds(front), rect, self._launcher_radius(rect.height()) if self.launcher_mode else min(19,rect.height()/2), self.devicePixelRatioF())
         else:
             self.glass.hide()
 
@@ -457,6 +516,7 @@ class Island(QWidget):
         return self._surface().contains(QPointF(self.mapFromGlobal(QCursor.pos())))
 
     def _set_hovered(self, inside):
+        inside = inside and self.preferences.get('hover', True)
         if inside != self.hovered:
             self.hovered = inside
             self._retarget()
@@ -467,9 +527,12 @@ class Island(QWidget):
         self.drawer_frame = None
         if expanded:
             self.setFixedHeight(self.HEIGHT)
-            if not self.glass.hwnd and not self.glass.failed:
+            if self.preferences.get('glass', True) and not self.glass.hwnd and not self.glass.failed:
                 QTimer.singleShot(0, self.glass.prepare)
+            previous_tab = self.dashboard.tab
             self.dashboard.opened()
+            self.dashboard.tab = previous_tab if self.preferences.get('remember_tab', False) else self.preferences.get('default_tab', 'Dashboard')
+            self.follow_bar()
             self.refresh_notifications.emit()
             self._refresh_avatar()
             self.dashboard_poll.start()
@@ -534,7 +597,8 @@ class Island(QWidget):
         buttons = self.dock.pressed_buttons()
         if buttons - self.buttons and self.drag is None and not self._pointer_inside():
             self.hovered = False
-            self._set_expanded(False)
+            if self.launcher_active:self.close_launcher(restore=False)
+            else:self._set_expanded(False)
         else:
             self.buttons = buttons
 
@@ -581,6 +645,7 @@ class Island(QWidget):
             self.update()
 
     def _action_at(self, point):
+        if self.launcher_mode:return None
         if self.expanded:
             return self.dashboard.action_at(point, self.state) if self.motion[3] >= 0.95 else None
         # Every segment in the collapsed pill shares the menu's click target.
@@ -657,7 +722,7 @@ class Island(QWidget):
             return
         if action in ('close', 'open'):
             if self.expanded:
-                compact_width = sum(self._slot_widths()) or 116.0
+                compact_width = sum(self._slot_widths()) or float(self.preferences.get('idle_width', 116))
                 self.hovered = abs(point.x() - self.WIDTH / 2) < compact_width / 2
             self._set_expanded(not self.expanded)
         elif action in TAB_RECTS:
@@ -697,6 +762,7 @@ class Island(QWidget):
             self.update()
 
     def wheelEvent(self, event):
+        if self.launcher_mode:event.ignore();return
         if not self.expanded or self.drag is not None:
             return
         delta = event.angleDelta()
@@ -739,6 +805,7 @@ class Island(QWidget):
         return result
 
     def _draw_compact(self, painter, rect):
+        colors=compact_colors(self.glass.wants_optical,player.INK,MAUVE,PINK,LAVENDER,SURFACE2)
         opacity = painter.opacity()
         occupied = False
         for kind, slot in zip(('media', 'codex', 'timer', 'watch', 'notification'), self._compact_rects(rect)):
@@ -748,15 +815,15 @@ class Island(QWidget):
             painter.setClipRect(slot, Qt.ClipOperation.IntersectClip)
             painter.setOpacity(opacity * min(1.0, slot.width() / 42))
             if occupied:
-                painter.setPen(QPen(QColor(SURFACE2), 1))
+                painter.setPen(QPen(QColor(colors['SURFACE2']), 1))
                 painter.drawLine(QPointF(slot.left() + 0.5, 8), QPointF(slot.left() + 0.5, 20))
             if kind == 'media':
                 title, art = self.compact_media
                 player.artwork(painter, art, QRectF(slot.left() + 8, 4, 20, 20), 6)
                 player.text(painter, title, QRectF(slot.left() + 35, 1, max(0.0, slot.width() - 66), 26),
-                            12, player.INK, QFont.Weight.DemiBold)
+                            12, colors['TEXT'], QFont.Weight.DemiBold)
                 if slot.width() >= 72:
-                    self._wave(painter, slot.right() - 24, 14, PINK, self.state.playing)
+                    self._wave(painter, slot.right() - 24, 14, colors['PINK'], self.state.playing)
             elif kind == 'codex' and self.codex_chip:
                 turn = self.codex_chip
                 label_width = slot.width() - 32
@@ -765,45 +832,46 @@ class Island(QWidget):
                     minutes, seconds = divmod(max(0, int(time.time()) - turn.started), 60)
                     extra = f' +{len(self.codex_turns) - 1}' if len(self.codex_turns) > 1 else ''
                     label = f'Codex{extra}'
-                    glyph, accent = 'terminal', MAUVE
+                    glyph, accent = 'terminal', colors['MAUVE']
                     clock = f'{minutes:02}:{seconds:02}'
                     clock_width = QFontMetrics(player._font(11, weight)).horizontalAdvance(clock) + 2
                     clock_left = slot.right() - 10 - clock_width
                     label_width = clock_left - slot.left() - 33
                     player.text(painter, clock, QRectF(clock_left, 1, clock_width, 26),
-                                11, player.INK, weight, Qt.AlignmentFlag.AlignRight)
+                                11, colors['TEXT'], weight, Qt.AlignmentFlag.AlignRight)
                 elif turn.status == 'completed':
-                    label, glyph, accent = 'Codex · Xong', 'check', MAUVE
+                    label, glyph, accent = 'Codex · Xong', 'check', colors['MAUVE']
                 else:
                     label = 'Codex · Lỗi' if turn.status == 'failed' else 'Codex · Đã dừng'
-                    glyph, accent = 'stop', PINK
+                    glyph, accent = 'stop', colors['PINK']
                 icon(painter, glyph, slot.left() + 15, 14, 14, accent)
                 player.text(painter, label, QRectF(slot.left() + 27, 1, max(0.0, label_width), 26),
-                            11, player.INK, weight)
+                            11, colors['TEXT'], weight)
             elif kind == 'notification':
                 if self.notice_kind == 'notification':
                     self._draw_notice_banner(painter, slot)
                 else:
-                    icon(painter, 'headphones', slot.left() + 14, 14, 13, LAVENDER)
+                    icon(painter, 'headphones', slot.left() + 14, 14, 13, colors['LAVENDER'])
                     label = '' if occupied else self.output_label
                     player.text(painter, label, QRectF(slot.left() + 24, 1, max(0.0, slot.width() - 27), 26),
-                                11, LAVENDER, QFont.Weight.DemiBold)
+                                11, colors['LAVENDER'], QFont.Weight.DemiBold)
             elif kind in ('timer', 'watch'):
                 live = self.dashboard.live
                 if kind == 'timer':
                     done = live.finished
-                    glyph, label, color = ('check' if done else 'hourglass'), 'Hẹn giờ', PINK
+                    glyph, label, color = ('check' if done else 'hourglass'), 'Hẹn giờ', colors['PINK']
                     value = 'Xong' if done else clock_text(live.countdown)
                 else:
-                    glyph, label, color = 'stopwatch', 'Bấm giờ', LAVENDER
+                    glyph, label, color = 'stopwatch', 'Bấm giờ', colors['LAVENDER']
                     value = clock_text(live.stopwatch)
                 icon(painter, glyph, slot.left() + 14, 14, 13, color)
                 if slot.width() >= 110:
-                    player.text(painter, label, QRectF(slot.left() + 26, 1, 62, 26), 11, player.INK, QFont.Weight.DemiBold)
+                    player.text(painter, label, QRectF(slot.left() + 26, 1, 62, 26), 11, colors['TEXT'], QFont.Weight.DemiBold)
                 player.text(painter, value, QRectF(slot.left() + 24, 1, max(0.0, slot.width() - 33), 26),
                             11, color, QFont.Weight.DemiBold, Qt.AlignmentFlag.AlignRight)
             painter.restore()
             occupied = True
+
 
     def _notice_text_metrics(self):
         weight = QFont.Weight.DemiBold
@@ -818,6 +886,7 @@ class Island(QWidget):
                 + (NOTICE_GAP + count_width if count else 0))
 
     def _draw_notice_banner(self, painter, slot):
+        colors=compact_colors(self.glass.wants_optical,player.INK,MAUVE,PINK,LAVENDER,SURFACE2)
         label_width, count, count_width = self._notice_text_metrics()
         content_width = NOTICE_ICON_SIZE + NOTICE_GAP + label_width + (NOTICE_GAP + count_width if count else 0)
         x = slot.center().x() - content_width / 2
@@ -826,17 +895,37 @@ class Island(QWidget):
         if not self.notice_icon.isNull():
             player.artwork(painter, self.notice_icon, target, 5)
         elif app:
-            player.pill(painter, target, 5, SURFACE2)
-            player.text(painter, app[0].upper(), target, 11, PINK, QFont.Weight.DemiBold,
+            player.pill(painter, target, 5, colors['SURFACE2'])
+            player.text(painter, app[0].upper(), target, 11, colors['PINK'], QFont.Weight.DemiBold,
                         Qt.AlignmentFlag.AlignHCenter)
         else:
-            icon(painter, 'bell', target.center().x(), 14, 14, PINK)
+            icon(painter, 'bell', target.center().x(), 14, 14, colors['PINK'])
         text_x = target.right() + NOTICE_GAP
         player.text(painter, NOTICE_LABEL, QRectF(text_x, 1, label_width, 26),
-                    11, PINK, QFont.Weight.DemiBold)
+                    11, colors['PINK'], QFont.Weight.DemiBold)
         if count:
             player.text(painter, count, QRectF(text_x + label_width + NOTICE_GAP, 1, count_width, 26),
-                        10, MAUVE, QFont.Weight.DemiBold)
+                        10, colors['MAUVE'], QFont.Weight.DemiBold)
+
+
+    def _launcher_snapshot(self):
+        """Crossfade content only; the growing Island supplies its single rim."""
+        if self.expanded:return self._drawer_snapshot()
+        scale=self.devicePixelRatioF()
+        image=QImage(round(self.width()*scale),round(self.height()*scale),QImage.Format.Format_ARGB32_Premultiplied)
+        image.setDevicePixelRatio(scale);image.fill(Qt.GlobalColor.transparent)
+        painter=QPainter(image);painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        surface=self._surface();rect=surface.boundingRect();painter.setClipPath(surface)
+        _,_,compact,expanded,_=self.motion
+        idle=max(0.,1-compact-expanded)
+        if idle>.01:
+            painter.setOpacity(idle)
+            ink=compact_colors(self.glass.wants_optical,player.INK,MAUVE,PINK,LAVENDER,SURFACE2)['MAUVE']
+            icon(painter,'grid',self.WIDTH/2,rect.top()+13.5,13,ink)
+        if compact>.01:
+            painter.setOpacity(compact*(1-expanded));offset=rect.top()-.5;painter.translate(0,offset)
+            self._draw_compact(painter,rect.translated(0,-offset))
+        painter.end();return image
 
     def _drawer_snapshot(self):
         scale = self.devicePixelRatioF()
@@ -849,42 +938,131 @@ class Island(QWidget):
         painter.end()
         return image
 
+    def apply_preferences(self, follow=True):
+        import json
+        import weather
+        from urllib.parse import urlencode
+        try:
+            settings = json.loads((ROOT.parent / 'bar-settings.json').read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            settings = {}
+        shared_motion=motion_spec.profile(ROOT.parent,settings)
+        self.animations_enabled=shared_motion['enabled'];self.motion_scale=shared_motion['scale']
+        self.preferences = settings.get('island', {})
+        options=settings.get('launcher',{})
+        if hasattr(self,'launcher_hotkey'):self._launcher_apply(options)
+        else:self.launcher_options=options
+        self.glass.configure(self.preferences)
+        interval = max(4, round(1000 / self.preferences.get('fps', 120)))
+        self.animation.setInterval(interval)
+        self.tab_frames.setInterval(interval)
+        self.notification.setInterval(int(self.preferences.get('notification_seconds', 5) * 1000))
+        if self.preferences.get('glass', True):
+            if follow:
+                self.glass.prepare()
+        else:
+            self.glass.hide()
+            self.glass.enabled = False
+        location = settings.get('weather', {})
+        city = location.get('city', 'Hà Nội')
+        weather.CITY = city
+        import dashboard
+        dashboard.CITY = tab_views.CITY = city
+        previous_url = weather.FORECAST
+        weather.FORECAST = 'https://api.open-meteo.com/v1/forecast?' + urlencode({
+            'latitude': location.get('latitude', 21.0245), 'longitude': location.get('longitude', 105.84117),
+            'timezone': location.get('timezone', 'Asia/Bangkok'), 'forecast_days': 7,
+            'current': 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m',
+            'daily': 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset',
+        })
+        if weather.FORECAST != previous_url:
+            self.dashboard.weather.forecast = None
+            self.dashboard.weather.updated = None
+            self.dashboard.weather.next_refresh = 0
+            if self.expanded:
+                self.dashboard.weather.refresh(force=True)
+        self.drawer_frame = None
+        self._retarget()
+        if follow:
+            self.follow_bar()
+        self.update()
+        logging.info('Island preferences applied')
+
+    def apply_theme(self, name):
+        import palette
+        if not palette.load_theme(name):
+            return False
+        for key in palette.NAMES:
+            if key in globals():
+                globals()[key] = getattr(palette, key)
+        self.drawer_frame = None
+        self.dashboard.transition = None
+        live = self.dashboard.live
+        if live.detail_doc is not None and live.notices and live.selected is not None:
+            row = next((row for row in live.notices if row['id'] == live.selected), None)
+            if row is not None:
+                live._prepare_detail(row, preserve=True)
+        self.update()
+        if hasattr(self,'launcher_view'):self.launcher_view.refresh_theme()
+        logging.info('Island theme selected: %s', name)
+        return True
+
     def paintEvent(self, event):
+        self._sync_glass()
         painter = QPainter(self)
         painter.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.SmoothPixmapTransform)
         surface = self._surface()
         _, _, compact, expanded, highlight = self.motion
         glass_mix = max(0.0, (expanded - 0.92) / 0.08) if self.glass.visible else 0.0
         reveal = min(1.0, expanded / 0.55)
+        if self.launcher_mode:
+            reveal=min(1.,max(0.,expanded))
+            glass_mix=reveal if self.glass.visible else 0.
         fill = QColor(MANTLE if expanded > 0.4 else CRUST)
+        optical = self.glass.wants_optical
+        if optical:
+            target_color=QColor(MANTLE);base_color=QColor('#161217')
+            fill=QColor(*(round(a+(b-a)*reveal) for a,b in zip(base_color.getRgb()[:3],target_color.getRgb()[:3])))
         # A layered window needs a nonzero alpha to keep the pill's click area.
-        fill.setAlpha(max(1, round((255 - 58 * glass_mix) * reveal)))
+        alpha = round(248 + (glass_alpha(globals()) - 248) * glass_mix)
+        closed_alpha = round(225*(1-self.glass.mix)+self.glass.mix) if optical else 190 if self.glass.wants_compact else 1
+        fill.setAlpha(max(1, round(closed_alpha*(1-reveal)+alpha*reveal)))
         painter.fillPath(surface, fill)
-        if glass_mix > 0.01:
+        if glass_mix > 0.01 and not optical:
             rect = surface.boundingRect()
             reflection = QLinearGradient(rect.topLeft(), rect.bottomRight())
             for position, strength, color in ((0.0, 132, PINK), (0.33, 62, MAUVE), (0.65, 34, MAUVE), (1.0, 82, PINK)):
                 stop = QColor(color)
                 stop.setAlpha(round(27 + (strength - 27) * glass_mix))
                 reflection.setColorAt(position, stop)
-            painter.strokePath(surface, QPen(QBrush(reflection), 0.85))
-        else:
+            if self.preferences.get('outline', True):
+                painter.strokePath(surface, QPen(QBrush(reflection), 0.85))
+        elif not optical:
             edge = QColor(MAUVE if highlight > 0.3 else SURFACE2)
             edge.setAlpha(round(112 + 78 * highlight))
-            painter.strokePath(surface, QPen(edge, 1))
-        if self.pulse.isActive() and not self.expanded:
+            if self.preferences.get('outline', True):
+                painter.strokePath(surface, QPen(edge, 1))
+        if self.pulse.isActive() and not self.expanded and self.preferences.get('outline', True):
             fade = max(0.0, 1.0 - (time.monotonic() - self.pulse_started) / self.pulse_duration)
             edge = QColor(PINK)
             edge.setAlpha(round(205 * fade))
             painter.strokePath(surface, QPen(edge, 1.35))
+        if self.launcher_mode:
+            self._launcher_paint(painter,surface)
+            painter.end()
+            return
         painter.setClipPath(surface)
         idle = max(0.0, 1.0 - compact - expanded)
         if idle > 0.01:
             painter.setOpacity(idle)
-            icon(painter, 'grid', self.WIDTH / 2, 14, 13, MAUVE)
+            icon(painter, 'grid', self.WIDTH / 2, surface.boundingRect().top() + 13.5, 13, compact_colors(self.glass.wants_optical,player.INK,MAUVE,PINK,LAVENDER,SURFACE2)['MAUVE'])
         if compact > 0.01:
             painter.setOpacity(compact * (1.0 - expanded))
-            self._draw_compact(painter, surface.boundingRect())
+            painter.save()
+            offset = surface.boundingRect().top() - 0.5
+            painter.translate(0, offset)
+            self._draw_compact(painter, surface.boundingRect().translated(0, -offset))
+            painter.restore()
         if expanded > 0.4:
             painter.setOpacity(((expanded - 0.4) / 0.6) ** 2)
             if self.animation.isActive() and not self.tab_frames.isActive():
@@ -918,6 +1096,10 @@ def main():
     codex.changed.connect(island.set_codex, Qt.ConnectionType.QueuedConnection)
     notifications.received.connect(island.show_notification)
     notifications.snapshot.connect(island.dashboard.live.set_notifications)
+    notifications.theme_changed.connect(island.apply_theme)
+    notifications.settings_changed.connect(island.apply_preferences)
+    notifications.launcher_requested.connect(lambda action: island.close_launcher() if action=="close" else island.toggle_launcher() if action=="toggle" else island.open_launcher())
+    notifications.shutdown_requested.connect(app.quit)
     island.dashboard.live.dismiss_requested.connect(notifications.request)
     island.dashboard.live.clear_requested.connect(notifications.clear)
     island.refresh_notifications.connect(notifications.request)

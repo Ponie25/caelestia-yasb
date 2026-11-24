@@ -1,0 +1,80 @@
+{
+  "settings_window": {
+    "mode": "system"
+  },
+  "appearance": {
+    "font_family": "JetBrainsMono NFP Light",
+    "font_size": 12,
+    "font_weight": 600,
+    "spacing": 6,
+    "padding": 8,
+    "radius": 0,
+    "background": "transparent",
+    "background_color": "#fafafb",
+    "background_opacity": 0.0,
+    "border": false,
+    "border_color": "#20232d",
+    "background_source": "theme",
+    "background_blur": false,
+    "background_gradient": false,
+    "background_color2": "#f1f2f5",
+    "background_opacity2": 0.72,
+    "gradient_direction": "vertical",
+    "foreground": "auto",
+    "text_color": "#1c1f28",
+    "border_color_source": "theme",
+    "border_opacity": 0.5,
+    "border_width": 1.0,
+    "border_edges": "all"
+  },
+  "animations": {
+    "enabled": true,
+    "popup_ms": 220
+  },
+  "launcher": {
+    "enabled": true,
+    "hotkey": true,
+    "max_results": 7
+  },
+  "island": {
+    "enabled": true,
+    "hover": true,
+    "glass": true,
+    "outline": true,
+    "material": "liquid-soft",
+    "liquid_refraction": 1.0,
+    "liquid_frost": 0.2,
+    "liquid_tint": 0.22,
+    "liquid_reflection": 1.0,
+    "liquid_fps": 120,
+    "liquid_contrast": true,
+    "media": true,
+    "codex": true,
+    "notifications": true,
+    "timer": true,
+    "stopwatch": true,
+    "output": true,
+    "notification_seconds": 5,
+    "idle_width": 116,
+    "speed": 1.0,
+    "fps": 120,
+    "default_tab": "Dashboard",
+    "remember_tab": false
+  },
+  "weather": {
+    "city": "Hà Nội",
+    "latitude": 21.0245,
+    "longitude": 105.84117,
+    "timezone": "Asia/Bangkok"
+  },
+  "palette": {},
+  "komorebi": {
+    "mode": "theme",
+    "single_color": "#cba6f7",
+    "stack_color": "#f5c2e7",
+    "monocle_color": "#cba6f7",
+    "floating_color": "#f5c2e7",
+    "unfocused_color": "#45475a",
+    "unfocused_locked_color": "#b4befe"
+  }
+}

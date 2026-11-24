@@ -100,17 +100,27 @@ class Weather(QObject):
         threading.Thread(target=self._fetch, daemon=True, name='Hanoi forecast').start()
 
     def _fetch(self):
+        request_url = FORECAST
         try:
-            request = Request(FORECAST, headers={'User-Agent': 'YASB Caelestia Dashboard'})
+            request = Request(request_url, headers={'User-Agent': 'YASB Caelestia Dashboard'})
             with urlopen(request, timeout=8) as response:
                 forecast = Forecast.parse(json.load(response))
         except (OSError, ValueError, KeyError, TypeError):
             logging.info('Hanoi forecast could not refresh', exc_info=True)
             forecast = None
-        self.completed.emit(forecast)
+        self.completed.emit((request_url, forecast))
 
     @Slot(object)
-    def _complete(self, forecast):
+    def _complete(self, result):
+        if isinstance(result, tuple):
+            request_url, forecast = result
+            if request_url != FORECAST:
+                self.loading = False
+                self.next_refresh = 0
+                self.refresh(force=True)
+                return
+        else:
+            forecast = result
         self.loading = False
         self.failed = forecast is None
         self.next_refresh = time.monotonic() + (60 if self.failed else 1200)

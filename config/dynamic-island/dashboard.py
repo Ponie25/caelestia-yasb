@@ -1,3 +1,6 @@
+from pathlib import Path
+import motion_spec
+from launcher_view import curve
 from datetime import date, datetime, timedelta
 from pathlib import Path
 import time
@@ -10,6 +13,7 @@ from icons import icon
 from live_activity import LiveActivity, SUMMARY
 from palette import BASE, LAVENDER, MANTLE, MAUVE, MUTED, OVERLAY, PINK, SURFACE, SURFACE2, TEXT
 import player
+from theme_tokens import on_accent
 from player import pill, text
 from resources import Metrics
 import tab_views
@@ -45,20 +49,24 @@ RIGHT = Qt.AlignmentFlag.AlignRight
 DEMI = QFont.Weight.DemiBold
 
 
-def _card(painter, rect, radius=19, tone=BASE):
+def _card(painter, rect, radius=19, tone=None):
+    tone = BASE if tone is None else tone
     pill(painter, rect, radius, tone)
 
 
-def _line(painter, x0, y, x1, color=SURFACE):
+def _line(painter, x0, y, x1, color=None):
+    color = SURFACE if color is None else color
     painter.setPen(QPen(QColor(color), 1))
     painter.drawLine(QPointF(x0, y), QPointF(x1, y))
 
 
-def _label(painter, value, x, y, width, height=22, size=13, color=TEXT, weight=QFont.Weight.Normal, align=None):
+def _label(painter, value, x, y, width, height=22, size=13, color=None, weight=QFont.Weight.Normal, align=None):
+    color = TEXT if color is None else color
     text(painter, value, QRectF(x, y, width, height), size, color, weight, align or Qt.AlignmentFlag.AlignLeft)
 
 
-def _button(painter, rect, glyph, hovered, color=MUTED):
+def _button(painter, rect, glyph, hovered, color=None):
+    color = MUTED if color is None else color
     if hovered:
         pill(painter, rect, 8, SURFACE)
     icon(painter, glyph, rect.center().x(), rect.center().y(), 15, color)
@@ -166,7 +174,10 @@ class Dashboard:
         elif tab == 'Performance':
             self.metrics.sample(details=True)
         incoming = self._snapshot(scale, lambda p: self._body(p, state, art, volume, None, None, None))
-        self.transition = (outgoing, incoming, time.perf_counter(), direction, from_indicator)
+        spec=motion_spec.profile(Path(__file__).resolve().parent.parent)
+        self._transition_duration=max(.001,motion_spec.milliseconds(spec,'page')/1000)
+        self._transition_curve=curve('effects')
+        self.transition = (outgoing, incoming, time.perf_counter(), direction, from_indicator) if spec['enabled'] else None
         return True
 
     @staticmethod
@@ -184,8 +195,8 @@ class Dashboard:
     def progress(self):
         if not self.transition:
             return 1.0
-        t = min(1.0, (time.perf_counter() - self.transition[2]) / TAB_DURATION)
-        return t * t * (3 - 2 * t)
+        t = min(1.0, (time.perf_counter() - self.transition[2]) / getattr(self,'_transition_duration',TAB_DURATION))
+        return self._transition_curve.valueForProgress(t)
 
     def indicator(self):
         end = TAB_RECTS[self.tab].center().x()
@@ -292,10 +303,10 @@ class Dashboard:
         for i in range(42):
             day = first + timedelta(days=i)
             x, y = 133 + 38 * (i % 7), 252 + 28 * (i // 7)
-            color = TEXT if day.month == self.month.month else OVERLAY
+            color = TEXT if day.month == self.month.month else MUTED
             if day == today:
                 pill(painter, QRectF(x + 5, y, 24, 24), 12, MAUVE)
-                color = MANTLE
+                color = on_accent(MAUVE)
             _label(painter, str(day.day), x, y, 34, 24, 12, color, DEMI if day == today else QFont.Weight.Normal, CENTER)
 
     def _media_mini(self, painter, state, art, hover):

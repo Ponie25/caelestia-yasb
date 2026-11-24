@@ -92,6 +92,13 @@ if (!$NoStart) {
     $shortcut.IconLocation = (Join-Path $InstallDir 'yasb\yasb.exe') + ',0'
     $shortcut.WindowStyle = 7
     $shortcut.Save()
+    $settings = (New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $programs 'Caelestia YASB Settings.lnk'))
+    $settings.TargetPath = Join-Path $InstallDir 'python\pythonw.exe'
+    $settings.Arguments = '"' + (Join-Path $InstallDir 'config\open-bar-settings.pyw') + '"'
+    $settings.WorkingDirectory = $InstallDir
+    $settings.IconLocation = (Join-Path $InstallDir 'yasb\yasb.exe') + ',0'
+    $settings.WindowStyle = 1
+    $settings.Save()
     if (Get-Process -Name yasb -ErrorAction SilentlyContinue) {
         Write-Host 'Quit the running YASB from its tray menu, then open Start Caelestia YASB.'
     } else {

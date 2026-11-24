@@ -1,0 +1,90 @@
+{
+  "core/bar_helper.pyc": {
+    "source": "bar_helper.py",
+    "upstream_sha256": "5feab1fd081ffdd60036fb8d1a130dd8aa795291cfe504ffeb9496f1eed244dc"
+  },
+  "core/bar_manager.pyc": {
+    "source": "bar_manager.py",
+    "upstream_sha256": "f6ec66867f2e176d7ddbfa78634fadfa5e5425ee6262173b9b1b08f5a658c9de"
+  },
+  "core/utils/utilities.pyc": {
+    "source": "utilities.py",
+    "upstream_sha256": "6896a8b67dc79c67785b08234ca6f26d4b5995799f8319e51d10996504b1481d"
+  },
+  "core/widgets/services/control_center/sections/quick_actions.pyc": {
+    "source": "quick_actions.py",
+    "upstream_sha256": "c137ab3f783ce852589d50072a0ad816b79b3f12c889df4e47a497f3c0c25aad"
+  },
+  "core/widgets/services/control_center/sections/system_controls.pyc": {
+    "source": "system_controls.py",
+    "upstream_sha256": "e84a95c94ba7e75e14845d1abd7cea03a6d8e236940f9798cf4548f7e4e24ea4"
+  },
+  "core/widgets/services/komorebi/client.pyc": {
+    "source": "client.py",
+    "upstream_sha256": "6cf54dc5b538479c4a77ebfd3e4fd8ec1a175937dc07247e1affb9e8dd515993"
+  },
+  "core/widgets/yasb/custom.pyc": {
+    "source": "custom.py",
+    "upstream_sha256": "5fb44a7dd63bc04f6677f6c5670fdb53f9b3809148ab05cd66c8cc951cd917ab"
+  },
+  "core/utils/bar_theme.pyc": {
+    "source": "bar_theme.py",
+    "upstream_sha256": null
+  },
+  "core/utils/bar_preferences.pyc": {
+    "source": "bar_preferences.py",
+    "upstream_sha256": null
+  },
+  "core/utils/bar_settings.pyc": {
+    "source": "bar_settings.py",
+    "upstream_sha256": null
+  },
+  "core/utils/theme_tokens.pyc": {
+    "source": "theme_tokens.py",
+    "upstream_sha256": null
+  },
+  "core/utils/bar_surface.pyc": {
+    "source": "bar_surface.py",
+    "upstream_sha256": null
+  },
+  "core/utils/komorebi_theme.pyc": {
+    "source": "komorebi_theme.py",
+    "upstream_sha256": null
+  },
+  "core/utils/settings_controls.pyc": {
+    "source": "settings_controls.py",
+    "upstream_sha256": null
+  },
+  "core/utils/settings_drafts.pyc": {
+    "source": "settings_drafts.py",
+    "upstream_sha256": null
+  },
+  "core/utils/settings_fluent.pyc": {
+    "source": "settings_fluent.py",
+    "upstream_sha256": null
+  },
+  "core/utils/settings_immediate.pyc": {
+    "source": "settings_immediate.py",
+    "upstream_sha256": null
+  },
+  "core/utils/settings_window.pyc": {
+    "source": "settings_window.py",
+    "upstream_sha256": null
+  },
+  "core/utils/settings_entry.pyc": {
+    "source": "settings_entry.py",
+    "upstream_sha256": null
+  },
+  "core/utils/ui_motion.pyc": {
+    "source": "ui_motion.py",
+    "upstream_sha256": null
+  },
+  "core/utils/motion_spec.pyc": {
+    "source": "motion_spec.py",
+    "upstream_sha256": null
+  },
+  "core/utils/settings_navigation.pyc": {
+    "source": "settings_navigation.py",
+    "upstream_sha256": null
+  }
+}

@@ -1,11 +1,8 @@
+import os,shutil,subprocess,winreg
+from pathlib import Path
 import logging
-import os
-import shutil
-import subprocess
-import winreg
 from collections.abc import Callable
 from functools import partial
-from pathlib import Path
 
 from pycaw.api.endpointvolume import IAudioEndpointVolume
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -162,6 +159,12 @@ class QuickActionsSectionWidget(QFrame):
             return
 
         action_id = action.id
+        if action_id == "bar_theme":
+            from core.utils.bar_theme import BarThemeController
+            controller = BarThemeController.instance()
+            if controller is not None:
+                controller.show_menu(self._action_buttons[action_id])
+            return
         if action_id == "toggle_theme":
             self._current_theme = ThemeService.toggle_theme_mode() or self._current_theme
         elif action_id == "toggle_dnd":

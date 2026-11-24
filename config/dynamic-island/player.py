@@ -15,7 +15,7 @@ REPEAT_NEXT = {RepeatMode.NONE: RepeatMode.LIST, RepeatMode.LIST: RepeatMode.TRA
 def _font(size, weight):
     font = QFont('Segoe UI Variable Text')
     font.setPixelSize(size)
-    font.setWeight(weight)
+    font.setWeight(QFont.Weight.Medium if weight == QFont.Weight.Normal and size <= 12 else weight)
     return font
 
 

@@ -1,6 +1,6 @@
 * {
     font-size: 12px;
-    color: #ffffff;
+    color: #000000;
     font-weight: 600;
     font-family: "JetBrainsMono NFP";
     margin: 0;
@@ -10,7 +10,7 @@
 .yasb-bar {
     padding: 0 8px;
     margin: 0;
-    background-color: rgba(35, 35, 35, 0.01);
+    background-color: rgba(220, 220, 220, 0.01);
 }
 
 .widget {
@@ -35,13 +35,13 @@
     /* UPTIME */
     font-size: 14px;
     margin-bottom: 10px;
-    color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
     font-weight: 600;
     font-family: "JetBrains Mono";
 }
 
 .power-menu-widget .label {
-    color: #eba0ac;
+    color: #4e4e4e;
     font-size: 16px;
 }
 
@@ -50,37 +50,37 @@
     width: 160px;
     height: 240px;
     border-radius: 4px;
-    background-color: rgba(41, 42, 58, 0.75);
+    background-color: rgba(212, 212, 212, 0.75);
     font-family: "JetBrains Mono";
-    color: white;
-    border: 4px solid rgba(255, 255, 255, 0);
+    color: #111111;
+    border: 4px solid rgba(0, 0, 0, 0);
 }
 
 .power-menu-popup .button.hover {
-    background-color: rgb(55, 56, 75);
-    border: 4px solid rgb(55, 56, 75);
+    background-color: rgb(198, 198, 198);
+    border: 4px solid rgb(198, 198, 198);
 }
 
 .power-menu-popup .button .label {
     margin-bottom: 8px;
     font-size: 16px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(0, 0, 0, 0.6);
     font-family: "JetBrains Mono";
 }
 
 .power-menu-popup .button .icon {
     font-size: 64px;
     padding-top: 54px;
-    color: rgba(255, 255, 255, 0.25);
+    color: rgba(0, 0, 0, 0.25);
 }
 
 .power-menu-popup .button.cancel .icon {
-    color: rgba(243, 139, 168, 0.55);
+    color: rgba(92, 92, 92, 0.55);
 }
 
 .power-menu-popup .button.cancel .label {
-    color: rgba(243, 139, 168, 0.95);
+    color: rgba(92, 92, 92, 0.95);
 }
 
 /* ICONS */
@@ -89,7 +89,7 @@
 }
 
 .volume-widget .icon {
-    color: #89b4fa;
+    color: #4f4f4f;
     margin: 1px 2px 0 0;
 }
 
@@ -100,11 +100,11 @@
 }
 
 .weather-widget .icon.sunnyDay {
-    color: rgb(221, 210, 107);
+    color: rgb(50, 50, 50);
 }
 
 .weather-widget .icon.clearNight {
-    color: rgb(107, 189, 221);
+    color: rgb(81, 81, 81);
     font-size: 18px;
     margin: -1px 2px 0px 0;
 }
@@ -115,11 +115,11 @@
 
 .weather-widget .icon.cloudyDay {
     font-size: 18px;
-    color: rgb(221, 210, 107);
+    color: rgb(50, 50, 50);
 }
 
 .weather-widget .icon.rainyDay {
-    color: rgb(245, 224, 220)
+    color: rgb(27, 27, 27)
 }
 
 /* MEDIA */
@@ -129,7 +129,7 @@
 }
 
 .media-widget .label {
-    color: #ffffff;
+    color: #000000;
     padding: 0px;
     padding-left: 10px;
     padding-right: 4px;
@@ -144,15 +144,15 @@
 
 .media-menu .btn.prev:hover,
 .media-menu .btn.next:hover {
-    color: #ffc400;
+    color: #3d3d3d;
 }
 
 .media-menu .source {
     font-size: 11px;
-    color: #000;
+    color: #ffffff;
     padding-left: 10px;
     border-radius: 3px;
-    background-color: #bac2de;
+    background-color: #3b3b3b;
     padding: 2px 4px;
     font-weight: 600;
     font-family: 'JetBrains Mono';
@@ -161,60 +161,60 @@
 
 /* GITHUB */
 .github-widget {
-    color: #fff;
+    color: #000000;
 }
 
 .github-widget .icon:hover {
-    color: #0091ff;
+    color: #858585;
 }
 
 .github-menu {
-    background-color: rgba(17, 17, 27, 0.2);
+    background-color: rgba(237, 237, 237, 0.2);
     max-height: 500px;
     min-height: 500px;
     min-width: 420px;
 }
 
 .github-menu .header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     font-size: 15px;
     font-weight: 400;
     font-family: 'Segoe UI';
     padding: 8px;
-    color: white;
-    background-color: rgba(17, 17, 27, 0.75);
+    color: #111111;
+    background-color: rgba(237, 237, 237, 0.75);
 }
 
 .github-menu .footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
     padding: 4px 8px 6px 8px;
-    background-color: rgba(17, 17, 27, 0.75);
+    background-color: rgba(237, 237, 237, 0.75);
 }
 
 .github-menu .footer .label {
     font-size: 12px;
     font-family: 'Segoe UI';
-    color: #9399b2;
+    color: #7f7f7f;
 }
 
 .github-menu .contents {
-    background-color: rgba(17, 17, 27, 0.2);
+    background-color: rgba(237, 237, 237, 0.2);
 }
 
 .github-menu .contents .item {
     min-height: 40px;
     padding: 6px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.075);
 }
 
 .github-menu .contents .item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0);
+    background-color: rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0);
 }
 
 .github-menu .contents .item .title,
 .github-menu .contents .item .description {
-    color: #9399b2;
+    color: #7f7f7f;
     font-family: Segoe UI;
 }
 
@@ -230,7 +230,7 @@
 
 .github-menu .contents .item.new .title,
 .github-menu .contents .item.new .description {
-    color: #ffffff
+    color: #000000
 }
 
 .github-menu .contents .item .icon {
@@ -238,59 +238,59 @@
     padding-right: 0;
     padding-left: 8px;
     padding-right: 4px;
-    color: #9399b2;
+    color: #7f7f7f;
 }
 
 .github-menu .contents .item.new .icon {
-    color: #3fb950;
+    color: #686868;
 }
 
 /* KOMOREBI */
 .komorebi-control-widget .label {
     font-size: 14px;
-    color: #cdd6f4;
+    color: #0f0f0f;
     font-weight: 600;
 }
 
 .komorebi-control-menu {
-    background-color: rgba(17, 17, 27, 0.2);
+    background-color: rgba(237, 237, 237, 0.2);
 }
 
 .komorebi-control-menu .button {
-    color: rgba(162, 177, 199, 0.4);
+    color: rgba(80, 80, 80, 0.4);
     padding: 8px 16px;
     font-size: 32px;
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .komorebi-control-menu .button.active {
-    color: rgb(228, 228, 228);
-    background-color: rgba(255, 255, 255, 0.04);
+    color: rgb(27, 27, 27);
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .komorebi-control-menu .button:disabled,
 .komorebi-control-menu .button.active:disabled {
-    background-color: rgba(255, 255, 255, 0.01);
-    color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.01);
+    color: rgba(0, 0, 0, 0.2);
 }
 
 .komorebi-control-menu .footer .text {
     font-size: 12px;
-    color: #6c7086;
+    color: #8d8d8d;
 }
 
 /* SYSTEMINFO GROUPER */
 .grouped-widgets .container {
-    background-color: rgba(35, 35, 35, 0.1);
+    background-color: rgba(220, 220, 220, 0.1);
     margin: 4px 0 4px 0;
     border-radius: 12px;
-    border: 2px solid #45475a;
+    border: 2px solid #bdbdbd;
 }
 
 /* CPU & MEMORY */
 .cpu-widget .icon {
-    color: var(--orange);
+    color: #272727;
 }
 
 .memory-widget .label,
@@ -304,129 +304,129 @@
 }
 
 .home-widget .icon {
-    color: #b4befe;
+    color: #272727;
 }
 
 .home-widget .icon:hover {
-    color: #cdd6f4;
+    color: #0f0f0f;
 }
 
 .home-menu {
-    background-color: rgba(17, 17, 27, 0.5);
+    background-color: rgba(237, 237, 237, 0.5);
 }
 
 .home-menu .menu-item {
     padding: 6px 48px 7px 16px;
     font-size: 12px;
     font-family: 'JetBrains Mono';
-    color: var(--text);
+    color: #0f0f0f;
     font-weight: 600;
 }
 
 .home-menu .menu-item:hover {
-    background-color: rgba(128, 130, 158, 0.15);
-    color: #fff;
+    background-color: rgba(123, 123, 123, 0.15);
+    color: #000000;
 }
 
 .home-menu .separator {
     max-height: 1px;
-    background-color: rgba(128, 130, 158, 0.3);
+    background-color: rgba(123, 123, 123, 0.3);
 }
 
 /* MUSIC SOURCES */
 .media-menu .source.aimp {
-    background-color: #6f42c1;
-    color: #ffffff;
+    background-color: #aaaaaa;
+    color: #000000;
 }
 
 .media-menu .source.apple-music {
-    background-color: #fa2b56;
-    color: #ffffff;
+    background-color: #a5a5a5;
+    color: #000000;
 }
 
 .media-menu .source.brave {
-    background-color: #fb542b;
-    color: #ffffff;
+    background-color: #8a8a8a;
+    color: #000000;
 }
 
 .media-menu .source.chrome {
-    background-color: #4285f4;
-    color: #ffffff;
+    background-color: #808080;
+    color: #000000;
 }
 
 .media-menu .source.edge {
-    background-color: #0078d4;
-    color: #ffffff;
+    background-color: #9a9a9a;
+    color: #000000;
 }
 
 .media-menu .source.firefox {
-    background-color: #ff7139;
-    color: #ffffff;
+    background-color: #747474;
+    color: #000000;
 }
 
 .media-menu .source.foobar2000 {
-    background-color: #444444;
-    color: #ffffff;
+    background-color: #bbbbbb;
+    color: #000000;
 }
 
 .media-menu .source.media-player {
-    background-color: #0078d4;
-    color: #ffffff;
+    background-color: #9a9a9a;
+    color: #000000;
 }
 
 .media-menu .source.murglar {
-    background-color: #8a8a8a;
-    color: #ffffff;
+    background-color: #757575;
+    color: #000000;
 }
 
 .media-menu .source.musicbee {
-    background-color: #ffcc00;
-    color: #000000;
+    background-color: #373737;
+    color: #ffffff;
 }
 
 .media-menu .source.nsmusics {
-    background-color: #e64a19;
-    color: #ffffff;
+    background-color: #979797;
+    color: #000000;
 }
 
 .media-menu .source.opera {
-    background-color: #ff1b2d;
-    color: #ffffff;
+    background-color: #b2b2b2;
+    color: #000000;
 }
 
 .media-menu .source.qobuz {
-    background-color: #003a6f;
-    color: #ffffff;
+    background-color: #cecece;
+    color: #000000;
 }
 
 .media-menu .source.spotify {
-    background-color: #1db954;
-    color: #ffffff;
+    background-color: #6e6e6e;
+    color: #000000;
 }
 
 .media-menu .source.tidal {
-    background-color: #000000;
-    color: #ffffff;
+    background-color: #ffffff;
+    color: #000000;
 }
 
 .media-menu .source.winamp {
-    background-color: #f1a11b;
-    color: #000000;
+    background-color: #575757;
+    color: #ffffff;
 }
 
 .media-menu .source.youtube {
-    background-color: #ff0000;
-    color: #ffffff;
+    background-color: #c9c9c9;
+    color: #000000;
 }
 
 .media-menu .source.youtube-music {
-    background-color: #c51f1f;
-    color: #ffffff;
+    background-color: #bdbdbd;
+    color: #000000;
 }
 
 .media-menu .source.zen {
-    background-color: #2ecc71;
-    color: #000000;
+    background-color: #5b5b5b;
+    color: #ffffff;
 }
 
 /* Hide media widget buttons */
@@ -443,11 +443,11 @@
 
 .wifi-widget .icon {
     font-size: 16px;
-    color: #89b4fa;
+    color: #4f4f4f;
 }
 
 .wifi-widget .label {
-    color: #cdd6f4;
+    color: #0f0f0f;
 }
 
 /* BATTERY WIDGET */
@@ -457,19 +457,19 @@
 
 .battery-widget .icon {
     font-size: 16px;
-    color: #a6e3a1;
+    color: #2e2e2e;
 }
 
 .battery-widget .icon.charging {
-    color: #f9e2af;
+    color: #1c1c1c;
 }
 
 .battery-widget .icon.low {
-    color: #f38ba8;
+    color: #5c5c5c;
 }
 
 .battery-widget .label {
-    color: #cdd6f4;
+    color: #0f0f0f;
 }
 
 /* Reduce volume padding to match */
@@ -481,136 +481,658 @@
 .control-center-widget,
 .raycast-search { padding: 0 5px; }
 .control-center-widget .icon,
-.raycast-search .icon { color: #cdd6f4; font-size: 14px; }
+.raycast-search .icon { color: #0f0f0f; font-size: 14px; }
 .control-center-widget:hover .icon,
-.raycast-search:hover .icon { color: #cba6f7; }
+.raycast-search:hover .icon { color: #000000; }
 
-/* Dynamic Island palette and glass, scoped to the three-line popup. */
-.control-center-menu {
-    min-width: 336px;
+/* Kirakira popup styles; the existing bar retains its own styles. */
+.control-center-menu,
+.control-center-menu *,
+.komorebi-layout-menu,
+.komorebi-layout-menu * { font-family: "Segoe UI Variable", "Segoe UI"; font-size: 12px; font-weight: 600; color: rgba(231, 231, 231, 1); }
+.control-center-menu,
+.control-center-menu *,
+.komorebi-layout-menu,
+.komorebi-layout-menu * { color: rgba(0, 0, 0, 1); }
+.komorebi-layout-menu {
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 12;
+    border: 1px solid rgba(0, 0, 0, 0.3);
 }
-.control-center-menu > QFrame.control-center-menu {
-    background-color: rgba(24, 24, 37, 197);
-    border: 1px solid qlineargradient(
-        x1: 0, y1: 0, x2: 1, y2: 1,
-        stop: 0 rgba(245, 194, 231, 132),
-        stop: 0.33 rgba(203, 166, 247, 62),
-        stop: 0.65 rgba(203, 166, 247, 34),
-        stop: 1 rgba(245, 194, 231, 82)
-    );
-    border-radius: 19px;
+.komorebi-layout-menu {
+    background-color: rgba(211, 211, 211, 0.4);
+    border: 1px solid rgba(0, 0, 0, 0.0698);
 }
-.control-center-menu .quick-actions {
-    padding: 12px 10px 2px;
-}
-.control-center-menu .quick-actions .button {
-    margin: 4px;
-    padding: 3px 2px;
-    background-color: #1e1e2e;
-    border: 1px solid transparent;
-    border-radius: 13px;
-}
-.control-center-menu .quick-actions .button:hover {
-    background-color: #313244;
-}
-.control-center-menu .quick-actions .button.active {
-    background-color: #313244;
-    border-color: rgba(203, 166, 247, 92);
-}
-.control-center-menu .quick-actions .button.active:hover {
-    background-color: #45475a;
-}
-.control-center-menu .quick-actions .button.disabled {
-    background-color: rgba(30, 30, 46, 145);
-}
-.control-center-menu .quick-actions .button .icon {
-    min-height: 30px;
-    min-width: 84px;
-    font-family: "Segoe MDL2 Assets";
-    font-size: 17px;
-    font-weight: 400;
-    color: #b4befe;
-}
-.control-center-menu .quick-actions .button.active .icon {
-    color: #f5c2e7;
-}
-.control-center-menu .quick-actions .button .title {
-    min-height: 22px;
-    font-family: "Segoe UI Variable Text";
+.komorebi-layout-menu .menu-item {
+    padding: 8px 16px;
     font-size: 12px;
-    font-weight: 500;
-    color: #cdd6f4;
+    font-weight: 600;
+    margin: 1 1px;
 }
-.control-center-menu .quick-actions .button.disabled .icon,
-.control-center-menu .quick-actions .button.disabled .title {
-    color: #6c7086;
+.komorebi-layout-menu .menu-item-icon {
+    color: rgba(231, 231, 231, 1);
+    font-size: 16px;
 }
-
-.control-center-menu .sliders {
-    margin: 6px 14px 14px;
-    padding: 7px 10px;
-    background-color: #1e1e2e;
-    border-radius: 12px;
+.komorebi-layout-menu .menu-item-icon {
+    color: rgba(0, 0, 0, 1);
 }
-.control-center-menu .sliders .slider .icon,
-.control-center-menu .sliders .slider .source-selector {
-    min-width: 26px;
-    min-height: 23px;
-    font-family: "Segoe MDL2 Assets";
-    font-size: 15px;
+.komorebi-layout-menu .menu-item-text {
+    font-family: "Segoe UI Variable", "Segoe UI";
+    padding-left:4px;
+    font-size: 12px;
+}
+.komorebi-layout-menu .menu-item-text {
+    color: rgba(0, 0, 0, 1);
+}
+.komorebi-layout-menu .menu-item:hover {
+    background-color: rgba(65, 65, 65, 0.4);
+    border-radius: 12;
+}
+.komorebi-layout-menu .menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.0837);
+}
+.komorebi-layout-menu .separator {
+    max-height: 0px;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+.control-center-menu {
+    background: rgba(0, 0, 0, 0.6);
+    min-width: 360px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 12;
+}
+.control-center-menu {
+    background: rgba(211, 211, 211, 0.4);
+    border: 1px solid rgba(0, 0, 0, 0.0698);
+}
+.control-center-menu .section {
+    background: transparent;
+    margin: 0;
+    padding: 16px 12px;
+    border: none;
+}
+.control-center-menu .section.system-controls {
+    padding: 12px 16px 0 16px;
+}
+.control-center-menu .section.sliders {
+    padding: 16px;
+}
+.control-center-menu .section.system-controls .button,
+.control-center-menu .section.quick-actions .button .icon,
+.control-center-menu .section.sliders .slider .icon,
+.control-center-menu .section.sliders .slider .source-selector,
+.control-center-menu .section.power .plan-name .icon,
+.control-center-menu .section.power .mode-name .icon,
+.control-center-menu .section.media .button {
+    font-family: "Segoe Fluent Icons";
     font-weight: 400;
-    color: #b4befe;
-    border: 0;
 }
-.control-center-menu .sliders .slider .source-selector {
-    margin-left: 6px;
-    border-radius: 7px;
+.control-center-menu .section.quick-actions .button .icon,
+.control-center-menu .section.system-controls .button,
+.control-center-menu .section.sliders .slider .source-selector,
+.control-center-menu .section.power .plan-name,
+.control-center-menu .section.power .mode-name,
+.control-center-menu .section.media .button {
+    transition: background-color 0.08s, opacity 0.08s;
+    opacity: 1;
 }
-.control-center-menu .sliders .slider .source-selector:hover {
-    background-color: #313244;
-    color: #f5c2e7;
+.control-center-menu .section.system-controls .button:clicked,
+.control-center-menu .section.system-controls .button:pressed,
+.control-center-menu .section.quick-actions .button .icon:clicked,
+.control-center-menu .section.quick-actions .button .icon:pressed,
+.control-center-menu .section.sliders .slider .source-selector:clicked,
+.control-center-menu .section.sliders .slider .source-selector:pressed,
+.control-center-menu .section.power .plan-name:clicked,
+.control-center-menu .section.power .plan-name:pressed,
+.control-center-menu .section.power .mode-name:clicked,
+.control-center-menu .section.power .mode-name:pressed,
+.control-center-menu .section.media .button:clicked,
+.control-center-menu .section.media .button:pressed {
+    opacity: 0.5;
 }
-.control-center-menu .sliders .slider .value {
-    min-width: 34px;
-    margin-left: 5px;
-    font-family: "Segoe UI Variable Text";
-    font-size: 11px;
-    font-weight: 400;
-    color: #a6adc8;
+.control-center-menu .section.quick-actions .button.disabled .title,
+.control-center-menu .section.quick-actions .button.disabled .icon,
+.control-center-menu .section.sliders .slider.disabled,
+.control-center-menu .section.media .button.disabled,
+.control-center-menu .section.media .button.disabled:hover {
+    opacity: 0.5;
 }
-.control-center-menu QSlider::groove:horizontal,
-.control-center-menu QSlider::add-page:horizontal {
-    height: 4px;
-    border-radius: 2px;
-    background-color: #45475a;
+.control-center-menu .section.system-controls .button {
+    background-color: rgba(85, 85, 85, 0.5);
+    border-radius: 16px;
+    min-height: 32px;
+    max-height: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    font-size: 14px;
+    color: rgba(231, 231, 231, 1);
+    transition: background-color 0.08s, opacity 0.08s;
+    border-radius: 12;
 }
-.control-center-menu QSlider::sub-page:horizontal {
-    border-radius: 2px;
-    background-color: #b4befe;
+.control-center-menu .section.system-controls .button {
+    background-color: rgba(0, 0, 0, 0.0605);
+    color: rgba(0, 0, 0, 1);
 }
-.control-center-menu QSlider::handle:horizontal {
+.control-center-menu .section.system-controls .button.profile-image {
+    background-color: transparent;
+}
+.control-center-menu .section.system-controls .button:hover {
+    background-color: rgba(65, 65, 65, 0.4);
+}
+.control-center-menu .section.system-controls .button:hover {
+    background-color: rgba(0, 0, 0, 0.0837);
+}
+.control-center-menu .section.quick-actions .button .icon {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.quick-actions .button {
+    margin: 0 4px;
+    cursor: pointer;
+}
+.control-center-menu .section.quick-actions .button .icon {
+    font-size: 16px;
+    background-color: rgba(85, 85, 85, 0.5);
+    min-height: 48px;
+    border-radius: 12;
+    color: rgba(231, 231, 231, 1);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+.control-center-menu .section.quick-actions .button .icon {
+    background-color: rgba(0, 0, 0, 0.0605);
+    border: 1px solid rgba(0, 0, 0, 0.0698);
+}
+.control-center-menu .section.quick-actions .button .icon:hover {
+    background-color: rgba(65, 65, 65, 0.4);
+}
+.control-center-menu .section.quick-actions .button .icon:hover {
+    background-color: rgba(0, 0, 0, 0.0837);
+}
+.control-center-menu .section.quick-actions .button.active .icon {
+    background-color: rgb(179, 179, 179);
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.quick-actions .button.active .icon {
+    background-color: rgb(204, 204, 204);
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.quick-actions .button.active .icon:hover {
+    background-color: rgb(192, 192, 192);
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.quick-actions .button.active .icon:hover {
+    background-color: rgb(192, 192, 192);
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.quick-actions .button.disabled .icon:hover {
+    background-color: rgba(65, 65, 65, 0.4);
+}
+.control-center-menu .section.quick-actions .button.disabled .icon:hover {
+    background-color: rgba(0, 0, 0, 0.0837);
+}
+.control-center-menu .section.quick-actions .button.active .icon:pressed {
+    background-color: rgba(65, 65, 65, 0.4);
+}
+.control-center-menu .section.quick-actions .button.active .icon:pressed {
+    background-color: rgba(0, 0, 0, 0.0837);
+}
+.control-center-menu .section.quick-actions .button .title {
+    font-size: 12px;
+    margin: 4px 0 8px 0;
+    padding: 0;
+    font-weight: 600;
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.quick-actions .button .title {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.sliders .slider {
+    background: transparent;
+    border: none;
+    min-height: 34px;
+    margin: 0 4px 0 4px;
+}
+.control-center-menu .section.sliders .slider .icon {
+    font-size: 16px;
+    color: rgba(231, 231, 231, 1);
+    min-width: 36px;
+}
+.control-center-menu .section.sliders .slider .icon {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.sliders .slider .value {
+    min-width: 36px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.sliders .slider .value {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.sliders .slider .source-selector {
+    font-size: 12px;
+    color: rgba(231, 231, 231, 1);
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.6);
+    margin-left: 4px;
+}
+.control-center-menu .section.sliders .slider .source-selector {
+    color: rgba(0, 0, 0, 1);
+    background-color: rgba(211, 211, 211, 0.4);
+}
+.control-center-menu .section.sliders .slider .source-selector:hover {
+    background-color: rgba(65, 65, 65, 0.4);
+}
+.control-center-menu .section.sliders .slider .source-selector:hover {
+    background-color: rgba(0, 0, 0, 0.0837);
+}
+.control-center-menu .section.power .plan-name,
+.control-center-menu .section.power .mode-name {
+    background: rgb(179, 179, 179);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 12;
+    min-height: 36px;
+    margin: 0 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+.control-center-menu .section.power .plan-name,
+.control-center-menu .section.power .mode-name {
+    background: rgb(204, 204, 204);
+    border: 1px solid rgba(0, 0, 0, 0.0698);
+}
+.control-center-menu .section.power .plan-name:hover,
+.control-center-menu .section.power .mode-name:hover {
+    background: rgb(192, 192, 192);
+}
+.control-center-menu .section.power .plan-name:hover,
+.control-center-menu .section.power .mode-name:hover {
+    background: rgb(192, 192, 192);
+}
+.control-center-menu .section.power .mode-name.disabled,
+.control-center-menu .section.power .mode-name.disabled:hover {
+    opacity: 0.5;
+    background: rgba(65, 65, 65, 0.4);
+}
+.control-center-menu .section.power .mode-name.disabled,
+.control-center-menu .section.power .mode-name.disabled:hover {
+    background: rgba(0, 0, 0, 0.0837);
+}
+.control-center-menu .section.power .plan-name .title,
+.control-center-menu .section.power .mode-name .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.power .plan-name .title,
+.control-center-menu .section.power .mode-name .title {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.power .plan-name .subtext,
+.control-center-menu .section.power .mode-name .subtext {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.power .plan-name .subtext,
+.control-center-menu .section.power .mode-name .subtext {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.power .plan-name.disabled .title,
+.control-center-menu .section.power .mode-name.disabled .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.power .plan-name.disabled .title,
+.control-center-menu .section.power .mode-name.disabled .title {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.power .plan-name.disabled .subtext,
+.control-center-menu .section.power .mode-name.disabled .subtext {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.power .plan-name.disabled .subtext,
+.control-center-menu .section.power .mode-name.disabled .subtext {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.power .plan-name .icon,
+.control-center-menu .section.power .mode-name .icon {
+    color: rgba(231, 231, 231, 1);
+    font-size: 16px;
+}
+.control-center-menu .section.power .plan-name .icon,
+.control-center-menu .section.power .mode-name .icon {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.power .plan-name.disabled .icon,
+.control-center-menu .section.power .mode-name.disabled .icon {
+    color: rgba(231, 231, 231, 1);
+    font-size: 16px;
+}
+.control-center-menu .section.power .plan-name.disabled .icon,
+.control-center-menu .section.power .mode-name.disabled .icon {
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.media {
+    background-color: transparent;
+    padding: 12px;
+}
+.control-center-menu .section.media .track-info {
+     padding-left: 8px;
+}
+.control-center-menu .section.media .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.media .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.media .subtext {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(165, 165, 165, 1);
+}
+.control-center-menu .section.media .subtext {
+    color: rgba(0, 0, 0, 0.786);
+}
+.control-center-menu .section.media .button {
+    font-size: 16px;
+    background-color: rgb(179, 179, 179);
+    color: rgba(231, 231, 231, 1);
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    border-radius: 6px;
+    margin: 0 0 0 4px;
+    border-radius: 12;
+}
+.control-center-menu .section.media .button {
+    background-color: rgb(204, 204, 204);
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .section.media .button.prev {
+    color: rgba(231, 231, 231, 1);
+    background-color: rgb(179, 179, 179);
+}
+.control-center-menu .section.media .button.prev {
+    color: rgba(0, 0, 0, 1);
+    background-color: rgb(204, 204, 204);
+}
+.control-center-menu .section.media .button.next {
+    color: rgba(231, 231, 231, 1);
+    background-color: rgb(204, 204, 204);
+}
+.control-center-menu .section.media .button.next {
+    color: rgba(0, 0, 0, 1);
+    background-color: rgb(204, 204, 204);
+}
+.control-center-menu .section.media .button.prev.disabled {
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.media .button.prev.disabled {
+    color: rgba(0, 0, 0, 1);
+    background-color: rgba(0, 0, 0, 0.0605);
+}
+.control-center-menu .section.media .button.next.disabled {
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .section.media .button.next.disabled {
+    color: rgba(0, 0, 0, 1);
+    background-color: rgba(0, 0, 0, 0.0605);
+}
+.control-center-menu .section.media .button:hover {
+    background-color: rgb(192, 192, 192);
+}
+.control-center-menu .section.media .button:hover {
+    background-color: rgb(192, 192, 192);
+}
+.control-center-menu .section.media .button.disabled,
+.control-center-menu .section.media .button.disabled:hover {
+    background-color: rgba(85, 85, 85, 0.5);
+}
+.control-center-menu .context-menu {
+    padding: 4px 0px;
+    font-family: "Segoe UI Variable", "Segoe UI";
+    font-weight: 600;
+    font-size: 12px;
+    color: rgba(231, 231, 231, 1);
+    border-radius: 12;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    background-color: transparent;
+}
+.control-center-menu .context-menu {
+    color: rgba(0, 0, 0, 1);
+    border: 1px solid rgba(0, 0, 0, 0.0698);
+}
+.control-center-menu .context-menu::item {
+    background-color: transparent;
+    padding: 6px 12px;
+    margin: 2px 6px;
+    border-radius: 8;
+    min-width: 100px;
+}
+.control-center-menu .context-menu::item:selected {
+    background-color: rgba(65, 65, 65, 0.4);
+    color: rgba(231, 231, 231, 1);
+}
+.control-center-menu .context-menu::item:selected {
+    background-color: rgba(0, 0, 0, 0.0837);
+    color: rgba(0, 0, 0, 1);
+}
+.control-center-menu .context-menu::separator {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.3);
+    margin: 4px 0;
+}
+.control-center-menu .context-menu::separator {
+    background-color: rgba(0, 0, 0, 0.0698);
+}
+.control-center-menu .context-menu::indicator:unchecked {
     width: 4px;
-    margin: -5px 0;
-    border-radius: 2px;
-    background-color: #f5c2e7;
+    height: 12px;
+    margin-left: 0;
+    color: transparent;
+    background-color: transparent;
 }
-.control-center-menu QSlider::sub-page:horizontal:disabled,
-.control-center-menu QSlider::handle:horizontal:disabled {
-    background-color: #6c7086;
+.control-center-menu .context-menu::indicator:checked {
+    width: 4px;
+    height: 12px;
+    background-color: rgb(179, 179, 179);
+    border-radius: 8;
+    margin-left: 0;
+}
+.control-center-menu .context-menu::indicator:checked {
+    background-color: rgb(204, 204, 204);
 }
 
-.control-center-menu QMenu {
+/* The layout symbols in the source theme are Nerd Font glyphs. */
+.komorebi-layout-menu .menu-item-icon { font-family: "JetBrainsMono NFP"; }
+/* Compact access to the new menu, next to the existing workspaces. */
+.komorebi-active-layout { padding: 0 4px; }
+.komorebi-active-layout .label { padding: 2px 2px 1px; }
+
+
+/* Requested bar order; popup and Island styles remain independent. */
+.yasb-bar .widget { padding: 0 6px; }
+.yasb-bar .komorebi-control-widget .label { font-size: 12px; padding: 2px 2px 1px; }
+.yasb-bar .bar-divider { padding: 0 4px; }
+.yasb-bar .bar-divider .label { color: #8d8d8d; padding: 2px 0 1px; }
+.yasb-bar .clock-widget .label { padding: 2px 2px 1px; }
+.yasb-bar .komorebi-workspaces { padding: 0 2px; }
+.yasb-bar .komorebi-workspaces .ws-btn,
+.yasb-bar .komorebi-workspaces .ws-btn.empty,
+.yasb-bar .komorebi-workspaces .ws-btn.populated,
+.yasb-bar .komorebi-workspaces .ws-btn.active {
+    background-color: transparent;
+    border: none;
+    font-family: "JetBrainsMono NFP", "Segoe UI Symbol";
+    font-size: 13px;
+    font-weight: 400;
+    min-width: 23px;
+    max-width: 23px;
+    min-height: 26px;
+    max-height: 26px;
+    padding: 0;
+    margin: 0 1px;
+    color: #7f7f7f;
+}
+.yasb-bar .komorebi-workspaces .ws-btn.populated { color: #000000; }
+.yasb-bar .komorebi-workspaces .ws-btn.active { color: #000000; }
+.yasb-bar .komorebi-workspaces .ws-btn.empty:hover { color: #0f0f0f; }
+
+
+/* Monochrome: the existing layout and transparent bar stay intact. */
+.yasb-bar .komorebi-workspaces .ws-btn.empty { color: #7f7f7f; }
+.yasb-bar .komorebi-workspaces .ws-btn.populated { color: #434343; }
+.yasb-bar .komorebi-workspaces .ws-btn.active { color: #000000; }
+.yasb-bar .komorebi-workspaces .ws-btn.empty:hover { color: #272727; }
+.control-center-menu,
+.komorebi-layout-menu,
+.komorebi-control-menu,
+.clock-popup.calendar {
+    background-color: rgba(239, 239, 239, 0.94);
+    border: 1px solid rgba(0, 0, 0, 0.14);
+}
+.control-center-menu .section.quick-actions .button.active .icon {
+    background-color: #0f0f0f;
+    color: #eeeeee;
+}
+.control-center-menu .section.quick-actions .button.active .icon:hover {
+    background-color: #272727;
+    color: #eeeeee;
+}
+.control-center-menu .context-menu {
+    background-color: #e8e8e8;
+    border: 1px solid #c5c5c5;
+}
+.control-center-menu .context-menu::indicator:checked { background-color: #0f0f0f; }
+.control-center-menu QSlider.slider-control { background: transparent; }
+.control-center-menu QSlider.slider-control::groove:horizontal {
+    height: 4px;
+    background-color: #b7b7b7;
+    border-radius: 2px;
+}
+.control-center-menu QSlider.slider-control::sub-page:horizontal {
+    background-color: #212121;
+    height: 4px;
+    border: none;
+    border-radius: 2px;
+}
+.control-center-menu QSlider.slider-control::add-page:horizontal {
+    background-color: #b7b7b7;
+    height: 4px;
+    border: none;
+    border-radius: 2px;
+}
+.control-center-menu QSlider.slider-control::handle:horizontal {
+    background-color: #000000;
+    border: 3px solid #cfcfcf;
+    width: 10px;
+    height: 10px;
+    margin: -6px 0;
+    border-radius: 8px;
+}
+.control-center-menu QSlider.slider-control::sub-page:horizontal:disabled { background-color: #8d8d8d; }
+.clock-popup.calendar { border-radius: 12px; }
+.clock-popup.calendar QCalendarWidget,
+.clock-popup.calendar .calendar-table {
+    background-color: transparent;
+    color: #111111;
+    alternate-background-color: transparent;
+    selection-background-color: #bfbfbf;
+    selection-color: #000000;
+}
+.clock-popup.calendar .day-label,
+.clock-popup.calendar .date-label { color: #000000; }
+.clock-popup.calendar .month-label,
+.clock-popup.calendar .year-label,
+.clock-popup.calendar .holiday-label { color: #434343; }
+
+.yasb-bar { background-color: rgba(250,250,250,0.96); }
+
+.control-center-menu .section.quick-actions .button .icon { color: #202020; }
+
+/* Bar theme selector */
+.bar-theme-menu {
+    background-color: #f7f7f7;
+    color: #181818;
+    border: 1px solid #c6c6c6;
+    border-radius: 10px;
     padding: 5px;
-    background-color: rgba(24, 24, 37, 230);
-    border: 1px solid #45475a;
-    border-radius: 9px;
+    font-family: "Segoe UI Variable", "Segoe UI";
+    font-size: 12px;
 }
-.control-center-menu QMenu::item {
-    padding: 7px 12px;
-    border-radius: 5px;
-    font-family: "Segoe UI Variable Text";
-    color: #cdd6f4;
+.bar-theme-menu::item { padding: 8px 25px 8px 12px; margin: 1px; border-radius: 6px; }
+.bar-theme-menu::item:selected { background-color: #e2e2e2; color: #181818; }
+.bar-theme-menu::indicator { width: 4px; height: 12px; margin-left: 3px; border-radius: 2px; }
+.bar-theme-menu::indicator:checked { background-color: #111111; }
+.bar-theme-menu::indicator:unchecked { background-color: transparent; }
+
+/* Readability and glass surfaces */
+.control-center-menu, .komorebi-layout-menu, .komorebi-control-menu, .clock-popup.calendar {
+    background-color:rgba(250,250,251,0.86); background:rgba(250,250,251,0.86); border:1px solid rgba(28,31,40,0.16);
 }
-.control-center-menu QMenu::item:selected {
-    background-color: #313244;
-}
+.control-center-menu, .control-center-menu *, .komorebi-layout-menu, .komorebi-layout-menu * {color:#1c1f28;}
+.control-center-menu .section.system-controls .button {background-color:rgba(229,231,236,0.6);color:#1c1f28;}
+.control-center-menu .section.quick-actions .button .icon {background-color:rgba(229,231,236,0.6);color:#1c1f28;border:1px solid rgba(28,31,40,0.16);}
+.control-center-menu .section.quick-actions .button .title {color:#1c1f28;}
+.control-center-menu .section.quick-actions .button .icon:hover {background-color:#e5e7ec;color:#1c1f28;}
+.control-center-menu .section.quick-actions .button.active .icon {background-color:#20232d;color:#ffffff;border:1px solid #20232d;}
+.control-center-menu .section.quick-actions .button.active .icon:hover {background-color:#383d4b;color:#ffffff;}
+.control-center-menu .section.sliders .slider .icon {color:#4a4d59;}
+.control-center-menu .section.sliders .slider .value {color:#1c1f28;}
+.control-center-menu .section.sliders .slider .source-selector {background-color:rgba(229,231,236,0.6);color:#1c1f28;}
+.control-center-menu QSlider.slider-control::groove:horizontal,
+.control-center-menu QSlider.slider-control::add-page:horizontal {background-color:#898b94;height:4px;border:none;border-radius:2px;}
+.control-center-menu QSlider.slider-control::sub-page:horizontal {background-color:#20232d;height:4px;border:none;border-radius:2px;}
+.control-center-menu QSlider.slider-control::handle:horizontal {background-color:#1c1f28;border:3px solid #f1f2f5;}
+.control-center-menu .section.power .plan-name, .control-center-menu .section.power .mode-name {background-color:rgba(241,242,245,0.73);background:rgba(241,242,245,0.73);border:1px solid rgba(28,31,40,0.16);}
+.control-center-menu .section.power .plan-name .title, .control-center-menu .section.power .mode-name .title {color:#1c1f28;}
+.control-center-menu .section.power .plan-name .subtext, .control-center-menu .section.power .mode-name .subtext {color:#4a4d59;}
+.control-center-menu .section.power .plan-name .icon, .control-center-menu .section.power .mode-name .icon {color:#4a4d59;}
+.control-center-menu .section.media .title {color:#1c1f28;}
+.control-center-menu .section.media .subtext {color:#4a4d59;}
+.control-center-menu .section.media .button.prev,
+.control-center-menu .section.media .button.play,
+.control-center-menu .section.media .button.pause,
+.control-center-menu .section.media .button.next {background-color:rgba(229,231,236,0.6);color:#1c1f28;}
+.control-center-menu .section.media .button:hover {background-color:#e5e7ec;color:#1c1f28;}
+.control-center-menu .context-menu, .bar-theme-menu {background-color:rgba(250,250,251,0.96);color:#1c1f28;border:1px solid rgba(28,31,40,0.16);}
+.control-center-menu .context-menu::item:selected, .bar-theme-menu::item:selected {background-color:#e5e7ec;color:#1c1f28;}
+.control-center-menu .context-menu::indicator:checked, .bar-theme-menu::indicator:checked {background-color:#20232d;}
+.komorebi-layout-menu .menu-item-text, .komorebi-layout-menu .menu-item-icon {color:#1c1f28;}
+.komorebi-layout-menu .menu-item:hover {background-color:#e5e7ec;}
+.komorebi-control-menu .button.active {color:#1c1f28;background-color:rgba(229,231,236,0.6);}
+.komorebi-control-menu .footer .text {color:#4a4d59;}
+.clock-popup.calendar .calendar-table {color:#1c1f28;selection-background-color:#e5e7ec;selection-color:#1c1f28;}
+.clock-popup.calendar .day-label, .clock-popup.calendar .date-label {color:#1c1f28;}
+.clock-popup.calendar .month-label, .clock-popup.calendar .year-label, .clock-popup.calendar .holiday-label {color:#4a4d59;}
+.yasb-bar .label {color:#1c1f28;}
+.yasb-bar .komorebi-workspaces .ws-btn.empty {color:#4a4d59;}
+.yasb-bar .komorebi-workspaces .ws-btn.populated {color:#1c1f28;}
+.yasb-bar .komorebi-workspaces .ws-btn.active {color:#20232d;}
+
+.yasb-bar {background-color:rgba(250,250,251,0.86);}
+
+/* Bar settings overrides */
+.yasb-bar { padding: 0 8px; border-radius: 0px; }
+.yasb-bar .label { font-family: "JetBrainsMono NFP Light"; font-size: 12px; font-weight: 600; }
+
+/* Full bar surface */
+.yasb-bar {background:rgba(0,0,0,0.004);background-color:rgba(0,0,0,0.004);}
+.yasb-bar .label,.yasb-bar .widget .label,.yasb-bar .widget .icon,.yasb-bar .komorebi-workspaces .ws-btn.populated {color:#000000;}
+.yasb-bar .komorebi-workspaces .ws-btn.empty,.yasb-bar .bar-divider .label {color:#41444f;}
+.yasb-bar .komorebi-workspaces .ws-btn:hover {color:#000000;}
+.yasb-bar .komorebi-workspaces .ws-btn.active,.yasb-bar .komorebi-workspaces .ws-btn.active:hover {color:#20232d;}
+.yasb-bar .label,.yasb-bar .widget .icon,.yasb-bar .komorebi-workspaces .ws-btn {text-shadow:0 0 2px rgba(255,255,255,0.85);}
+.yasb-bar {border:none;}
+
+/* Custom CSS */

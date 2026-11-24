@@ -1,4 +1,5 @@
 from datetime import datetime
+from theme_tokens import on_accent,track_color
 from functools import lru_cache
 import math
 import time
@@ -27,7 +28,8 @@ DRIVE_SWITCH = QRectF(374, 237, 37, 36)
 WEATHER_REFRESH = QRectF(674, 79, 28, 29)
 
 
-def label(painter, value, x, y, width, height=22, size=13, color=TEXT, weight=QFont.Weight.Normal, align=None):
+def label(painter, value, x, y, width, height=22, size=13, color=None, weight=QFont.Weight.Normal, align=None):
+    color = TEXT if color is None else color
     text(painter, value, QRectF(x, y, width, height), size, color, weight, align or Qt.AlignmentFlag.AlignLeft)
 
 
@@ -61,7 +63,7 @@ def _time(seconds):
 def _bar(painter, rect, fraction, color, knob=False, wave=False, animate=False):
     fraction = max(0.0, min(1.0, fraction))
     y = rect.center().y()
-    pill(painter, QRectF(rect.x(), y - 2, rect.width(), 4), 2, SURFACE2)
+    pill(painter, QRectF(rect.x(), y - 2, rect.width(), 4), 2, track_color(globals()))
     width = rect.width() * fraction
     if wave and width > 3:
         path = QPainterPath(QPointF(rect.x(), y))
@@ -134,7 +136,7 @@ def media_view(painter, state, art, hover, seek_preview):
                 glyph = 'repeat_one'
             pill(painter, rect, 15 if action == 'toggle' else rect.width() / 2, bg)
             icon(painter, glyph, rect.center().x(), rect.center().y(), 22 if action == 'toggle' else 16,
-                 MANTLE if active and supported else TEXT if supported else OVERLAY)
+                 on_accent(bg) if active and supported else TEXT if supported else OVERLAY)
     else:
         pill(painter, QRectF(298, 166, 74, 63), 23, SURFACE)
         icon(painter, 'music', 335, 197, 30, LAVENDER)

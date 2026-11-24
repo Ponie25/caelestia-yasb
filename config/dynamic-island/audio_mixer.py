@@ -1,3 +1,4 @@
+from theme_tokens import track_color
 from _ctypes import COMError
 from dataclasses import dataclass
 from functools import lru_cache
@@ -62,13 +63,13 @@ def _slider(painter, rect, level, muted, hovered=False):
     color = OVERLAY if muted else PINK if hovered else LAVENDER
     start = rect.left()
     if level is None:
-        pill(painter, QRectF(start, y - 2, rect.width(), 4), 2, SURFACE2)
+        pill(painter, QRectF(start, y - 2, rect.width(), 4), 2, track_color(globals()))
         return
     end = start + rect.width() * level / 100
     if end - start > 5:
         pill(painter, QRectF(start, y - 2, end - start - 5, 4), 2, color)
     if rect.right() - end > 5:
-        pill(painter, QRectF(end + 5, y - 2, rect.right() - end - 5, 4), 2, SURFACE2)
+        pill(painter, QRectF(end + 5, y - 2, rect.right() - end - 5, 4), 2, track_color(globals()))
     pill(painter, QRectF(end - 1.5, y - 7, 3, 14), 1.5, color)
 
 

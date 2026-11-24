@@ -120,6 +120,10 @@ class CodexActivity(QObject):
 class NotificationReceiver(QObject):
     received = Signal(str, int, QImage)
     snapshot = Signal(object)
+    theme_changed = Signal(str)
+    settings_changed = Signal()
+    launcher_requested = Signal(str)
+    shutdown_requested = Signal()
     MAX_PACKET = 2 * 1024 * 1024
 
     def __init__(self, root):
@@ -167,7 +171,18 @@ class NotificationReceiver(QObject):
         if socket.canReadLine():
             try:
                 message = json.loads(bytes(socket.readLine(self.MAX_PACKET)))
-                if message.get('kind') == 'snapshot':
+                if message.get('kind') == 'launcher':
+                    action=message.get('action','open')
+                    if action in ('open','close','toggle'):self.launcher_requested.emit(action)
+                elif message.get('kind') == 'control' and message.get('action') == 'quit':
+                    self.shutdown_requested.emit()
+                elif message.get('kind') == 'settings':
+                    self.settings_changed.emit()
+                elif message.get('kind') == 'theme':
+                    name = message.get('name')
+                    if name in ('light', 'dark', 'catppuccin', 'everforest', 'red-white', 'red-black'):
+                        self.theme_changed.emit(name)
+                elif message.get('kind') == 'snapshot':
                     self._snapshot(message.get('items'))
                 else:
                     app, count = message.get('app'), message.get('count')

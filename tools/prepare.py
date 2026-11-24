@@ -2,6 +2,8 @@
 
 from importlib.util import MAGIC_NUMBER
 from pathlib import Path, PurePosixPath
+import hashlib
+import json
 import py_compile
 import re
 import shutil
@@ -10,12 +12,8 @@ import warnings
 from zipfile import ZipFile
 
 
-PATCHES = {
-    "core/bar_manager.pyc": "bar_manager.py",
-    "core/widgets/services/control_center/sections/quick_actions.pyc": "quick_actions.py",
-    "core/widgets/yasb/custom.pyc": "custom.py",
-}
 ROOT = Path(__file__).resolve().parents[1]
+PATCHES = json.loads((ROOT / 'patches/manifest.json').read_text(encoding='utf-8'))
 
 
 def install_wheels(downloads, runtime):
@@ -44,8 +42,17 @@ def patch_yasb(archive, build):
     patched = archive.with_suffix(".new.zip")
     with ZipFile(archive) as original, ZipFile(patched, "w") as output:
         replacements = {}
-        for entry, source in PATCHES.items():
-            if original.namelist().count(entry) != 1 or original.read(entry)[:4] != MAGIC_NUMBER:
+        for entry, patch in PATCHES.items():
+            source = patch['source']
+            if Path(source).name != source or not entry.startswith('core/') or not entry.endswith('.pyc'):
+                raise ValueError(f'Invalid patch target: {entry}')
+            expected = patch['upstream_sha256']
+            if expected is None:
+                if entry in original.namelist():
+                    raise ValueError(f'New module already exists: {entry}')
+            elif (original.namelist().count(entry) != 1 or
+                  original.read(entry)[:4] != MAGIC_NUMBER or
+                  hashlib.sha256(original.read(entry)).hexdigest() != expected):
                 raise ValueError(f"Unexpected YASB bytecode: {entry}")
             compiled = build / (source + "c")
             py_compile.compile(
@@ -59,6 +66,12 @@ def patch_yasb(archive, build):
             for member in original.infolist():
                 content = replacements.get(member.filename)
                 output.writestr(member, original.read(member) if content is None else content)
+            for entry, content in replacements.items():
+                if entry not in original.namelist():
+                    output.writestr(entry, content)
+    with ZipFile(patched) as check:
+        if check.testzip() is not None:
+            raise ValueError('Patched runtime verification failed')
     patched.replace(archive)
 
 
@@ -68,9 +81,15 @@ def main():
     if sys.argv[3] == "standard":
         path = config / "config.yaml"
         text = path.read_text(encoding="utf-8")
-        text = re.sub(r"^komorebi:\n(?:  [^\n]*\n)+\n", "", text, flags=re.M)
-        text = re.sub(r'^ {10}"komorebi_(control|workspaces)",\n', "", text, flags=re.M)
+        text = re.sub(r"^komorebi:\n(?:[ \t]+[^\n]*\n)+", "", text, flags=re.M)
+        text = re.sub(r'(      left:\n)(.*?)(      center:)',
+                      lambda m: m[1] + re.sub(r'^      - (?:komorebi_(?:control|active_layout|workspaces)|bar_divider)\n', '', m[2], flags=re.M) + m[3],
+                      text, count=1, flags=re.S)
         path.write_text(text, encoding="utf-8", newline="\n")
+        preferences = config / 'bar-settings.json'
+        options = json.loads(preferences.read_text(encoding='utf-8'))
+        options['komorebi']['mode'] = 'off'
+        preferences.write_text(json.dumps(options, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
 
     install_wheels(downloads, config / "dynamic-island" / "runtime")
     patch_yasb(install / "yasb" / "lib" / "library.zip", downloads)
