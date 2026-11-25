@@ -381,7 +381,7 @@ class BarSettingsDialog(ImmediateSettingsMixin,SettingsDraftMixin,QDialog):
         for index,(name,label) in enumerate(self.controller.theme_labels.items()):
             palette=json.loads((self.root/'theme-profiles'/name/'palette.json').read_text())
             button=ThemeCard(label,palette);button.setChecked(name==self.selected_theme)
-            button.setToolTip({'catppuccin':'Catppuccin · tím hồng','everforest':'Everforest · xanh lá'}.get(name,label))
+            button.setToolTip({'catppuccin':'Catppuccin · tím hồng','everforest':'Everforest · xanh lá','wallpaper':'Tự tạo bảng màu từ hình nền hiện tại; giữ tông sáng/tối bạn chọn.'}.get(name,label))
             button.clicked.connect(lambda checked=False,name=name:self._choose_theme(name))
             self.theme_group.addButton(button);self.theme_buttons[name]=button;grid.addWidget(button,index//3,index%3)
         layout.addLayout(grid)
@@ -439,6 +439,7 @@ class BarSettingsDialog(ImmediateSettingsMixin,SettingsDraftMixin,QDialog):
         self._immediate_begin_loading()
         try:
             self.preferences['palette']={};self.custom_accent.setChecked(False)
+            self._set_field('launcher','wallpaper_auto_theme',name=='wallpaper')
             self.accent.value=palette['MAUVE'];self.accent.refresh();self.theme_buttons[name].setChecked(True)
             for group,values in (('appearance',appearance_preset(palette)),('island',material_preset('liquid-soft'))):
                 for key,value in values.items():self._set_field(group,key,value)
@@ -635,7 +636,7 @@ class BarSettingsDialog(ImmediateSettingsMixin,SettingsDraftMixin,QDialog):
                 control._settings_row.setControlEnabled(active,reason)
             self.glass_details.section_card.setEnabled(optical)
             self._refresh_material_status()
-        for key in ('hotkey','max_results','dangerous_actions','wallpaper_directory'):
+        for key in ('hotkey','max_results','dangerous_actions'):
             if ('launcher',key) in self.controls:self.controls[('launcher',key)][0]._settings_row.setControlEnabled(settings['launcher']['enabled'],'Bật App launcher để sử dụng.')
         duration=self.controls[('animations','popup_ms')][0];duration._settings_row.setControlEnabled(settings['animations']['enabled'],'Bật Chuyển động để chỉnh thời gian.')
         for value,button in self.motion_presets.items():button.setChecked(settings['animations']['enabled'] and settings['animations']['popup_ms']==value and settings['island']['speed']==1.)
@@ -836,9 +837,14 @@ class BarSettingsDialog(ImmediateSettingsMixin,SettingsDraftMixin,QDialog):
         self._bind(form,'Mở bằng Alt+Space','launcher','hotkey','bool')
         self._bind(form,'Số kết quả hiển thị','launcher','max_results',low=3,high=7)
         self._bind(form,'Lệnh tắt máy, khởi động lại và đăng xuất','launcher','dangerous_actions','bool')
+        form=self._section(layout,'Hình nền và màu giao diện')
+        self._bind(form,'Chỉ hiện yêu thích từ Wallpaper Engine','launcher','wallpaper_favorites_only','bool')
+        self._bind(form,'Tự đổi màu giao diện theo hình nền','launcher','wallpaper_auto_theme','bool')
+        self._bind(form,'Tông màu theo hình nền','launcher','wallpaper_theme_mode','choice',choices=[('Giữ sáng/tối đang dùng','current'),('Luôn sáng','light'),('Luôn tối','dark')])
         self._bind(form,'Thư mục hình nền','launcher','wallpaper_directory','text')
         choose=QPushButton('Chọn thư mục hình nền…');choose.clicked.connect(self._choose_wallpaper_directory);form.addRow(choose)
         hint=QLabel('Gõ tên app, phép tính hoặc > để xem lệnh. Mũi tên để chọn, Enter để mở, Esc để đóng. Hiệu ứng dùng cùng cài đặt chuyển động của Island.');hint.setWordWrap(True);hint.setProperty('role','muted');form.addRow(hint)
+        hint=QLabel('Yêu thích lấy từ tài khoản Steam đang dùng với Wallpaper Engine; chỉ hiện các ảnh đã tải về máy. Bấm Làm mới trong gallery sau khi thêm hoặc bỏ sao. Chọn một theme cố định sẽ tắt tự đổi màu.');hint.setWordWrap(True);hint.setProperty('role','muted');form.addRow(hint)
         form=self._section(layout,'Khi bấm vào Island')
         choices=[('Tổng quan (Dashboard)','Dashboard'),('Nhạc và âm thanh (Media)','Media'),('Hiệu năng máy (Performance)','Performance'),('Thời tiết (Weather)','Weather'),('Hoạt động đang chạy (Live Activity)','Live Activity')]
         self._bind(form,'Trang mở khi bấm','island','default_tab','choice',choices=choices)

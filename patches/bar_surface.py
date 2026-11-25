@@ -12,6 +12,16 @@ def wallpaper_signature():
     buffer=ctypes.create_unicode_buffer(32768)
     if not ctypes.windll.user32.SystemParametersInfoW(0x73,len(buffer),buffer,0):return None
     path=buffer.value
+    # The ordinary Windows bitmap can be covered by Wallpaper Engine. Reuse the
+    # current project's preview for automatic ink; never capture the desktop.
+    try:
+        import json
+        from settings import DEFAULT_CONFIG_DIRECTORY
+        root=Path(DEFAULT_CONFIG_DIRECTORY)
+        if json.loads((root/'theme.json').read_text(encoding='utf-8')).get('name')=='wallpaper':
+            selected=json.loads((root/'dynamic-island/wallpaper-theme-state.json').read_text(encoding='utf-8')).get('path','')
+            if selected and Path(selected).is_file():path=selected
+    except (OSError,ValueError,TypeError):pass
     try:stamp=Path(path).stat().st_mtime_ns if path else 0
     except OSError:stamp=0
     rgb=ctypes.windll.user32.GetSysColor(1)

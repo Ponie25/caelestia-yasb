@@ -83,6 +83,10 @@
     "source": "motion_spec.py",
     "upstream_sha256": null
   },
+  "core/utils/wallpaper_theme.pyc": {
+    "source": "wallpaper_theme.py",
+    "upstream_sha256": null
+  },
   "core/utils/settings_navigation.pyc": {
     "source": "settings_navigation.py",
     "upstream_sha256": null

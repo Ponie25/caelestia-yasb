@@ -8,8 +8,8 @@ from functools import lru_cache
 from pathlib import Path
 
 from PySide6.QtCore import QAbstractListModel,QEvent,QModelIndex,QPointF,QRectF,QSize,Qt,QVariantAnimation,Signal,QEasingCurve
-from PySide6.QtGui import QColor,QFont,QFontDatabase,QIcon,QKeyEvent,QPainter,QPainterPath,QPalette,QPen,QRegion
-from PySide6.QtWidgets import QApplication,QAbstractItemView,QGraphicsOpacityEffect,QLineEdit,QListView,QPushButton,QStyledItemDelegate,QWidget
+from PySide6.QtGui import QColor,QCursor,QFont,QFontDatabase,QIcon,QKeyEvent,QPainter,QPainterPath,QPalette,QPen,QRegion
+from PySide6.QtWidgets import QApplication,QAbstractItemView,QGraphicsOpacityEffect,QHBoxLayout,QLabel,QLineEdit,QListView,QPushButton,QStyledItemDelegate,QWidget
 from PySide6.QtSvg import QSvgRenderer
 import palette
 
@@ -57,10 +57,12 @@ PATHS={
     'restart':'<path d="M20 7V3m0 4h-4M4 17v4m0-4h4M20 7A8 8 0 0 0 6 5m-2 12a8 8 0 0 0 14 2"/>',
     'logout':'<path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5m5-13 5 5-5 5m5-5H9"/>',
     'check':'<path d="m5 12 4 4L19 6"/>',
+    'star':'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/>',
+    'star-filled':'<path fill="currentColor" d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/>',
 }
 @lru_cache(maxsize=96)
 def svg(name,color):
-    return QSvgRenderer(('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+PATHS.get(name,PATHS['apps'])+'</svg>').encode())
+    return QSvgRenderer(('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+PATHS.get(name,PATHS['apps']).replace('currentColor',color)+'</svg>').encode())
 def glyph(painter,name,rect,color=None):svg(name,color or palette.MUTED).render(painter,QRectF(rect))
 
 
@@ -139,7 +141,12 @@ class Delegate(QStyledItemDelegate):
             else:source.setHeight(source.width()/ratio);source.moveCenter(QRectF(image.rect()).center())
             painter.drawImage(art,image,source)
         else:glyph(painter,row.glyph,QRectF(art.center().x()-18,art.center().y()-18,36,36),palette.MUTED)
-        painter.restore();painter.setFont(font(12));painter.setPen(QColor(palette.TEXT))
+        painter.restore()
+        if row.kind=='wallpaper' and row.favorite:
+            badge=QRectF(art.right()-27,art.top()+4,24,24);color=QColor(palette.BASE);color.setAlphaF(.94)
+            painter.setPen(Qt.PenStyle.NoPen);painter.setBrush(color);painter.drawEllipse(badge)
+            glyph(painter,'star-filled' if row.favorite else 'star',badge.adjusted(4,4,-4,-4),palette.MAUVE if row.favorite else palette.TEXT)
+        painter.setFont(font(12));painter.setPen(QColor(palette.TEXT))
         painter.drawText(QRectF(rect.left()+10,rect.top()+108,164,20),Qt.AlignmentFlag.AlignCenter,painter.fontMetrics().elidedText(row.title,Qt.TextElideMode.ElideRight,164))
         painter.setFont(font(10));painter.setPen(QColor(palette.MUTED))
         painter.drawText(QRectF(rect.left()+10,rect.top()+129,164,16),Qt.AlignmentFlag.AlignCenter,painter.fontMetrics().elidedText(row.detail,Qt.TextElideMode.ElideRight,164))
@@ -154,26 +161,44 @@ class Results(QListView):
         self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.setStyleSheet('QListView {background:transparent;border:0;outline:0;padding:0;} QListView::item {background:transparent;}')
         self.viewport().setAutoFillBackground(False);self.highlight=0.
-        self.animation=QVariantAnimation(self);self.animation.setDuration(350);self.animation.setEasingCurve(curve('fast'))
+        self.animation=QVariantAnimation(self);self.animation.setDuration(350);self.animation.setEasingCurve(curve('spatial'))
         self.animation.valueChanged.connect(self._move_highlight)
+        self.scroll_animation=QVariantAnimation(self);self.scroll_animation.setEasingCurve(curve('spatial'));self.scroll_animation.valueChanged.connect(lambda value:self.horizontalScrollBar().setValue(round(value)))
+        self.last_mouse=QCursor.pos();self.motion_ms=350
         self.selectionModel().currentChanged.connect(self._selected)
-        self.entered.connect(self.setCurrentIndex)
     def _move_highlight(self,value):self.highlight=float(value);self.viewport().update()
     def _selected(self,index,previous):
+        if not index.isValid():return
+        self.animation.setDuration(self.motion_ms)
         self.animation.stop();self.animation.setStartValue(self.highlight);self.animation.setEndValue(float(max(0,index.row())*(192 if self.gallery else ROW+GAP)));self.animation.start()
         if self.gallery:
             self.scrollTo(index,QAbstractItemView.ScrollHint.PositionAtCenter)
-            if self.wallpapers:self.wallpapers.request_previews(self.model().rows[max(0,index.row()-2):index.row()+3])
+            if self.wallpapers:
+                rows=self.model().rows;at=index.row();near=[at,at-1,at+1,at-2,at+2]
+                self.wallpapers.request_previews([rows[i] for i in near if 0<=i<len(rows)])
+    def scrollTo(self,index,hint=QAbstractItemView.ScrollHint.EnsureVisible):
+        if not getattr(self,'gallery',False):super().scrollTo(index,hint);return
+        if not index.isValid():return
+        bar=self.horizontalScrollBar();target=max(0,min(bar.maximum(),index.row()*192+92-self.viewport().width()/2))
+        self.scroll_animation.stop();self.scroll_animation.setDuration(self.motion_ms);self.scroll_animation.setStartValue(float(bar.value()));self.scroll_animation.setEndValue(float(target));self.scroll_animation.start()
+    def move_selection(self,delta):
+        self.last_mouse=QCursor.pos();count=self.model().rowCount()
+        if count:self.setCurrentIndex(self.model().index((self.currentIndex().row()+delta)%count,0))
+    def mouseMoveEvent(self,event):
+        position=event.globalPosition().toPoint()
+        if (position-self.last_mouse).manhattanLength()>2:
+            self.last_mouse=position;index=self.indexAt(event.position().toPoint())
+            if index.isValid():self.setCurrentIndex(index)
+        super().mouseMoveEvent(event)
     def set_gallery(self,enabled):
         if self.gallery==enabled:return
-        self.gallery=enabled;self.animation.stop();self.highlight=0.
+        self.gallery=enabled;self.animation.stop();self.scroll_animation.stop();self.highlight=0.
         self.setFlow(QListView.Flow.LeftToRight if enabled else QListView.Flow.TopToBottom);self.setWrapping(False)
         self.setGridSize(QSize(192,158) if enabled else QSize());self.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.horizontalScrollBar().setValue(0);self.verticalScrollBar().setValue(0)
     def wheelEvent(self,event):
         if self.gallery and event.angleDelta().y():
-            count=self.model().rowCount()
-            if count:self.setCurrentIndex(self.model().index((self.currentIndex().row()+(-1 if event.angleDelta().y()>0 else 1))%count,0))
+            self.move_selection(-1 if event.angleDelta().y()>0 else 1)
             event.accept();return
         super().wheelEvent(event)
     def paintEvent(self,event):
@@ -190,6 +215,8 @@ class LauncherView(QWidget):
     accepted=Signal(object)
     dismissed=Signal()
     height_changed=Signal()
+    favorite_filter_changed=Signal(bool)
+    wallpaper_refresh_requested=Signal()
     def __init__(self,parent,catalog):
         super().__init__(parent);self.catalog=catalog;self.wallpapers=getattr(parent,'wallpapers',None);self.bottom=False;self.max_rows=7;self.morph_margin=16.;self.search=Search(self);self.results=Results(catalog,self)
         self.effect=QGraphicsOpacityEffect(self.search);self.effect.setOpacity(0);self.search.setGraphicsEffect(self.effect)
@@ -197,6 +224,15 @@ class LauncherView(QWidget):
         self.search.edit.textChanged.connect(self.query_changed)
         QApplication.instance().installEventFilter(self);self.results.clicked.connect(self._accept_index)
         self.search.edit.returnPressed.connect(self.accept_current)
+        self.wallpaper_mode=False;self.wallpaper_tools=QWidget(self);tools=QHBoxLayout(self.wallpaper_tools);tools.setContentsMargins(0,0,0,0);tools.setSpacing(6)
+        self.favorites_button=QPushButton('Yêu thích');self.all_button=QPushButton('Tất cả')
+        for button in (self.favorites_button,self.all_button):button.setCheckable(True);button.setFixedHeight(26);button.setFocusPolicy(Qt.FocusPolicy.NoFocus);button.setFont(font(11));tools.addWidget(button)
+        self.favorites_button.clicked.connect(lambda:self.favorite_filter_changed.emit(True));self.all_button.clicked.connect(lambda:self.favorite_filter_changed.emit(False))
+        self.wallpaper_info=QLabel('Lên/Xuống chọn · Enter đổi nền');hint_font=QFont('Segoe UI');hint_font.setPixelSize(11);self.wallpaper_info.setFont(hint_font);tools.addStretch();tools.addWidget(self.wallpaper_info)
+        self.wallpaper_refresh=QPushButton();self.wallpaper_refresh.setFixedSize(28,26);self.wallpaper_refresh.setFocusPolicy(Qt.FocusPolicy.NoFocus);self.wallpaper_refresh.setToolTip('Làm mới yêu thích và thư viện · Ctrl+R');self.wallpaper_refresh.setAccessibleName('Làm mới thư viện hình nền');self.wallpaper_refresh.clicked.connect(self.wallpaper_refresh_requested);tools.addWidget(self.wallpaper_refresh)
+        self.wallpaper_refresh.setObjectName('wallpaperRefresh')
+        self.tools_effect=QGraphicsOpacityEffect(self.wallpaper_tools);self.wallpaper_tools.setGraphicsEffect(self.tools_effect)
+        self.wallpaper_tools.hide();self.refresh_theme()
         catalog.image_ready.connect(lambda *_:self.results.viewport().update())
         if self.wallpapers:self.wallpapers.image_ready.connect(lambda *_:self.results.viewport().update())
         self.hide()
@@ -204,21 +240,30 @@ class LauncherView(QWidget):
     def set_results(self,rows,preserve=False):
         selected=self.results.currentIndex().row()
         old=self.rows()[selected].key if 0<=selected<len(self.rows()) else None
-        self.results.set_gallery(any(row.kind=='wallpaper' for row in rows));self.results.model().replace(rows)
-        at=next((i for i,row in enumerate(rows) if row.key==old),0) if preserve else next((i for i,row in enumerate(rows) if row.current),0) if self.results.gallery else 0
+        self.results.set_gallery(any(row.kind=='wallpaper' for row in rows));model=self.results.model()
+        if [row.key for row in rows]==[row.key for row in model.rows]:
+            model.rows=rows
+            if rows:model.dataChanged.emit(model.index(0,0),model.index(len(rows)-1,0))
+        else:model.replace(rows)
+        at=next((i for i,row in enumerate(rows) if row.key==old),min(selected,max(0,len(rows)-1))) if preserve else next((i for i,row in enumerate(rows) if row.current),0) if self.results.gallery else 0
         if rows:self.results.setCurrentIndex(self.results.model().index(at,0))
+        if self.wallpaper_mode:self.wallpaper_info.setText(f"{sum(row.kind=='wallpaper' for row in rows)} ảnh · Lên/Xuống chọn · Enter đổi")
         self.catalog.request_icons(rows)
-        if self.results.gallery and self.wallpapers:self.wallpapers.request_previews(rows[:5])
         self.height_changed.emit();self.layout_contents()
+    def set_wallpaper_mode(self,enabled,favorites_only=True,status=''):
+        self.wallpaper_mode=enabled;self.wallpaper_tools.setVisible(enabled);self.favorites_button.setChecked(favorites_only);self.all_button.setChecked(not favorites_only)
+        self.wallpaper_info.setToolTip(status)
     def body_height(self):return 158 if self.results.gallery else max(ROW,min(self.max_rows,len(self.rows()))*(ROW+GAP)-GAP)
-    def preferred_height(self):return PADDING*3+SEARCH+self.body_height()
+    def preferred_height(self):return PADDING*3+SEARCH+self.body_height()+(32 if self.wallpaper_mode else 0)
     def resizeEvent(self,event):self.layout_contents()
     def layout_contents(self):
         if not hasattr(self,'results'):return
         height=self.body_height()
         margin=round(self.morph_margin)
         self.search.setGeometry(margin,self.height()-margin-SEARCH if self.bottom else margin,self.width()-2*margin,SEARCH)
-        self.results.setGeometry(PADDING,PADDING if self.bottom else margin*2+SEARCH,self.width()-2*PADDING,height)
+        tools_y=PADDING+height if self.bottom else margin*2+SEARCH
+        self.wallpaper_tools.setGeometry(PADDING,tools_y,self.width()-2*PADDING,28)
+        self.results.setGeometry(PADDING,PADDING if self.bottom else margin*2+SEARCH+(32 if self.wallpaper_mode else 0),self.width()-2*PADDING,height)
     def eventFilter(self,obj,event):
         island=self.parentWidget()
         if not getattr(island,'launcher_active',False):return False
@@ -230,6 +275,8 @@ class LauncherView(QWidget):
         if event.type()==QEvent.Type.KeyPress:
             key=event.key()
             if key==Qt.Key.Key_Escape:self.dismissed.emit();return True
+            if self.wallpaper_mode and event.modifiers()&Qt.KeyboardModifier.ControlModifier:
+                if key==Qt.Key.Key_R:self.wallpaper_refresh_requested.emit();return True
             # During activation an event can reach the window before Qt has
             # assigned a child focus receiver. Route that first text event to
             # the real editor, preserving layout, modifiers and composition.
@@ -240,8 +287,7 @@ class LauncherView(QWidget):
                 QApplication.sendEvent(self.search.edit,copy);return True
             delta=-1 if key in (Qt.Key.Key_Up,Qt.Key.Key_Backtab) else 1 if key in (Qt.Key.Key_Down,Qt.Key.Key_Tab) else 0
             if delta:
-                count=len(self.rows())
-                if count:self.results.setCurrentIndex(self.results.model().index((self.results.currentIndex().row()+delta)%count,0))
+                self.results.move_selection(delta)
                 return True
         elif event.type()==QEvent.Type.InputMethod and obj is not self.search.edit and not self.search.edit.hasFocus():
             self.search.edit.setFocus(Qt.FocusReason.OtherFocusReason)
@@ -250,12 +296,18 @@ class LauncherView(QWidget):
     def _accept_index(self,index):
         if index.isValid():self.accepted.emit(self.rows()[index.row()])
     def accept_current(self):self._accept_index(self.results.currentIndex())
-    def refresh_theme(self):self.search.theme();self.results.viewport().update()
+    def refresh_theme(self):
+        self.search.theme();self.results.viewport().update()
+        if hasattr(self,'wallpaper_tools'):
+            self.wallpaper_tools.setStyleSheet('QPushButton {color:'+palette.MUTED+';background:transparent;border:0;border-radius:12px;padding:3px 9px;} QPushButton#wallpaperRefresh {padding:0;} QPushButton:checked {color:'+palette.TEXT+';background:'+palette.SURFACE2+';} QPushButton:hover {background:'+palette.SURFACE+';} QLabel {color:'+palette.MUTED+';background:transparent;}')
+            from PySide6.QtGui import QPixmap
+            pixmap=QPixmap(16,16);pixmap.fill(Qt.GlobalColor.transparent);p=QPainter(pixmap);glyph(p,'restart',QRectF(1,1,14,14),palette.MUTED);p.end();self.wallpaper_refresh.setIcon(QIcon(pixmap))
     def effects(self,enabled,opacity):
-        for effect in (self.effect,self.results_effect):effect.setEnabled(enabled);effect.setOpacity(opacity)
+        for effect in (self.effect,self.results_effect,self.tools_effect):effect.setEnabled(enabled);effect.setOpacity(opacity)
     def reveal(self,search_amount,body_amount,path):
         if self.effect.isEnabled():self.effect.setOpacity(search_amount)
         if self.results_effect.isEnabled():self.results_effect.setOpacity(body_amount)
+        if self.tools_effect.isEnabled():self.tools_effect.setOpacity(body_amount)
         self.search.backdrop_strength=body_amount;self.search.update()
         if not self.parentWidget().animation.isActive():self.clearMask();return
         local=QPainterPath(path);local.translate(-self.x(),-self.y())

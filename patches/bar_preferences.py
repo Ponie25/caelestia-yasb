@@ -20,7 +20,8 @@ DEFAULTS = {
                    'foreground':'auto','text_color':'#f7eeee','border_color_source':'custom',
                    'border_opacity':0.5,'border_width':1.0,'border_edges':'all'},
     'animations': {'enabled': True, 'popup_ms': 220},
-    'launcher': {'enabled':True,'hotkey':True,'max_results':7,'dangerous_actions':False,'wallpaper_directory':''},
+    'launcher': {'enabled':True,'hotkey':True,'max_results':7,'dangerous_actions':False,'wallpaper_directory':'',
+                 'wallpaper_favorites_only':True,'wallpaper_auto_theme':True,'wallpaper_theme_mode':'current'},
     'island': {'enabled': True, 'hover': True, 'glass': True, 'outline': True,
                'material':'liquid-soft','liquid_refraction':1.0,'liquid_frost':0.4,
                'liquid_tint':0.32,'liquid_reflection':1.0,'liquid_fps':120,'liquid_contrast':True,
@@ -128,6 +129,7 @@ def validate_preferences(data):
     if data['komorebi']['mode'] not in ('theme','custom','original','off'):raise ValueError('Chế độ viền Komorebi không hợp lệ.')
     if data['settings_window']['mode'] not in ('system','light','dark'):raise ValueError('Chế độ cửa sổ cần là system, light hoặc dark.')
     directory=data['launcher']['wallpaper_directory']
+    if data['launcher']['wallpaper_theme_mode'] not in ('current','light','dark'):raise ValueError('Tông màu theo hình nền cần là current, light hoặc dark.')
     if not isinstance(directory,str) or len(directory)>4096 or any(ord(char)<32 for char in directory) or directory and not Path(directory).is_absolute():
         raise ValueError('Thư mục hình nền cần là đường dẫn đầy đủ, hoặc để trống để dùng thư mục mặc định.')
     for key in ('font_family',):
@@ -227,7 +229,7 @@ def restore_snapshot(root,directory):
     validate_config(yaml.safe_load((directory/'config.yaml').read_bytes()))
     if 'theme.json' in files:
         theme=json.loads((directory/'theme.json').read_text(encoding='utf-8'))
-        if not isinstance(theme,dict) or theme.get('name') not in ('light','dark','catppuccin','everforest','red-white','red-black'):
+        if not isinstance(theme,dict) or theme.get('name') not in ('light','dark','catppuccin','everforest','red-white','red-black','wallpaper'):
             raise ValueError('Theme trong bản sao lưu không hợp lệ.')
     if 'bar-settings.json' in files:
         validate_preferences(json.loads((directory/'bar-settings.json').read_text(encoding='utf-8')))

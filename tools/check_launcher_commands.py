@@ -2,11 +2,12 @@
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
-import importlib.machinery,importlib.util,json,os,sys,tempfile,traceback,uuid
+import importlib.machinery,importlib.util,json,os,sys,tempfile,traceback,uuid,time,io
 install=Path(sys.argv[1]).resolve();root=install/'config/dynamic-island'
 os.environ['QT_QPA_PLATFORM']='offscreen';sys.path[:0]=[str(root),str(root/'runtime')]
-from PySide6.QtCore import QEventLoop,QTimer,Qt
-from PySide6.QtGui import QColor,QImage
+os.environ['YASB_SETTINGS_NO_EXTERNAL']='1'
+from PySide6.QtCore import QEventLoop,QTimer,Qt,QPointF
+from PySide6.QtGui import QColor,QCursor,QImage,QKeyEvent,QMouseEvent
 from PySide6.QtWidgets import QApplication
 from launcher_core import query,Result
 from launcher_windows import Catalog,Shortcut
@@ -15,6 +16,8 @@ from launcher_actions import ControlRequest,power_action
 from PySide6.QtNetwork import QLocalServer
 import launcher as launcher_module
 from launcher_view import LauncherView
+from wallpaper_data import steam_favorites,dominant,make_palette
+from theme_tokens import normalize_palette,contrast
 app=QApplication([]);app.setQuitOnLastWindowClosed(False)
 errors=[]
 def error(kind,value,tb):
@@ -46,6 +49,22 @@ assert query('>restart',[],context={'dangerous_actions':True})[0].value=='reboot
 assert query('>scheme cat',[],context={'theme':'catppuccin','palettes':{'catppuccin':['#111111','#cba6f7']}})[0].current
 assert query('>calc sqrt(144)',[])[0].value=='12'
 assert query('>scheme missing99',[])[0].kind=='hint'
+html=b'<div class="workshopBrowseItems"><div id="sharedfile_123456"><div id="sharedfile_654321"></div>'
+with patch('wallpaper_data.urlopen',return_value=io.BytesIO(html)):
+    assert steam_favorites(123)['ids']==['123456','654321']
+with patch('wallpaper_data.urlopen',side_effect=[io.BytesIO(b'<div class="workshopBrowseItems" id="sharedfile_123456"><a href="?p=2">Next</a>'),io.BytesIO(html)]) as fetch:
+    assert steam_favorites(123)['ids']==['123456','654321'] and fetch.call_count==2
+many=[dict(path=str(i),name=f'Wallpaper {i}',favorite=True) for i in range(40)]
+assert len(query('>wallpaper ',[],context={'wallpapers':many}))==40,'Every installed favorite must be reachable using arrows, not only the first page'
+with patch('wallpaper_data.urlopen',side_effect=OSError('offline')):
+    assert steam_favorites(123,{'account':123,'ids':['123456'],'updated':0},force=True)['ids']==['123456']
+assert dominant([(240,40,60)]*100+[(110,110,110)]*1000).startswith('#f0')
+for seed in ('#ff0000','#00ff00','#0000ff','#ffffff','#000000','#8d4cc4'):
+    for dark in (True,False):
+        palette=normalize_palette(make_palette(seed,dark))
+        for bg in ('BASE','MANTLE','SURFACE','SURFACE2'):
+            assert contrast(palette['TEXT'],palette[bg])>=7
+            assert contrast(palette['MAUVE'],palette[bg])>=4.5
 with patch('launcher_actions.subprocess.run',return_value=SimpleNamespace(returncode=0)) as command:
     power_action('reboot');assert command.call_args.args[0][-3:]==['/r','/t','0']
 with patch('launcher_actions._sleep') as sleep:power_action('sleep');sleep.assert_called_once()
@@ -67,7 +86,7 @@ with tempfile.TemporaryDirectory(prefix='launcher-commands-') as directory:
     folder=Path(directory)
     for name,color in [('Aurora','#6359ac'),('Forest','#426659'),('Rose','#9b475a'),('Sky','#527ca5')]:
         image=QImage(640,360,QImage.Format.Format_RGB32);image.fill(QColor(color));assert image.save(str(folder/(name+'.png')))
-    project=folder/'Project';project.mkdir();(project/'project.json').write_text(json.dumps({'title':'Engine scene','preview':'../Aurora.png'}),encoding='utf-8')
+    project=folder/'Project';project.mkdir();(project/'project.json').write_text(json.dumps({'title':'Engine scene','preview':'../Aurora.png','workshopid':'123456'}),encoding='utf-8')
     items=discover(folder);assert len(items)==5
     assert next(item for item in items if item['engine'])['preview']=='','Project preview must stay inside its own directory'
     engine=folder/'wallpaper64.exe';engine.write_bytes(b'fixture')
@@ -81,11 +100,12 @@ with tempfile.TemporaryDirectory(prefix='launcher-commands-') as directory:
         island.dock.pressed_buttons=lambda:set();island._launcher_focus_lost=lambda:None
         island.follow_bar=lambda:island.show()
         island.catalog.apps=[dict(id='notes',name='Notepad',target=str(folder/'fake.lnk'))]
-        island.wallpapers.items=items;island.wallpapers.loaded=True;island.wallpapers.current=items[0]['path']
+        island.wallpapers.items=items;island.wallpapers.loaded=True;island.wallpapers.checked=time.time();island.wallpapers.current=items[0]['path']
+        island.launcher_options['wallpaper_favorites_only']=False
         island.open_launcher();wait(650)
         edit=island.launcher_view.search.edit
         edit.setText('>scheme ');wait(650)
-        assert not island.launcher_view.results.gallery and len(island.launcher_view.rows())==6
+        assert not island.launcher_view.results.gallery and len(island.launcher_view.rows())==7
         assert island.launcher_view.geometry().bottom()<island.height(),'More command rows must grow the native window as well as its painted surface'
         themes=[];island._launcher_control=lambda payload,after=None:themes.append(payload)
         island._launcher_accept(island.launcher_view.rows()[0]);assert themes[-1]['action']=='theme'
@@ -93,6 +113,24 @@ with tempfile.TemporaryDirectory(prefix='launcher-commands-') as directory:
         assert island.launcher_view.results.gallery and island.launcher_view.body_height()==158
         assert island.launcher_view.results.horizontalScrollBar().maximum()>0
         assert edit.hasFocus(),'Changing to wallpaper gallery stole typing focus'
+        view=island.launcher_view.results;start=view.horizontalScrollBar().value()
+        for _ in range(3):app.sendEvent(edit,QKeyEvent(QKeyEvent.Type.KeyPress,Qt.Key.Key_Down,Qt.KeyboardModifier.NoModifier))
+        assert view.currentIndex().row()==3 and edit.hasFocus()
+        assert view.horizontalScrollBar().value()==start,'Keyboard navigation must not jump the viewport'
+        wait(70);middle=view.horizontalScrollBar().value();target=round(view.scroll_animation.endValue())
+        assert start<middle<target,(start,middle,target)
+        view.entered.emit(view.model().index(0,0));assert view.currentIndex().row()==3,'Hover enter while scrolling must not steal keyboard selection'
+        position=QCursor.pos();view.last_mouse=position
+        event=QMouseEvent(QMouseEvent.Type.MouseMove,QPointF(10,10),QPointF(position),Qt.MouseButton.NoButton,Qt.MouseButton.NoButton,Qt.KeyboardModifier.NoModifier)
+        app.sendEvent(view.viewport(),event);assert view.currentIndex().row()==3
+        app.sendEvent(edit,QKeyEvent(QKeyEvent.Type.KeyPress,Qt.Key.Key_Up,Qt.KeyboardModifier.NoModifier));assert view.currentIndex().row()==2
+        wait(650)
+        island.wallpapers.engine_favorites={'123456'};island._launcher_filter_wallpapers(True);wait(400)
+        assert len(island.launcher_view.rows())==1 and island.launcher_view.rows()[0].favorite
+        assert island.launcher_view.rows()[0].value==str(project/'project.json')
+        island.wallpapers.engine_favorites=set();island.wallpapers.changed.emit();wait(400)
+        assert not any(row.kind=='wallpaper' for row in island.launcher_view.rows()),'An empty favorites list must never fall back to all wallpapers'
+        island._launcher_filter_wallpapers(False);wait(400)
         island.wallpapers.items=[];edit.setText('>wallpaper missing');wait(400)
         assert not island.launcher_view.results.gallery,'Empty libraries must show readable instructions, not a blank carousel'
         island.wallpapers.items=items

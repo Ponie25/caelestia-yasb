@@ -180,7 +180,7 @@ class NotificationReceiver(QObject):
                     self.settings_changed.emit()
                 elif message.get('kind') == 'theme':
                     name = message.get('name')
-                    if name in ('light', 'dark', 'catppuccin', 'everforest', 'red-white', 'red-black'):
+                    if name in ('light', 'dark', 'catppuccin', 'everforest', 'red-white', 'red-black','wallpaper'):
                         self.theme_changed.emit(name)
                 elif message.get('kind') == 'snapshot':
                     self._snapshot(message.get('items'))

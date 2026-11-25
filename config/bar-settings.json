@@ -36,7 +36,10 @@
     "hotkey": true,
     "max_results": 7,
     "dangerous_actions": false,
-    "wallpaper_directory": ""
+    "wallpaper_directory": "",
+    "wallpaper_favorites_only": true,
+    "wallpaper_auto_theme": true,
+    "wallpaper_theme_mode": "current"
   },
   "island": {
     "enabled": true,

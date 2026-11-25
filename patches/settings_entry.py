@@ -40,16 +40,21 @@ class SettingsEntry(QObject):
         if action=='theme':
             name=message.get('name')
             return bool(self.controller.select_preset(name)) if isinstance(name,str) and name in self.controller.theme_labels else False
-        if action=='wallpaper_directory':
+        if action=='wallpaper_changed':
+            self.controller.wallpaper_theme.refresh(force=True);return True
+        if action in ('wallpaper_directory','wallpaper_options'):
             from core.utils.bar_preferences import load_preferences,validate_preferences,create_snapshot,atomic_write
-            value=message.get('path');preferences=load_preferences(self.controller.root)
-            preferences['launcher']['wallpaper_directory']=value;validate_preferences(preferences)
+            values={'wallpaper_directory':message.get('path')} if action=='wallpaper_directory' else message.get('options')
+            if not isinstance(values,dict) or not values or any(key not in ('wallpaper_directory','wallpaper_favorites_only','wallpaper_auto_theme','wallpaper_theme_mode') for key in values):return False
+            preferences=load_preferences(self.controller.root);preferences['launcher'].update(values);validate_preferences(preferences)
             dialog=self.controller.settings_dialog
             if dialog is not None and dialog.isVisible():
-                control=dialog.controls[('launcher','wallpaper_directory')][0];previous=control.text();control.setText(value)
+                previous=dialog._collect_preferences()['launcher']
+                for key,value in values.items():dialog._set_field('launcher',key,value)
                 if dialog._flush_immediate_preferences():return True
-                control.setText(previous);return False
-            create_snapshot(self.controller.root,'Đổi thư mục hình nền')
+                for key in values:dialog._set_field('launcher',key,previous[key])
+                return False
+            create_snapshot(self.controller.root,'Hình nền và màu giao diện')
             atomic_write(self.controller.root/'bar-settings.json',json.dumps(preferences,ensure_ascii=False,indent=2)+'\n')
             self.controller.reload_preferences();return True
         return False

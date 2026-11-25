@@ -19,6 +19,7 @@ class Result:
     swatch: tuple[str, ...] = ()
     preview: str = ''
     current: bool = False
+    favorite: bool = False
 
 
 def normalized(value):
@@ -127,7 +128,7 @@ DANGEROUS=frozenset(('shutdown','reboot','logout'))
 ALIASES={'theme':'scheme','themes':'scheme','schemes':'scheme','wallpapers':'wallpaper','background':'wallpaper',
          'restart':'reboot','signout':'logout','logoff':'logout','suspend':'sleep','poweroff':'shutdown'}
 SCHEMES=(('light','Sáng','Light'),('dark','Tối','Dark'),('catppuccin','Tím hồng','Catppuccin'),
-         ('everforest','Xanh lá','Everforest'),('red-white','Đỏ trắng','Red · White'),('red-black','Đỏ đen','Red · Black'))
+         ('everforest','Xanh lá','Everforest'),('red-white','Đỏ trắng','Red · White'),('red-black','Đỏ đen','Red · Black'),('wallpaper','Theo hình nền','Dynamic'))
 
 def _command_rows(command,rest,context):
     if command=='scheme':
@@ -148,17 +149,24 @@ def _command_rows(command,rest,context):
                    Result('wallpaper-refresh','Làm mới thư viện','Đọc lại ảnh mới và các project đã thêm','wallpaper_refresh','','restart')]
         if normalized(rest) in ('folder','thu muc'):return utilities[:1]
         if normalized(rest) in ('refresh','reload','lam moi'):return utilities[1:]
+        if normalized(rest) in ('all','tat ca','favorites','yeu thich'):
+            favorite=normalized(rest) in ('favorites','yeu thich')
+            return [Result('wallpaper-filter','Chỉ hình nền yêu thích' if favorite else 'Tất cả hình nền','Enter để đổi danh sách','wallpaper_filter','favorites' if favorite else 'all','image')]
         rows=[]
-        if loading:rows.append(Result('wallpaper-loading','Đang đọc thư viện…','Có thể tiếp tục gõ để lọc','hint','','image'))
+        if loading and not images:rows.append(Result('wallpaper-loading','Đang đọc thư viện…','Có thể tiếp tục gõ để lọc','hint','','image'))
         ranked=[]
         for image in images:
             score=rank(rest,image['name'])
             if score is None:continue
             selected=context.get('wallpaper')==image['path']
             ranked.append((score,Result('wallpaper:'+image['path'],image['name'],('Đã chọn · ' if selected else '')+('Wallpaper Engine' if image.get('engine') else 'Ảnh nền Windows'),
-                'wallpaper',image['path'],'image',preview=image.get('preview',''),current=selected)))
-        rows.extend(row for _,row in sorted(ranked,key=lambda item:item[0],reverse=True)[:24])
-        if not loading and not rows:rows.append(Result('wallpaper-empty','Chưa có hình nền phù hợp','Chọn thư mục hoặc thêm ảnh vào config/wallpapers','hint','','image'))
+                'wallpaper',image['path'],'image',preview=image.get('preview',''),current=selected,favorite=bool(image.get('favorite')))))
+        rows.extend(row for _,row in sorted(ranked,key=lambda item:item[0],reverse=True)[:2000])
+        if rows and any(row.kind=='wallpaper' for row in rows):return rows
+        if not loading and not rows:
+            favorite=context.get('wallpaper_favorites_only',False)
+            rows.append(Result('wallpaper-empty','Chưa có hình nền yêu thích phù hợp' if favorite else 'Chưa có hình nền phù hợp',
+                context.get('wallpaper_error') or ('Đánh dấu yêu thích trong Wallpaper Engine rồi bấm Làm mới' if favorite else 'Chọn thư mục hoặc thêm ảnh vào config/wallpapers'),'hint','','image'))
         rows.extend(utilities)
         return rows
     if command in DANGEROUS and not context.get('dangerous_actions',False):

@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import QApplication, QMenu
 
 from core.utils.win32.utils import apply_qmenu_style
 
-THEMES = {'light': 'Sáng', 'dark': 'Tối', 'catppuccin': 'Tím hồng', 'everforest': 'Xanh lá', 'red-white': 'Đỏ trắng', 'red-black': 'Đỏ đen'}
+THEMES = {'light': 'Sáng', 'dark': 'Tối', 'catppuccin': 'Tím hồng', 'everforest': 'Xanh lá', 'red-white': 'Đỏ trắng', 'red-black': 'Đỏ đen','wallpaper':'Theo hình nền'}
 
 
 class BarThemeController(QObject):
@@ -41,11 +41,14 @@ class BarThemeController(QObject):
         from core.utils.settings_entry import SettingsEntry
         self.settings_entry=SettingsEntry(self)
         self._wallpaper_signature=None
+        from core.utils.wallpaper_theme import WallpaperTheme
+        self.wallpaper_theme=WallpaperTheme(self)
         self.wallpaper_poll=QTimer(self);self.wallpaper_poll.setInterval(3000)
         self.wallpaper_poll.timeout.connect(self._refresh_wallpaper_contrast);self.wallpaper_poll.start()
         QTimer.singleShot(0,self._refresh_wallpaper_contrast)
 
     def _refresh_wallpaper_contrast(self):
+        self.wallpaper_theme.refresh()
         from core.utils.bar_preferences import load_preferences
         from core.utils.bar_surface import wallpaper_signature
         if load_preferences(self.root)['appearance']['foreground']=='custom':return
@@ -98,6 +101,7 @@ class BarThemeController(QObject):
         path=self.root/'bar-settings.json';previous=path.read_bytes() if path.exists() else None
         palette=json.loads((self.root/'theme-profiles'/name/'palette.json').read_text(encoding='utf-8'))
         fresh=theme_preset(load_preferences(self.root),palette)
+        fresh['launcher']['wallpaper_auto_theme']=name=='wallpaper'
         create_snapshot(self.root,'Trước khi dùng lại preset '+THEMES[name])
         atomic_write(path,json.dumps(fresh,ensure_ascii=False,indent=2)+'\n')
         if self.select(name):self.reload_preferences();return True
@@ -242,6 +246,7 @@ class BarThemeController(QObject):
 
     def reload_preferences(self):
         self._send_message({'kind': 'settings'})
+        if hasattr(self,'wallpaper_theme'):QTimer.singleShot(0,self.wallpaper_theme.refresh)
 
     def _send_island(self, name):
         self._send_message({'kind': 'theme', 'name': name})

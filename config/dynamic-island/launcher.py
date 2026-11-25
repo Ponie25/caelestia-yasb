@@ -26,7 +26,7 @@ class LauncherMixin:
         self.launcher_phase=(0.,0.);self.launcher_phase_origin=(1.,1.);self.launcher_origin_image=None
         self.wallpapers=Wallpapers(root);self.wallpapers.changed.connect(self._launcher_wallpapers_changed)
         self.launcher_confirmation=None;self.launcher_sequence=0;self.launcher_last_error='';self.launcher_palettes={};self.launcher_busy=False
-        for name in ('light','dark','catppuccin','everforest','red-white','red-black'):
+        for name in ('light','dark','catppuccin','everforest','red-white','red-black','wallpaper'):
             try:
                 data=json.loads((Path(root).parent/'theme-profiles'/name/'palette.json').read_text(encoding='utf-8'))
                 self.launcher_palettes[name]=(data['BASE'],data['MAUVE'])
@@ -36,6 +36,8 @@ class LauncherMixin:
         self.launcher_view.query_changed.connect(self._launcher_query)
         self.launcher_view.accepted.connect(self._launcher_accept)
         self.launcher_view.dismissed.connect(self.close_launcher)
+        self.launcher_view.favorite_filter_changed.connect(self._launcher_filter_wallpapers)
+        self.launcher_view.wallpaper_refresh_requested.connect(self._launcher_refresh_wallpapers)
         self.launcher_view.height_changed.connect(self._launcher_height)
         self.launcher_hotkey=Shortcut(int(self.winId()))
         self.launcher_hotkey.status.connect(lambda message:logging.warning(message))
@@ -45,9 +47,11 @@ class LauncherMixin:
         self.catalog.start()
         self._launcher_apply(getattr(self,'launcher_options',{}))
     def _launcher_apply(self,options):
-        self.launcher_options={'enabled':True,'hotkey':True,'max_results':7,'dangerous_actions':False,'wallpaper_directory':''}
+        self.launcher_options={'enabled':True,'hotkey':True,'max_results':7,'dangerous_actions':False,'wallpaper_directory':'','wallpaper_favorites_only':True,'wallpaper_auto_theme':True,'wallpaper_theme_mode':'current'}
         if isinstance(options,dict):self.launcher_options.update(options)
         self.wallpapers.configure(self.launcher_options.get('wallpaper_directory',''))
+        from motion_spec import profile,milliseconds
+        self.launcher_view.results.motion_ms=milliseconds(profile(self.catalog.root.parent),'menu')
         if not hasattr(self,'launcher_hotkey'):return
         if self.launcher_options.get('enabled',True) and self.launcher_options.get('hotkey',True):self.launcher_hotkey.start()
         else:self.launcher_hotkey.stop()
@@ -63,10 +67,13 @@ class LauncherMixin:
         self.catalog.accept(apps)
         if self.launcher_active:self._launcher_query(self.launcher_view.search.edit.text(),preserve=True)
     def _launcher_query(self,text,preserve=False):
+        if palette.THEME=='wallpaper':self.launcher_palettes['wallpaper']=(palette.BASE,palette.MAUVE)
         self.launcher_sequence+=1;self.launcher_confirmation=None
         command=text.strip().split(' ',1)[0].casefold()
         if command in ('>wallpaper','>wallpapers','>background','>random'):self.wallpapers.ensure()
-        context=dict(theme=palette.THEME,palettes=self.launcher_palettes,wallpapers=self.wallpapers.items,
+        favorite=self.launcher_options.get('wallpaper_favorites_only',True)
+        self.launcher_view.set_wallpaper_mode(command in ('>wallpaper','>wallpapers','>background'),favorite,self.wallpapers.favorite_error)
+        context=dict(theme=palette.THEME,palettes=self.launcher_palettes,wallpapers=self.wallpapers.visible_items(favorite),wallpaper_favorites_only=favorite,wallpaper_error=self.wallpapers.favorite_error,
                      wallpaper_loading=self.wallpapers.loading,wallpaper=self.wallpapers.current,
                      dangerous_actions=self.launcher_options.get('dangerous_actions') is True)
         rows=query(text,self.catalog.apps,self.catalog.history,context)
@@ -77,6 +84,14 @@ class LauncherMixin:
     def _launcher_wallpapers_changed(self):
         if self.launcher_active and self.launcher_view.search.edit.text().strip().split(' ',1)[0].casefold() in ('>wallpaper','>wallpapers','>background','>random'):
             self._launcher_query(self.launcher_view.search.edit.text(),preserve=True)
+    def _launcher_filter_wallpapers(self,favorite):
+        self.launcher_options['wallpaper_favorites_only']=favorite
+        self._launcher_query(self.launcher_view.search.edit.text(),preserve=True)
+        self._launcher_control(dict(action='wallpaper_options',options={'wallpaper_favorites_only':favorite}),after=lambda:None)
+    def _launcher_refresh_wallpapers(self):
+        self.wallpapers.ensure(force=True);edit=self.launcher_view.search.edit
+        if edit.text()=='>wallpaper ':self._launcher_query(edit.text(),preserve=True)
+        else:edit.setText('>wallpaper ')
     def _launcher_height(self):
         if self.launcher_active:
             required=max(self.HEIGHT,self.launcher_view.preferred_height()+48)
@@ -110,6 +125,7 @@ class LauncherMixin:
         self.buttons=self.dock.pressed_buttons();self.outside_click.start()
         self.follow_bar();focused=self._launcher_focus(True);self._retarget()
         if not focused:QTimer.singleShot(0,self._launcher_retry_focus)
+        if os.environ.get('YASB_SETTINGS_NO_EXTERNAL')!='1':QTimer.singleShot(0,self.wallpapers.ensure)
         logging.info('Island launcher opened')
     def _launcher_retry_focus(self):
         if (self.launcher_active and launcher_focus.foreground()==int(self.winId())
@@ -304,11 +320,16 @@ class LauncherMixin:
         if result.kind=='wallpaper_folder':
             self.close_launcher(restore=False,after=self._launcher_choose_wallpaper_folder);return True
         if result.kind=='wallpaper_refresh':
-            self.wallpapers.ensure(force=True);self._launcher_query('>wallpaper ');return True
+            self._launcher_refresh_wallpapers();return True
+        if result.kind=='wallpaper_filter':
+            self.launcher_view.search.edit.setText('>wallpaper ');self._launcher_filter_wallpapers(result.value=='favorites');return True
         if result.kind in ('wallpaper','random'):
-            item=self.wallpapers.random() if result.kind=='random' else self.wallpapers.get(result.value)
+            item=self.wallpapers.random(self.launcher_options.get('wallpaper_favorites_only',True)) if result.kind=='random' else self.wallpapers.get(result.value)
             if item is None:raise OSError('Chưa có hình nền để chọn.')
-            self._launcher_background(lambda:apply_wallpaper(item,self.wallpapers.engine),after=lambda:self.wallpapers.remember(item['path']));return True
+            def applied():
+                self.wallpapers.remember(item['path'],item)
+                if self.launcher_options.get('wallpaper_auto_theme',True):self._launcher_control(dict(action='wallpaper_changed'),after=lambda:None)
+            self._launcher_background(lambda:apply_wallpaper(item,self.wallpapers.engine),after=applied);return True
         return False
 
     def _launcher_choose_wallpaper_folder(self):

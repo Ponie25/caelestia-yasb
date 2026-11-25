@@ -4,6 +4,7 @@ import ctypes,importlib.machinery,importlib.util,json,os,sys,traceback
 from unittest.mock import patch
 stage=Path(sys.argv[1]).resolve();root=stage/'config/dynamic-island'
 os.environ['QT_QPA_PLATFORM']='offscreen'
+os.environ['YASB_SETTINGS_NO_EXTERNAL']='1'
 sys.path[:0]=[str(root),str(root/'runtime')]
 from PySide6.QtCore import QEventLoop,QTimer,Qt
 from PySide6.QtGui import QInputMethodEvent,QKeyEvent

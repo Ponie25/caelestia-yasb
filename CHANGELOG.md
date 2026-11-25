@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-11-26 — Wallpaper interaction and automatic colors
+
+- Animate gallery scrolling and scaling together; keep Up/Down selection until
+  the pointer really moves instead of allowing hover to steal it during scroll.
+- Default to installed favorites from the current Wallpaper Engine/Steam account.
+  Cache the public list locally and provide All/Favorites and explicit refresh.
+  No separate launcher favorites list or credential access is introduced.
+- Generate a shared, contrast-normalized palette from the current static picture
+  or Wallpaper Engine preview, preserving opacity, glass, layout and motion.
+  Synchronize Komorebi borders and transparent-bar ink with that source.
+- Add the automatic wallpaper scheme, light/dark tone controls and Settings draft
+  protection. Fixed preset selection disables automatic colors.
+- Prioritize nearby previews, protect visible entries in the bounded image cache,
+  and prepare wallpaper metadata in the background after launcher activation.
+- Validate keyboard/scroll intermediate states, favorite filtering, offline cache,
+  multiple color seeds, shared theme application and unsaved Settings drafts.
+
 ## 2026-11-26 — Caelestia launcher commands
 
 - Expand `>` with Scheme, Wallpaper, Random, Light/Dark and Windows session

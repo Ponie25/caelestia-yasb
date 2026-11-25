@@ -9,6 +9,8 @@ config/dynamic-island/backup/
 config/dynamic-island/launcher-apps.json
 config/dynamic-island/launcher-history.json
 config/dynamic-island/wallpaper-state.json
+config/dynamic-island/wallpaper-favorites.json
+config/dynamic-island/wallpaper-theme-state.json
 config/wallpapers/*
 !config/wallpapers/README.md
 config/dynamic-island/material-status.json

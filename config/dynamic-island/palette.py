@@ -14,7 +14,7 @@ THEME = 'catppuccin'
 
 def load_theme(name):
     global THEME
-    if name not in ('light', 'dark', 'catppuccin', 'everforest', 'red-white', 'red-black'):
+    if name not in ('light', 'dark', 'catppuccin', 'everforest', 'red-white', 'red-black','wallpaper'):
         return False
     try:
         data = json.loads((ROOT / 'theme-profiles' / name / 'palette.json').read_text(encoding='utf-8'))

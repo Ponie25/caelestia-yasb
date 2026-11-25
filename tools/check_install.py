@@ -84,6 +84,9 @@ with patch.object(controller,'request_settings') as open_settings:
 assert not entry._dispatch({'action':'theme','name':'not-a-theme'})
 assert not entry._dispatch({'action':'exec','command':'anything'})
 assert not local_request({'action':'wallpaper_directory','path':'relative/path'})
+assert not local_request({'action':'wallpaper_options','options':{'anything':True}})
+assert not local_request({'action':'wallpaper_options','options':{'wallpaper_favorites_only':'yes'}})
+assert local_request({'action':'wallpaper_options','options':{'wallpaper_favorites_only':True,'wallpaper_theme_mode':'current'}})
 wallpaper_directory=str(root.parent/'Pictures')
 assert entry._dispatch({'action':'wallpaper_directory','path':wallpaper_directory})
 updated=load_preferences(root);assert updated['launcher']['wallpaper_directory']==wallpaper_directory
@@ -108,11 +111,32 @@ for name in controller.theme_labels:
     assert entry._dispatch({'action':'theme','name':name});wait()
     assert controller.current==name and dialog.theme_buttons[name].isChecked()
     assert load_preferences(root)['launcher']['wallpaper_directory']==wallpaper_directory
+    assert load_preferences(root)['launcher']['wallpaper_auto_theme']==(name=='wallpaper')
+
+# Generated colors update the shared theme while keeping glass/layout preferences.
+service=controller.wallpaper_theme;data=service.data
+from core.utils.theme_tokens import normalize_palette,contrast
+before=load_preferences(root);preferences_path=root/'bar-settings.json';saved_preferences=preferences_path.read_bytes()
+result={'mode':'current','signature':('fixture',1,False),'seed':'#ed2848','palette':normalize_palette(data.make_palette('#ed2848',False))}
+service._ready(result);assert controller.current=='wallpaper' and service.signature==result['signature']
+assert preferences_path.read_bytes()==saved_preferences
+assert dialog._collect_preferences()==load_preferences(root) and not dialog._draft_dirty
+assert dialog._immediate_theme_baseline==(root/'theme.json').read_bytes()
+profile=root/'theme-profiles/wallpaper/palette.json';saved_palette=profile.read_bytes();custom=dialog.custom_css.toPlainText()
+dialog.custom_css.setPlainText(custom+'\n/* own pending change */');app.processEvents()
+green={'mode':'current','signature':('fixture-green',2,False),'seed':'#20cf70','palette':normalize_palette(data.make_palette('#20cf70',False))}
+service._ready(green);assert profile.read_bytes()==saved_palette and service.pending==green
+assert 'own pending change' in dialog.custom_css.toPlainText()
+dialog.custom_css.setPlainText(custom);dialog.custom_css.document().setModified(False);dialog._refresh_draft_state()
+wait(400)
+assert not service._blocked(),(dialog._immediate_pending,dialog._immediate_busy,dialog._advanced_preferences_pending,dialog._draft_signature()==dialog._draft_saved_signature,dialog._disk_state()==dialog._disk_baseline)
+service.pending=None;service._ready(green);assert profile.read_bytes()!=saved_palette
+assert load_preferences(root)==before,'Automatic colors must not reset opacity, motion, widgets or glass'
 
 dialog.hide();assert entry._dispatch({'action':'wallpaper_directory','path':''})
 assert load_preferences(root)['launcher']['wallpaper_directory']==''
 dialog.reject();app.processEvents()
 assert not errors,errors
 controller.border_bridge.close()
-print('PASS: configured font, every widget schema, native Settings, preference round-trip, search, shared motion, compact navigation, all six themes and launcher IPC/draft protection.')
+print('PASS: fonts/schemas/Settings, seven themes, wallpaper IPC, automatic colors, preserved glass/preferences and advanced-draft protection.')
 temporary.cleanup()
