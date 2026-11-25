@@ -8,6 +8,13 @@ captured windows with premultiplied alpha, limit frame rate, suspend hidden
 instances, wake on changes, explicitly shut down the capture thread and GPU,
 and soften optical highlights with optional background contrast protection.
 
+The WGC backend no longer initializes the unused Desktop Duplication backend or
+allocates its monitor-sized history textures. A single frame-pool buffer is
+copied and released in the native callback. Closed pills discover background
+layers only within their shape plus the refraction margin; opening surfaces keep
+the full host region to preserve morphs. `lg_resource_info` exposes capture counts
+and texture-byte estimates for diagnostics; these are not private VRAM residency.
+
 The Qt interface stays in its original window. The D3D11 underlay is transparent
 to input and uses per-window Windows Graphics Capture; it is visible in normal
 screenshots. Missing capture/GPU support falls back to the existing Windows blur.

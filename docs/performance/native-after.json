@@ -1,0 +1,73 @@
+{
+  "rows": [
+    {
+      "stage": "qt_base",
+      "rss_mib": 56.859375,
+      "private_commit_mib": 29.17578125,
+      "threads": 17,
+      "native": {
+        "captures": 0,
+        "desktop_duplications": 0,
+        "capture_copies_bytes": 0,
+        "pool_frame_estimate_bytes": 0
+      }
+    },
+    {
+      "stage": "initial",
+      "rss_mib": 89.78125,
+      "private_commit_mib": 90.3125,
+      "threads": 68,
+      "native": {
+        "captures": 1,
+        "desktop_duplications": 0,
+        "capture_copies_bytes": 6480000,
+        "pool_frame_estimate_bytes": 6480000
+      }
+    },
+    {
+      "stage": "open",
+      "rss_mib": 102.19921875,
+      "private_commit_mib": 106.51171875,
+      "threads": 69,
+      "native": {
+        "captures": 2,
+        "desktop_duplications": 0,
+        "capture_copies_bytes": 6771600,
+        "pool_frame_estimate_bytes": 6771600
+      }
+    },
+    {
+      "stage": "after_cycles",
+      "rss_mib": 105.55078125,
+      "private_commit_mib": 108.06640625,
+      "threads": 71,
+      "native": {
+        "captures": 2,
+        "desktop_duplications": 0,
+        "capture_copies_bytes": 6771600,
+        "pool_frame_estimate_bytes": 6771600
+      }
+    },
+    {
+      "stage": "shutdown",
+      "rss_mib": 78.0546875,
+      "private_commit_mib": 56.53515625,
+      "threads": 19,
+      "native": {
+        "captures": 0,
+        "desktop_duplications": 0,
+        "capture_copies_bytes": 0,
+        "pool_frame_estimate_bytes": 0
+      }
+    }
+  ],
+  "static_frames": 0,
+  "animated_frames": 308,
+  "animated_seconds": 6.00053980000007,
+  "resize_cycles": 3,
+  "idle_cpu_total_pct": 0.03964745256807188,
+  "active_cpu_total_pct": 0.7160814098758166,
+  "scale": 1.5,
+  "logical_cpus": 28,
+  "validation": "static redraw, live updates, selected resize mode, suspend/resume and shutdown passed"
+}

@@ -1,0 +1,18 @@
+{
+  "closed": {
+    "width": 1092,
+    "height": 48,
+    "mean_channel_delta": 2.107576884920635,
+    "max_channel_delta": 150,
+    "different_channels": 31348,
+    "visible_region_mean_delta": 0.0,
+    "visible_region_max_delta": 0
+  },
+  "open": {
+    "width": 1092,
+    "height": 684,
+    "mean_channel_delta": 0.0,
+    "max_channel_delta": 0,
+    "different_channels": 0
+  }
+}

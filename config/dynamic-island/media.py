@@ -200,13 +200,19 @@ class MediaWorker(QObject):
         if not info or not title or info.playback_status not in (PlaybackStatus.PLAYING, PlaybackStatus.PAUSED):
             return MediaState()
         controls = info.controls
+        if controls is None:
+            return MediaState()
         playing = info.playback_status == PlaybackStatus.PLAYING
         rate = info.playback_rate or 1.0
         timeline = session.get_timeline_properties()
-        start = timeline.start_time.total_seconds()
-        duration = timeline.end_time.total_seconds() - start
-        position = timeline.position.total_seconds() - start
-        if playing and duration > 0:
+        # A player may disappear or omit timeline data between Windows events.
+        # Keep transport working instead of reconnecting the media service.
+        has_timeline = timeline is not None and all(getattr(timeline, key, None) is not None
+                                                   for key in ('start_time', 'end_time', 'position'))
+        start = timeline.start_time.total_seconds() if has_timeline else 0.0
+        duration = timeline.end_time.total_seconds() - start if has_timeline else 0.0
+        position = timeline.position.total_seconds() - start if has_timeline else 0.0
+        if playing and duration > 0 and timeline.last_updated_time is not None:
             age = time.time() - timeline.last_updated_time.timestamp()
             if 0 < age < 24 * 3600:
                 position += age * rate
@@ -214,7 +220,7 @@ class MediaWorker(QObject):
             generation=self.generation, title=title, artist=artist, artwork=artwork, playing=playing,
             previous=controls.is_previous_enabled, toggle=controls.is_play_pause_toggle_enabled or (
                 controls.is_pause_enabled if playing else controls.is_play_enabled
-            ), next=controls.is_next_enabled, seek=controls.is_playback_position_enabled,
+            ), next=controls.is_next_enabled, seek=controls.is_playback_position_enabled and has_timeline and duration > 0,
             start=start, duration=max(0.0, duration), position=position, captured_at=time.monotonic(), rate=rate,
             shuffle=bool(info.is_shuffle_active) if controls.is_shuffle_enabled else None,
             repeat=(info.auto_repeat_mode or RepeatMode.NONE) if controls.is_repeat_enabled else None,

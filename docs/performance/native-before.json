@@ -1,0 +1,48 @@
+{
+  "rows": [
+    {
+      "stage": "qt_base",
+      "rss_mib": 56.6171875,
+      "private_commit_mib": 28.75390625,
+      "threads": 17,
+      "native": null
+    },
+    {
+      "stage": "initial",
+      "rss_mib": 90.6875,
+      "private_commit_mib": 153.01171875,
+      "threads": 69,
+      "native": null
+    },
+    {
+      "stage": "open",
+      "rss_mib": 94.4453125,
+      "private_commit_mib": 167.91796875,
+      "threads": 69,
+      "native": null
+    },
+    {
+      "stage": "after_cycles",
+      "rss_mib": 103.91015625,
+      "private_commit_mib": 168.97265625,
+      "threads": 71,
+      "native": null
+    },
+    {
+      "stage": "shutdown",
+      "rss_mib": 78.3203125,
+      "private_commit_mib": 58.1875,
+      "threads": 19,
+      "native": null
+    }
+  ],
+  "static_frames": 0,
+  "animated_frames": 236,
+  "animated_seconds": 6.0014946999999665,
+  "resize_cycles": 3,
+  "idle_cpu_total_pct": 0.35559462658630137,
+  "active_cpu_total_pct": 0.7345640316665059,
+  "scale": 1.5,
+  "logical_cpus": 28,
+  "validation": "static redraw, live updates, selected resize mode, suspend/resume and shutdown passed"
+}

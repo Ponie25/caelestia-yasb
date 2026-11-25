@@ -6,6 +6,12 @@ A horizontal YASB setup for Windows 11 with a Caelestia-inspired Dynamic Island,
 
 The current Settings, launcher and shared-motion update is on **main**. Older tagged release bundles do not include these additions; use the source ZIP above for this version.
 
+The latest resource update removes an unused graphics-capture backend, bounds the
+launcher icon cache and stops hidden glass polling. It keeps Python/Qt and the
+native C++ renderer. Read the [measurements and Rust decision](docs/performance.md)
+or the [changelog](CHANGELOG.md); the measured allocation saving is not a claim of
+an equivalent physical-RAM reduction.
+
 ![Dynamic Island showcase with all five tabs, the audio output picker and compact activity states](docs/screenshots/dynamic-island-showcase-16x9.png)
 
 ## Install
@@ -72,7 +78,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -InstallDi
 
 ### How the bundle is built
 
-`dependencies.json` pins YASB 2.0.8, Python 3.14.10, and the Island's Python wheels by SHA-256. Setup extracts the official MSI and compiles the 22 source modules listed in `patches/manifest.json` into that portable copy. The manifest verifies stock module hashes and distinguishes new modules. The patches supply Settings, themes, surface contrast, shared motion, Island lifetime/notifications and the capture integrations. Keep them paired with the pinned runtime. To smoke-test a prepared install, run its `python\python.exe tools\check_install.py <install-path>` from this repository. `tools/check_launcher_input.py <install-path>` checks early typing, Vietnamese IME and Esc in an isolated offscreen Island without registering a global shortcut. Rebuild the glass DLL from `native/liquid-glass/` using an x64 Visual Studio developer prompt.
+`dependencies.json` pins YASB 2.0.8, Python 3.14.10, and the Island's Python wheels by SHA-256. Setup extracts the official MSI and compiles the 22 source modules listed in `patches/manifest.json` into that portable copy. The manifest verifies stock module hashes and distinguishes new modules. The patches supply Settings, themes, surface contrast, shared motion, Island lifetime/notifications and the capture integrations. Keep them paired with the pinned runtime. To smoke-test a prepared install, run its `python\python.exe tools\check_install.py <install-path>` from this repository. `tools/check_launcher_input.py <install-path>` checks early typing, Vietnamese IME and Esc in an isolated offscreen Island without registering a global shortcut. `tools/check_resources.py` checks bounded caching, media teardown and hidden polling; `tools/benchmark_glass.py` exercises native allocations and lifecycle in an owned scene. Rebuild the glass DLL from `native/liquid-glass/` using an x64 Visual Studio developer prompt. See the [performance report](docs/performance.md) for commands and limitations.
 
 ![Native Settings with search, six themes and text color controls](docs/screenshots/settings-appearance.png)
 
@@ -83,6 +89,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -InstallDi
 3. Nếu bạn đang chạy YASB, thoát từ biểu tượng ở khay hệ thống rồi mở **Start Caelestia YASB** trong Start menu.
 
 Bấm Island để mở Dashboard; **Alt+Space** mở launcher tích hợp và **Esc** đóng launcher. Tab **Media** có trình phát và bộ chỉnh âm lượng từng ứng dụng. Mở **Caelestia YASB Settings** trong Start để chọn sáu theme, chỉnh màu chữ, nền bar, Liquid Glass và nhịp chuyển động chung; **Ctrl+F** tìm cài đặt. Dự báo mặc định ở Hà Nội. Khi thiếu Flameshot, nút chụp vùng dùng công cụ của YASB. Bộ cài không thay cấu hình Komorebi sẵn có của bạn.
+
+Bản tối ưu hiện giữ Python/Qt và C++, chưa chuyển sang Rust. Đã bỏ các texture
+toàn màn hình dư, giới hạn cache icon và ngừng kiểm tra kính liên tục khi Island
+ẩn. Phép thử native giảm khoảng 61–63 MiB bộ nhớ private commit; RAM vật lý không
+giảm tương ứng. [Báo cáo chi tiết và cách đo](docs/performance.md).
 
 ## Credits
 

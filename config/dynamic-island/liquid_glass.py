@@ -94,7 +94,8 @@ class MaterialLayer:
         try:
             self._load();self.context=self.lib.lg_create_wgc(int(self.owner.winId()),1)
             if not self.context:raise OSError('Native material did not create a context.')
-            self._first_attempt=time.monotonic();self._ready=False;self._resume_floor=0;self._signature=None;self.timer.setInterval(16);self.timer.start()
+            self._first_attempt=time.monotonic();self._ready=False;self._resume_floor=0;self._signature=None;self.timer.setInterval(16)
+            if self.owner.isVisible():self.timer.start()
             self.lib.lg_light(self.context,0,-.25)
             self._status('starting','Đang khởi tạo Liquid Glass…')
         except (OSError,AttributeError) as error:self._fallback(str(error))
@@ -106,6 +107,7 @@ class MaterialLayer:
 
     def _health(self):
         if not self.context:return
+        if not self.owner.isVisible():self.timer.stop();return
         stage=ctypes.c_int();hr=ctypes.c_long();frames=ctypes.c_long();updates=ctypes.c_long();us=ctypes.c_int()
         self.lib.lg_error(self.context,ctypes.byref(stage),ctypes.byref(hr))
         self.lib.lg_info(self.context,ctypes.byref(frames),ctypes.byref(updates),ctypes.byref(us))
@@ -156,6 +158,7 @@ class MaterialLayer:
 
     def hide(self):
         self.legacy.hide()
+        self.timer.stop()
         if self.context and self._visible:
             frames=ctypes.c_long();updates=ctypes.c_long();us=ctypes.c_int()
             self.lib.lg_info(self.context,ctypes.byref(frames),ctypes.byref(updates),ctypes.byref(us))

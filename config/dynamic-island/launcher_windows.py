@@ -1,5 +1,6 @@
 """Windows app discovery, lazy icons and the explicitly assigned Alt+Space key."""
 import ctypes
+from collections import OrderedDict
 from ctypes import wintypes as w
 import json
 import logging
@@ -37,10 +38,11 @@ def known_folder(name):
 
 
 class Catalog(QObject):
+    ICON_CACHE_LIMIT = 64
     changed=Signal(object)
     image_ready=Signal(str,QImage)
     def __init__(self,root):
-        super().__init__();self.root=Path(root);self.apps=[];self.images={};self.pending=set();self.closing=threading.Event()
+        super().__init__();self.root=Path(root);self.apps=[];self.images=OrderedDict();self.visible_icons=set();self.pending=set();self.closing=threading.Event()
         cached=read_json(self.root/'launcher-apps.json',[])
         if isinstance(cached,list):self.apps=[r for r in cached if isinstance(r,dict) and all(isinstance(r.get(k),str) for k in ('id','name','target'))][:3000]
         history=read_json(self.root/'launcher-history.json',{})
@@ -93,12 +95,19 @@ class Catalog(QObject):
         try:write_json(self.root/'launcher-history.json',self.history)
         except OSError:logging.warning('Could not save launcher usage',exc_info=True)
     def request_icons(self,results):
+        results=tuple(results);self.visible_icons={result.key for result in results if result.kind=='app'}
         for result in results:
-            if result.kind!='app' or result.key in self.images or result.key in self.pending:continue
+            if result.kind!='app':continue
+            if result.key in self.images:self.images.move_to_end(result.key);continue
+            if result.key in self.pending:continue
             self.pending.add(result.key);self.icons.put((result.key,result.value))
     def _received(self,key,image):
         self.pending.discard(key)
         self.images[key]=image
+        self.images.move_to_end(key)
+        while len(self.images)>self.ICON_CACHE_LIMIT:
+            victim=next((key for key in self.images if key not in self.visible_icons),next(iter(self.images)))
+            del self.images[victim]
     def _icons(self):
         shell=ctypes.WinDLL('shell32');ole=ctypes.WinDLL('ole32');user=ctypes.WinDLL('user32')
         class FileInfo(ctypes.Structure):

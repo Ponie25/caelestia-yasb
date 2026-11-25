@@ -17,3 +17,4 @@ config/reopen-bar-settings.json
 *.obj
 *.exp
 *.lib
+native/liquid-glass/*.dll

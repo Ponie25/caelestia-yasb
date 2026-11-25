@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -147,6 +148,8 @@ static wd3::IDirect3DDevice gWinrtDev{ nullptr };
 static ID3D11Device* gDev = nullptr; static ID3D11DeviceContext* gCtx = nullptr;   // Shared egalik qiladi; kadr oqimlari ham ishlatadi (ctx multithread-himoyali)
 static std::atomic<long> gCapSerial{ 0 };
 static std::atomic<long> gZSerial{ 0 };   // z-tartib/fokus o'zgardi: qatlamlarni darhol qayta skanerlaymiz
+static std::atomic<unsigned long long> gCopyBytes{0}, gPoolBytes{0};
+static std::atomic<unsigned int> gCaptureCount{0}, gDuplicationCount{0};
 static void CALLBACK zHook(HWINEVENTHOOK, DWORD, HWND, LONG, LONG, DWORD, DWORD) { gZSerial++; }
 static HANDLE gWake = nullptr;   // kadr kelganda render oqimini uyg'otadi (aks holda tsikl bo'sh aylanadi)
 
@@ -163,7 +166,9 @@ struct WinCap : std::enable_shared_from_this<WinCap> {
         try {
             auto interop = winrt::get_activation_factory<wgc::GraphicsCaptureItem, IGraphicsCaptureItemInterop>();
             winrt::check_hresult(interop->CreateForWindow(hwnd, winrt::guid_of<wgc::GraphicsCaptureItem>(), winrt::put_abi(item)));
-            pool = wgc::Direct3D11CaptureFramePool::CreateFreeThreaded(gWinrtDev, wgd::DirectXPixelFormat::B8G8R8A8UIntNormalized, 2, item.Size());
+            // Frames are copied and released within the callback; no second queued
+            // full-window frame is needed for the glass underlay.
+            pool = wgc::Direct3D11CaptureFramePool::CreateFreeThreaded(gWinrtDev, wgd::DirectXPixelFormat::B8G8R8A8UIntNormalized, 1, item.Size());
             std::weak_ptr<WinCap> wk = shared_from_this();
             rev = pool.FrameArrived(winrt::auto_revoke, [wk](wgc::Direct3D11CaptureFramePool const& sender, winrt::Windows::Foundation::IInspectable const&) {
                 auto self = wk.lock(); if (!self) return;
@@ -218,9 +223,50 @@ static RECT capFrame(HWND h, bool wallpaper) {
     return r;
 }
 
+static RECT captureRegion(Ov* o) {
+    RECT region{ o->last.x - PAD, o->last.y - PAD, o->last.x + o->W + PAD, o->last.y + o->H + PAD };
+    // The closed Island occupies only part of its transparent Qt host. Opening
+    // windows retain the full host region so all layers are ready during morphs.
+    if (o->H > 96) return region;
+    std::lock_guard<std::mutex> lock(o->mu);
+    RECT shapes{}; bool found = false;
+    for (int i = 0; i < o->count && (size_t)(i * 12 + 3) < o->shapes.size(); ++i) {
+        const float* s = o->shapes.data() + i * 12;
+        if (s[2] <= 0 || s[3] <= 0) continue;
+        RECT part{(LONG)std::floor(s[0] - s[2]), (LONG)std::floor(s[1] - s[3]),
+                  (LONG)std::ceil(s[0] + s[2]), (LONG)std::ceil(s[1] + s[3])};
+        if (!found) shapes = part; else UnionRect(&shapes, &shapes, &part);
+        found = true;
+    }
+    if (found) {
+        RECT cropped{ o->last.x + shapes.left - PAD, o->last.y + shapes.top - PAD,
+                      o->last.x + shapes.right + PAD, o->last.y + shapes.bottom + PAD };
+        IntersectRect(&region, &region, &cropped);
+    }
+    return region;
+}
+
+static void updateResourceStats(Shared& s) {
+    unsigned long long bytes = 0, pools = 0; unsigned int captures = 0;
+    for (const auto& entry : gCapCache) {
+        auto& cap = entry.second; std::lock_guard<std::mutex> lock(cap->mu);
+        if (cap->ok && !cap->failed) ++captures;
+        if (cap->tex) {
+            D3D11_TEXTURE2D_DESC desc{}; cap->tex->GetDesc(&desc);
+            bytes += (unsigned long long)desc.Width * desc.Height * 4;
+        }
+        if (cap->pool && cap->item) {
+            auto size = cap->item.Size();
+            pools += (unsigned long long)std::max(0, size.Width) * std::max(0, size.Height) * 4;
+        }
+    }
+    gCopyBytes = bytes; gPoolBytes = pools; gCaptureCount = captures;
+    gDuplicationCount = (unsigned int)s.outs.size();
+}
+
 // Popup ostidagi oynalarni (z-tartibda, target'dan pastdagilar) topadi. To'liq yopuvchi (shaffof bo'lmagan) oynadan pastdagilar olinmaydi. Imzo o'zgarsa true.
 static bool scanLayers(Ov* o) {
-    RECT region{ o->last.x - PAD, o->last.y - PAD, o->last.x + o->W + PAD, o->last.y + o->H + PAD };
+    RECT region = captureRegion(o);
     RECT wide = region;   // popup siljiganda yangi oyna kadri allaqachon tayyor bo'lsin
     struct Ctx { RECT region; Ov* o; std::vector<HWND> list; std::vector<HWND> skip; std::vector<HWND> glass; bool seenMine; } c{ wide, o, {}, {}, {}, false };
     { std::lock_guard<std::mutex> lk(gMu); for (Ov* q : gActive) if (q != o && q->target) c.skip.push_back(q->target); }   // boshqa shisha oynalarning deyarli ko'rinmas Qt oynasi orqa fon bo'lmasin (to'q kulrang to'rtburchak chiqardi)
@@ -426,9 +472,13 @@ static int setupOverlay(Shared& S, Ov* o, POINT origin, int w, int h, HRESULT& h
         if (!found) { hr = E_FAIL; return 2; }
         if (!initDevice(S, adapter.Get())) { hr = E_FAIL; return 3; }
     }
-    ensureOuts(S, origin.x, origin.y, w, h);
-    bool any = false; for (auto& od : S.outs) if (rectHit(od.rc, origin.x, origin.y, origin.x + w, origin.y + h)) any = true;
-    if (!any) { hr = E_FAIL; return 4; }
+    // WGC already supplies the window layers. Desktop Duplication here used to
+    // allocate unused monitor-sized textures and a second capture backend.
+    if (!o->wgc) {
+        ensureOuts(S, origin.x, origin.y, w, h);
+        bool any = false; for (auto& od : S.outs) if (rectHit(od.rc, origin.x, origin.y, origin.x + w, origin.y + h)) any = true;
+        if (!any) { hr = E_FAIL; return 4; }
+    }
     ComPtr<IDXGIFactory2> fac2; S.fac.As(&fac2);
     o->fixedWin = false;
     if (o->fixedWin) { o->VX = GetSystemMetrics(SM_XVIRTUALSCREEN); o->VY = GetSystemMetrics(SM_YVIRTUALSCREEN); o->VW = GetSystemMetrics(SM_CXVIRTUALSCREEN); o->VH = GetSystemMetrics(SM_CYVIRTUALSCREEN); SetWindowPos(o->hwnd, nullptr, o->VX, o->VY, o->VW, o->VH, SWP_NOACTIVATE | SWP_NOZORDER); }
@@ -754,7 +804,7 @@ static void worker() {
                 ShowWindow(o->hwnd, SW_SHOWNOACTIVATE);
             }
             if (org.x != o->last.x || org.y != o->last.y) {
-                ensureOuts(S, org.x, org.y, W, H);   // boshqa monitorga o'tsa ham qatlam qayta qurilmaydi: yangi monitor duplication'ga ulanadi, orqa fon hammasidan yig'iladi
+                if (!o->wgc) ensureOuts(S, org.x, org.y, W, H);
                 for (int k = 3; k > 0; k--) o->hist[k] = o->hist[k - 1];
                 o->hist[0] = org; o->nhist = std::min(o->nhist + 1, 4); o->histT = GetTickCount64();
                 o->last = org; o->dirty = true; o->needBack = true;
@@ -906,6 +956,8 @@ static void worker() {
             }
         }
         for (size_t i = 0; i < S.outs.size(); i++) if (S.outs[i].dupl && S.outs[i].frame) { S.outs[i].frame.Reset(); S.outs[i].dupl->ReleaseFrame(); }
+        { static ULONGLONG statsAt = 0; auto now = GetTickCount64();
+          if (now - statsAt > 500) { statsAt = now; updateResourceStats(S); } }
         bool urgent = false;
         for (auto* item : alive) if (item->dirty || item->needBack) urgent = true;
         if (!waited) WaitForSingleObject(gWake, urgent ? 1 : (GetTickCount64() - gLastMove < 400 ? 2 : 40));   // ekran kadri kutilmadi (WGC rejimi): oyna kadri kelguncha yoki 8 ms uxlaymiz
@@ -919,11 +971,20 @@ static void worker() {
     }
     for (auto& entry : gCapCache) entry.second->stop();
     gCapCache.clear();
+    gCopyBytes = 0; gPoolBytes = 0; gCaptureCount = 0; gDuplicationCount = 0;
     gWinrtDev = nullptr; gDev = nullptr; gCtx = nullptr;
     winrt::uninit_apartment();
 }
 
 extern "C" {
+// Diagnostics report capture texture estimates, not private VRAM residency.
+__declspec(dllexport) void lg_resource_info(unsigned int* captures, unsigned int* duplications,
+                                           unsigned long long* copies, unsigned long long* pools) {
+    if (captures) *captures = gCaptureCount.load();
+    if (duplications) *duplications = gDuplicationCount.load();
+    if (copies) *copies = gCopyBytes.load();
+    if (pools) *pools = gPoolBytes.load();
+}
 __declspec(dllexport) void* lg_create3(HWND target, int under, int visible) {
     Ov* o = new Ov(); o->target = target; o->under = under != 0; o->visible = visible != 0;
     std::lock_guard<std::mutex> lk(gMu);
