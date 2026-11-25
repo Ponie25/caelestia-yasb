@@ -1,5 +1,6 @@
 """Launcher state in the existing Island window; collapsed clicks stay menus."""
 import ctypes
+import json
 import hashlib
 import logging
 import os
@@ -9,8 +10,10 @@ import time
 
 from PySide6.QtCore import QPointF,QTimer,Qt,QUrl
 from PySide6.QtGui import QColor,QDesktopServices,QPainterPath,QPen
-from PySide6.QtWidgets import QApplication
-from launcher_core import Result,query
+from PySide6.QtWidgets import QApplication,QFileDialog
+from launcher_core import Result,query,DANGEROUS
+from launcher_actions import BackgroundAction,ControlRequest,power_action
+from launcher_wallpapers import Wallpapers,apply_wallpaper
 from launcher_view import LauncherView,WIDTH,curve
 from launcher_windows import Catalog,Shortcut
 import launcher_focus
@@ -21,6 +24,13 @@ class LauncherMixin:
     def _launcher_init(self,root):
         self.launcher_active=False;self.launcher_mode=False;self.launcher_jolt=False;self.launcher_previous=None;self.launcher_after_close=None
         self.launcher_phase=(0.,0.);self.launcher_phase_origin=(1.,1.);self.launcher_origin_image=None
+        self.wallpapers=Wallpapers(root);self.wallpapers.changed.connect(self._launcher_wallpapers_changed)
+        self.launcher_confirmation=None;self.launcher_sequence=0;self.launcher_last_error='';self.launcher_palettes={};self.launcher_busy=False
+        for name in ('light','dark','catppuccin','everforest','red-white','red-black'):
+            try:
+                data=json.loads((Path(root).parent/'theme-profiles'/name/'palette.json').read_text(encoding='utf-8'))
+                self.launcher_palettes[name]=(data['BASE'],data['MAUVE'])
+            except (OSError,ValueError,KeyError):pass
         self.catalog=Catalog(root);self.launcher_view=LauncherView(self,self.catalog)
         self.catalog.changed.connect(self._launcher_catalog)
         self.launcher_view.query_changed.connect(self._launcher_query)
@@ -30,18 +40,20 @@ class LauncherMixin:
         self.launcher_hotkey=Shortcut(int(self.winId()))
         self.launcher_hotkey.status.connect(lambda message:logging.warning(message))
         QApplication.instance().aboutToQuit.connect(self.catalog.stop)
+        QApplication.instance().aboutToQuit.connect(self.wallpapers.stop)
         QApplication.instance().aboutToQuit.connect(self.launcher_hotkey.stop)
         self.catalog.start()
         self._launcher_apply(getattr(self,'launcher_options',{}))
     def _launcher_apply(self,options):
-        self.launcher_options={'enabled':True,'hotkey':True,'max_results':7}
+        self.launcher_options={'enabled':True,'hotkey':True,'max_results':7,'dangerous_actions':False,'wallpaper_directory':''}
         if isinstance(options,dict):self.launcher_options.update(options)
+        self.wallpapers.configure(self.launcher_options.get('wallpaper_directory',''))
         if not hasattr(self,'launcher_hotkey'):return
         if self.launcher_options.get('enabled',True) and self.launcher_options.get('hotkey',True):self.launcher_hotkey.start()
         else:self.launcher_hotkey.stop()
         if not self.launcher_options.get('enabled',True) and self.launcher_active:self.close_launcher()
         if self.launcher_active:
-            self.launcher_view.max_rows=self._launcher_max_rows();self.launcher_view.layout_contents();self._retarget()
+            self.launcher_view.max_rows=self._launcher_max_rows();self._launcher_height();self.launcher_view.layout_contents();self._retarget()
     def _launcher_max_rows(self):
         screen=self.screen() or QApplication.primaryScreen()
         count=self.launcher_options.get('max_results',7)
@@ -51,11 +63,24 @@ class LauncherMixin:
         self.catalog.accept(apps)
         if self.launcher_active:self._launcher_query(self.launcher_view.search.edit.text(),preserve=True)
     def _launcher_query(self,text,preserve=False):
-        rows=query(text,self.catalog.apps,self.catalog.history)
+        self.launcher_sequence+=1;self.launcher_confirmation=None
+        command=text.strip().split(' ',1)[0].casefold()
+        if command in ('>wallpaper','>wallpapers','>background','>random'):self.wallpapers.ensure()
+        context=dict(theme=palette.THEME,palettes=self.launcher_palettes,wallpapers=self.wallpapers.items,
+                     wallpaper_loading=self.wallpapers.loading,wallpaper=self.wallpapers.current,
+                     dangerous_actions=self.launcher_options.get('dangerous_actions') is True)
+        rows=query(text,self.catalog.apps,self.catalog.history,context)
+        if self.launcher_last_error and not text:rows=[Result('last-error',self.launcher_last_error,'Lệnh trước chưa hoàn tất · gõ để tiếp tục','hint')]+rows[:6]
+        elif text:self.launcher_last_error=''
         if not rows:rows=[Result('index','Đang lập danh sách ứng dụng…' if not self.catalog.apps else 'Không có kết quả','Gõ > để xem các lệnh nhanh','hint')]
         self.launcher_view.set_results(rows,preserve)
+    def _launcher_wallpapers_changed(self):
+        if self.launcher_active and self.launcher_view.search.edit.text().strip().split(' ',1)[0].casefold() in ('>wallpaper','>wallpapers','>background','>random'):
+            self._launcher_query(self.launcher_view.search.edit.text(),preserve=True)
     def _launcher_height(self):
         if self.launcher_active:
+            required=max(self.HEIGHT,self.launcher_view.preferred_height()+48)
+            if self.height()<required:self.setFixedHeight(required);self.follow_bar()
             if abs(self.target[1]-self.launcher_view.preferred_height())<.01:return
             self.launcher_phase_origin=self.launcher_phase
             self.launcher_jolt=False
@@ -123,6 +148,7 @@ class LauncherMixin:
     def close_launcher(self,restore=True,after=None):
         if not self.launcher_active:return
         self.launcher_active=False;self.launcher_jolt=False;self.launcher_after_close=after
+        self.launcher_confirmation=None
         self.launcher_hotkey.active=False
         self.launcher_view.effects(True,1)
         self.launcher_view.search.edit.clearFocus()
@@ -196,6 +222,8 @@ class LauncherMixin:
         self.launcher_view.set_results([Result('error',message,'Hãy thử tìm lại hoặc chọn một mục khác','hint','', 'search')])
     def _launcher_accept(self,result):
         try:
+            if self.launcher_busy and result.kind in ('theme','power','power_confirm','wallpaper','random','wallpaper_folder'):return
+            if self._launcher_command_result(result):return
             if result.kind=='complete':
                 self.launcher_view.search.edit.setText(result.value);self.launcher_view.search.edit.setFocus();return
             if result.kind=='hint':return
@@ -215,10 +243,8 @@ class LauncherMixin:
                     def menu():
                         self._set_expanded(True);self.dashboard.tab=tab;self.drawer_frame=None;self.update()
                     self.close_launcher(restore=False,after=menu);return
-                if result.value=='bar':
-                    root=self.catalog.root.parent
-                    key=hashlib.sha256(os.fsencode(os.path.normcase(str(root.resolve())))).hexdigest()[:20]
-                    with open('\\\\.\\pipe\\yasb-settings-'+key,'r+b',buffering=0) as pipe:pipe.write(b'{"action":"open"}\n')
+                if result.value in ('bar','launcher-settings'):
+                    self._launcher_control(dict(action='open',page=4 if result.value=='launcher-settings' else None));return
                 elif result.value=='settings':os.startfile('ms-settings:')
                 elif result.value in ('downloads','documents'):
                     # Resolve redirected Known Folders rather than assuming C:\Users.
@@ -230,3 +256,66 @@ class LauncherMixin:
         except (OSError,ValueError,RuntimeError):
             logging.warning('Launcher action failed',exc_info=True)
             self._launcher_error('Chưa mở được mục này')
+
+    def _launcher_control(self,payload,after=None):
+        root=self.catalog.root.parent;key=hashlib.sha256(os.fsencode(os.path.normcase(str(root.resolve())))).hexdigest()[:20]
+        sequence=self.launcher_sequence;request=ControlRequest(self);self.launcher_busy=True
+        def finished(ok,message):
+            self.launcher_busy=False
+            if ok:
+                if after:after()
+                elif self.launcher_active and sequence==self.launcher_sequence:self.close_launcher(restore=False)
+            elif self.launcher_active and sequence==self.launcher_sequence:self._launcher_error(message)
+            else:self.launcher_last_error=message
+        request.finished.connect(finished);request.start('yasb-settings-'+key,payload)
+
+    def _launcher_background(self,function,after=None,session=False):
+        sequence=self.launcher_sequence;job=BackgroundAction(self,function);self.launcher_busy=True
+        def finished(ok,message):
+            self.launcher_busy=False
+            if ok:
+                if after:after()
+                if not session and self.launcher_active and sequence==self.launcher_sequence:self.close_launcher(restore=False)
+            elif self.launcher_active and sequence==self.launcher_sequence:self._launcher_error(message)
+            else:self.launcher_last_error=message
+            job.deleteLater()
+        job.finished.connect(finished);job.start()
+
+    def _launcher_command_result(self,result):
+        if result.kind=='theme':
+            if result.value not in self.launcher_palettes:raise ValueError('Bảng màu không hợp lệ.')
+            self._launcher_control(dict(action='theme',name=result.value));return True
+        if result.kind in ('power','power_confirm','power_cancel'):
+            if result.kind=='power_cancel':self._launcher_query(self.launcher_view.search.edit.text());return True
+            action=result.value
+            if action not in ('lock','sleep',*DANGEROUS):raise ValueError('Lệnh nguồn không hợp lệ.')
+            if action in DANGEROUS and self.launcher_options.get('dangerous_actions') is not True:
+                self._launcher_query('>'+action);return True
+            if action=='lock':
+                self.close_launcher(restore=False,after=lambda:self._launcher_background(lambda:power_action(action),session=True));return True
+            if result.kind=='power_confirm':
+                if self.launcher_confirmation!=action:return True
+                self.close_launcher(restore=False,after=lambda:self._launcher_background(lambda:power_action(action),session=True));return True
+            self.launcher_confirmation=action
+            labels={'sleep':'Ngủ','shutdown':'Tắt máy','reboot':'Khởi động lại','logout':'Đăng xuất'}
+            self.launcher_view.set_results([Result('power-cancel','Hủy','Quay lại danh sách lệnh · Esc đóng launcher','power_cancel','','x'),
+                Result('power-confirm',labels[action]+' ngay','Lưu công việc đang mở trước khi tiếp tục','power_confirm',action,result.glyph)])
+            return True
+        if result.kind=='wallpaper_folder':
+            self.close_launcher(restore=False,after=self._launcher_choose_wallpaper_folder);return True
+        if result.kind=='wallpaper_refresh':
+            self.wallpapers.ensure(force=True);self._launcher_query('>wallpaper ');return True
+        if result.kind in ('wallpaper','random'):
+            item=self.wallpapers.random() if result.kind=='random' else self.wallpapers.get(result.value)
+            if item is None:raise OSError('Chưa có hình nền để chọn.')
+            self._launcher_background(lambda:apply_wallpaper(item,self.wallpapers.engine),after=lambda:self.wallpapers.remember(item['path']));return True
+        return False
+
+    def _launcher_choose_wallpaper_folder(self):
+        folder=QFileDialog.getExistingDirectory(self,'Chọn thư mục hình nền',str(self.wallpapers.directory))
+        def reopen():
+            self.open_launcher();self.launcher_view.search.edit.setText('>wallpaper ')
+        if not folder:reopen();return
+        def selected():
+            self.wallpapers.configure(folder);self.wallpapers.ensure(force=True);reopen()
+        self._launcher_control(dict(action='wallpaper_directory',path=folder),after=selected)

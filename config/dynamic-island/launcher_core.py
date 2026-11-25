@@ -16,6 +16,9 @@ class Result:
     kind: str
     value: str = ''
     glyph: str = 'apps'
+    swatch: tuple[str, ...] = ()
+    preview: str = ''
+    current: bool = False
 
 
 def normalized(value):
@@ -102,6 +105,16 @@ def convert(expression):
 
 COMMANDS=(
     Result('calc','Máy tính','Tính biểu thức, phần trăm và đổi đơn vị','complete','>calc ','calculate'),
+    Result('scheme','Scheme','Chọn bảng màu cho thanh bar, Island và các menu','complete','>scheme ','palette'),
+    Result('wallpaper','Wallpaper','Duyệt ảnh và thư viện Wallpaper Engine','complete','>wallpaper ','image'),
+    Result('random','Random','Đổi ngẫu nhiên trong thư viện hình nền','complete','>random ','dice'),
+    Result('light','Light','Dùng preset Sáng của thanh bar và Island','theme','light','sun'),
+    Result('dark','Dark','Dùng preset Tối của thanh bar và Island','theme','dark','moon'),
+    Result('lock','Lock','Khóa phiên Windows hiện tại','power','lock','lock'),
+    Result('sleep','Sleep','Đưa Windows vào chế độ ngủ','power','sleep','moon'),
+    Result('shutdown','Shutdown','Tắt máy · cần xác nhận','power','shutdown','power'),
+    Result('reboot','Reboot','Khởi động lại · cần xác nhận','power','reboot','restart'),
+    Result('logout','Logout','Đăng xuất Windows · cần xác nhận','power','logout','logout'),
     Result('web','Tìm trên web','Gõ nội dung rồi Enter để tìm bằng trình duyệt','complete','>web ','search'),
     Result('bar','Cài đặt thanh bar','Đổi giao diện, nền bar và Dynamic Island','action','bar','settings'),
     Result('settings','Cài đặt Windows','Mở ứng dụng Settings','action','settings','settings'),
@@ -110,20 +123,65 @@ COMMANDS=(
     Result('island','Menu Dynamic Island','Mở Dashboard và các tab hiện có','action','island','apps'),
     Result('timer','Hẹn giờ','Mở Live Activity để đặt hẹn giờ','action','timer','timer'),
 )
+DANGEROUS=frozenset(('shutdown','reboot','logout'))
+ALIASES={'theme':'scheme','themes':'scheme','schemes':'scheme','wallpapers':'wallpaper','background':'wallpaper',
+         'restart':'reboot','signout':'logout','logoff':'logout','suspend':'sleep','poweroff':'shutdown'}
+SCHEMES=(('light','Sáng','Light'),('dark','Tối','Dark'),('catppuccin','Tím hồng','Catppuccin'),
+         ('everforest','Xanh lá','Everforest'),('red-white','Đỏ trắng','Red · White'),('red-black','Đỏ đen','Red · Black'))
+
+def _command_rows(command,rest,context):
+    if command=='scheme':
+        rows=[]
+        for key,label,family in SCHEMES:
+            score=rank(rest,key+' '+label+' '+family)
+            if score is None:continue
+            selected=context.get('theme')==key
+            rows.append((score,Result('scheme:'+key,label,family+' · '+('Đang dùng' if selected else 'Dùng lại các giá trị gốc của preset'),
+                'theme',key,'palette',tuple(context.get('palettes',{}).get(key,())),current=selected)))
+        return [row for _,row in sorted(rows,key=lambda item:item[0],reverse=True)] or [Result('scheme-empty','Không tìm thấy bảng màu','Thử Catppuccin, Everforest, Sáng hoặc Tối','hint')]
+    if command in ('wallpaper','random'):
+        images=context.get('wallpapers',());loading=context.get('wallpaper_loading',False)
+        if command=='random':
+            if loading:return [Result('wallpaper-loading','Đang đọc thư viện hình nền…','Có thể tiếp tục gõ để lọc','hint','','image')]
+            if images:return [Result('random','Đổi hình nền ngẫu nhiên',f'{len(images)} mục trong thư viện · Enter để đổi','random','','dice')]
+        utilities=[Result('wallpaper-folder','Chọn thư mục ảnh','Ảnh tĩnh hoặc thư mục có các project Wallpaper Engine','wallpaper_folder','','folder'),
+                   Result('wallpaper-refresh','Làm mới thư viện','Đọc lại ảnh mới và các project đã thêm','wallpaper_refresh','','restart')]
+        if normalized(rest) in ('folder','thu muc'):return utilities[:1]
+        if normalized(rest) in ('refresh','reload','lam moi'):return utilities[1:]
+        rows=[]
+        if loading:rows.append(Result('wallpaper-loading','Đang đọc thư viện…','Có thể tiếp tục gõ để lọc','hint','','image'))
+        ranked=[]
+        for image in images:
+            score=rank(rest,image['name'])
+            if score is None:continue
+            selected=context.get('wallpaper')==image['path']
+            ranked.append((score,Result('wallpaper:'+image['path'],image['name'],('Đã chọn · ' if selected else '')+('Wallpaper Engine' if image.get('engine') else 'Ảnh nền Windows'),
+                'wallpaper',image['path'],'image',preview=image.get('preview',''),current=selected)))
+        rows.extend(row for _,row in sorted(ranked,key=lambda item:item[0],reverse=True)[:24])
+        if not loading and not rows:rows.append(Result('wallpaper-empty','Chưa có hình nền phù hợp','Chọn thư mục hoặc thêm ảnh vào config/wallpapers','hint','','image'))
+        rows.extend(utilities)
+        return rows
+    if command in DANGEROUS and not context.get('dangerous_actions',False):
+        return [Result('power-disabled','Lệnh nguồn đang được ẩn','Bật trong Cài đặt → Island và Launcher nếu muốn sử dụng','hint','','power'),
+                Result('power-settings','Mở cài đặt launcher','Cho phép hiện các lệnh tắt máy, khởi động lại và đăng xuất','action','launcher-settings','settings')]
+    return None
 
 
-def query(text,apps,history=None):
+def query(text,apps,history=None,context=None):
     """Return bounded rows; only Enter/click ever runs a result."""
-    text=text.strip();history=history or {}
+    text=text.strip();history=history or {};context=context or {}
     if text.startswith('>'):
         command,_,rest=text[1:].partition(' ')
+        command=ALIASES.get(command.casefold(),command.casefold())
+        special=_command_rows(command,rest,context)
+        if special is not None:return special
         if command.casefold() in ('calc','calculate'):
             answer=convert(rest) or calculate(rest)
             return [Result('answer',answer or 'Nhập biểu thức để tính','Enter để sao chép' if answer else 'Ví dụ: sqrt(144) · 15% of 200 · 10 km to mi','copy' if answer else 'hint',answer or '', 'calculate')]
         if command.casefold() in ('web','google') and rest:
             return [Result('web-result',rest,'Tìm bằng Google · Enter để mở trình duyệt','url','https://www.google.com/search?q='+quote_plus(rest),'search')]
-        rows=[(rank(command,row.key+' '+row.title),row) for row in COMMANDS]
-        return [row for score,row in sorted((r for r in rows if r[0] is not None),key=lambda r:r[0],reverse=True)][:7]
+        rows=[(rank(command,row.key+' '+row.title),row) for row in COMMANDS if row.key not in DANGEROUS or context.get('dangerous_actions',False)]
+        return [row for score,row in sorted((r for r in rows if r[0] is not None),key=lambda r:r[0],reverse=True)]
     answer=convert(text) or (calculate(text) if re.search(r'[\dπ]|^(?:sqrt|sin|cos|tan|log|abs|round|pi|tau)\b',text) else None)
     if answer:return [Result('answer',answer,'Enter để sao chép kết quả','copy',answer,'calculate')]
     if re.fullmatch(r'[\d\s.+*/()%^-]+',text) and re.search(r'\d',text) and re.search(r'[+*/()%^\-]',text):

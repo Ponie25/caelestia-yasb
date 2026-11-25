@@ -38,6 +38,18 @@ The showcase uses sample media, notifications, and device data. The Windows acco
 
 Press **Alt+Space** or click Search. The Island grows into the launcher using Caelestia's spatial easing; the input is available while the opening animation runs. Search installed apps and Start-menu shortcuts, calculate expressions and unit conversions, or type `>` for commands. Use arrows, Enter and **Esc** to navigate, launch and close. Alt+Space belongs to this launcher while it is enabled; turn it off in Settings if another launcher needs the shortcut.
 
+The `>` menu now includes Caelestia's **Scheme, Wallpaper, Random, Light, Dark,
+Lock and Sleep** groups. `>scheme` previews the six palettes; `>wallpaper` opens a
+thumbnail carousel of your folder and the local library of a running Wallpaper
+Engine. Type a name to filter, use Up/Down or the wheel to select, then Enter to
+apply. `>random` chooses a different image when possible. Wallpaper changes only
+after selection, never on hover. **Shutdown, Reboot and Logout** are hidden by
+default; enable them in **Settings → Island và Launcher**, where you can also
+choose the image folder. Sleep and the three destructive session actions require
+confirmation, with Cancel selected first. [Command list and Windows adaptations](docs/launcher-commands.md).
+
+![Launcher commands, rendered from an isolated UI fixture](docs/screenshots/launcher-commands.png)
+
 Liquid Glass is the default Island material. A native D3D11 renderer supplies refraction, frost, tint and reflection; an unavailable graphics/capture path falls back to ordinary Windows blur. It suspends when hidden and avoids continuously redrawing static backgrounds. The renderer DLL, source and MIT attribution are included. Native glass and Qt animation have separate frame caps.
 
 ### Compact activities
@@ -78,7 +90,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -InstallDi
 
 ### How the bundle is built
 
-`dependencies.json` pins YASB 2.0.8, Python 3.14.10, and the Island's Python wheels by SHA-256. Setup extracts the official MSI and compiles the 22 source modules listed in `patches/manifest.json` into that portable copy. The manifest verifies stock module hashes and distinguishes new modules. The patches supply Settings, themes, surface contrast, shared motion, Island lifetime/notifications and the capture integrations. Keep them paired with the pinned runtime. To smoke-test a prepared install, run its `python\python.exe tools\check_install.py <install-path>` from this repository. `tools/check_launcher_input.py <install-path>` checks early typing, Vietnamese IME and Esc in an isolated offscreen Island without registering a global shortcut. `tools/check_resources.py` checks bounded caching, media teardown and hidden polling; `tools/benchmark_glass.py` exercises native allocations and lifecycle in an owned scene. Rebuild the glass DLL from `native/liquid-glass/` using an x64 Visual Studio developer prompt. See the [performance report](docs/performance.md) for commands and limitations.
+`dependencies.json` pins YASB 2.0.8, Python 3.14.10, and the Island's Python wheels by SHA-256. Setup extracts the official MSI and compiles the 22 source modules listed in `patches/manifest.json` into that portable copy. The manifest verifies stock module hashes and distinguishes new modules. The patches supply Settings, themes, surface contrast, shared motion, Island lifetime/notifications and the capture integrations. Keep them paired with the pinned runtime. To smoke-test a prepared install, run its `python\python.exe tools\check_install.py <install-path>` from this repository. `tools/check_launcher_input.py <install-path>` checks early typing, Vietnamese IME and Esc in an isolated offscreen Island without registering a global shortcut. `tools/check_launcher_commands.py <install-path>` checks commands, gallery navigation, async local control and confirmation; all real session/wallpaper mutations are mocked. `tools/check_resources.py` checks bounded caching, media teardown and hidden polling; `tools/benchmark_glass.py` exercises native allocations and lifecycle in an owned scene. Rebuild the glass DLL from `native/liquid-glass/` using an x64 Visual Studio developer prompt. See the [performance report](docs/performance.md) for commands and limitations.
 
 ![Native Settings with search, six themes and text color controls](docs/screenshots/settings-appearance.png)
 
@@ -89,6 +101,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -InstallDi
 3. Nếu bạn đang chạy YASB, thoát từ biểu tượng ở khay hệ thống rồi mở **Start Caelestia YASB** trong Start menu.
 
 Bấm Island để mở Dashboard; **Alt+Space** mở launcher tích hợp và **Esc** đóng launcher. Tab **Media** có trình phát và bộ chỉnh âm lượng từng ứng dụng. Mở **Caelestia YASB Settings** trong Start để chọn sáu theme, chỉnh màu chữ, nền bar, Liquid Glass và nhịp chuyển động chung; **Ctrl+F** tìm cài đặt. Dự báo mặc định ở Hà Nội. Khi thiếu Flameshot, nút chụp vùng dùng công cụ của YASB. Bộ cài không thay cấu hình Komorebi sẵn có của bạn.
+
+Gõ **`>`** trong launcher để xem lệnh. **`>scheme`** chọn theme, **`>wallpaper`**
+duyệt hình nền, **`>random`** đổi ảnh ngẫu nhiên; **`>light`**, **`>dark`**,
+**`>lock`** và **`>sleep`** dùng các chức năng tương ứng. Mũi tên lên/xuống chọn
+mục; Enter áp dụng. Chọn thư mục ảnh trong **Island và Launcher** hoặc gõ
+`>wallpaper folder`. Các lệnh tắt máy, khởi động lại và đăng xuất tắt mặc định;
+bật trong Settings nếu cần. [Hướng dẫn đầy đủ](docs/launcher-commands.md).
 
 Bản tối ưu hiện giữ Python/Qt và C++, chưa chuyển sang Rust. Đã bỏ các texture
 toàn màn hình dư, giới hạn cache icon và ngừng kiểm tra kính liên tục khi Island

@@ -34,7 +34,9 @@
   "launcher": {
     "enabled": true,
     "hotkey": true,
-    "max_results": 7
+    "max_results": 7,
+    "dangerous_actions": false,
+    "wallpaper_directory": ""
   },
   "island": {
     "enabled": true,
