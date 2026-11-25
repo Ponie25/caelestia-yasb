@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-26 — Designed wallpaper presets
+
+- Replace wallpaper-derived palette generation with deterministic selection from
+  18 checked-in presets: nine color families, each with light and dark variants.
+- Copy full preset palette/CSS files exactly; wallpaper pixels only choose the
+  hue family and never create interface colors.
+- Rename automatic mode to “Tự chọn preset” and show the selected preset's name
+  in Settings. Preserve opacity, glass, layout, motion and Komorebi integration.
+- Add an offline preset builder, reference board and checks for all palette
+  contrasts, tone matching and byte-identical preset application.
+
 ## 2026-11-26 — Wallpaper interaction and automatic colors
 
 - Animate gallery scrolling and scaling together; keep Up/Down selection until

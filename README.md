@@ -1,6 +1,6 @@
 # Caelestia YASB
 
-A horizontal YASB setup for Windows 11 with a Caelestia-inspired Dynamic Island, an integrated Alt+Space launcher, Liquid Glass and matching Quick Settings. Six fixed palettes, an automatic wallpaper palette and a native Settings window let you customize the bar. The clock stays on the right; clicking the Island always opens its menu.
+A horizontal YASB setup for Windows 11 with a Caelestia-inspired Dynamic Island, an integrated Alt+Space launcher, Liquid Glass and matching Quick Settings. Six manual themes, automatic matching to 18 designed presets, and a native Settings window let you customize the bar. The clock stays on the right; clicking the Island always opens its menu.
 
 [Download current source and installer](https://github.com/Ponie25/caelestia-yasb/archive/refs/heads/main.zip) · [Tagged releases](https://github.com/Ponie25/caelestia-yasb/releases) · [Cài đặt tiếng Việt](#cài-đặt-tiếng-việt)
 
@@ -39,8 +39,8 @@ The showcase uses sample media, notifications, and device data. The Windows acco
 Press **Alt+Space** or click Search. The Island grows into the launcher using Caelestia's spatial easing; the input is available while the opening animation runs. Search installed apps and Start-menu shortcuts, calculate expressions and unit conversions, or type `>` for commands. Use arrows, Enter and **Esc** to navigate, launch and close. Alt+Space belongs to this launcher while it is enabled; turn it off in Settings if another launcher needs the shortcut.
 
 The `>` menu now includes Caelestia's **Scheme, Wallpaper, Random, Light, Dark,
-Lock and Sleep** groups. `>scheme` previews the six fixed palettes and automatic
-wallpaper colors; `>wallpaper` opens a
+Lock and Sleep** groups. `>scheme` previews the six manual themes and automatic
+preset selection; `>wallpaper` opens a
 thumbnail carousel of your folder and the local library of a running Wallpaper
 Engine. Type a name to filter, use Up/Down or the wheel to select, then Enter to
 apply. `>random` chooses a different image when possible. Wallpaper changes only
@@ -56,12 +56,16 @@ library, or refresh after adding/removing a star in Wallpaper Engine. Favorites
 are read from Steam's public list and cached locally, without cookies or login
 credentials; they are not a separate favorites list maintained by this launcher.
 
-**Automatic wallpaper colors are enabled by default.** The bar, Island, menus
-and synchronized Komorebi borders follow a palette extracted from the current
-image or Wallpaper Engine preview. Settings offers **keep current light/dark,
-always light, or always dark**. Automatic updates preserve your layout, opacity
-and glass; selecting a fixed theme turns automatic colors off. The decoder reads
-image files, never the screen or frames of the running animated wallpaper.
+**Automatic preset selection is enabled by default.** The wallpaper's dominant
+color chooses one of **18 fixed palettes**: Lavender, Rose, Ruby, Amber, Sage,
+Teal, Cyan, Blue and Graphite, each in light and dark. The full palette and CSS
+are copied from the chosen preset; wallpaper pixels never generate interface
+colors. The bar, Island, menus and synchronized Komorebi borders share the result.
+Settings offers **keep current light/dark, always light, or always dark** and shows
+the selected preset's name. Matching preserves layout, opacity and glass;
+selecting a manual theme disables it. Only image files/local previews are read.
+
+![Eighteen fixed light and dark presets](docs/screenshots/wallpaper-presets.png)
 
 ![Launcher commands, rendered from an isolated UI fixture](docs/screenshots/launcher-commands.png)
 
@@ -91,7 +95,7 @@ The bar follows YASB's monitor settings. The Island anchors to the bar on the pr
 
 - Open **Caelestia YASB Settings** from Start, the bar tray menu or Quick Settings. Search with **Ctrl+F**; ordinary settings save automatically. The window follows Windows light/dark mode or your own preference and supports a compact navigation rail.
 - Choose Light, Dark, Catppuccin pink/purple, Everforest green, Red/White or Red/Black. Choosing a full preset again resets its appearance and glass values; your bar layout stays intact. Text can follow the background, keep the theme color, use an adaptive custom hue or use an exact chosen color.
-- Choose **Theo hình nền**, or enable **Island và Launcher → Tự đổi màu giao diện theo hình nền**, to follow wallpaper colors. That page also controls the light/dark tone and favorite-only wallpaper browsing.
+- Choose **Tự chọn preset**, or enable **Island và Launcher → Tự chọn preset khi đổi wallpaper**. That page also controls light/dark tone and favorite-only wallpaper browsing. The chosen preset's name appears in Settings.
 - Adjust full-width bar backgrounds, opacity, blur, gradients and borders independently from the Island's material. Island, menus and launcher share the same material preferences. **Giao diện → Hiệu ứng chuyển động** offers Fast/Balanced/Relaxed presets, a preview, custom timing and a shared Qt frame cap. Menus, dropdowns, Settings page transitions and expanders use the launcher curve family. Windows' disabled-animation preference is respected.
 - Layout/widget controls and code editing are under advanced settings. Config/CSS drafts require **Apply**; backups and external-change detection protect existing edits. Weather location, Island activities and launcher options are editable in Settings.
 - Source configuration lives in the install folder's `config\` directory: `config.yaml`, `bar-settings.json`, `theme.json`, `custom.css`, `theme-profiles\` and `motion-profile.json`. `styles.css` is generated when appearance changes; put lasting CSS overrides in `custom.css`.
@@ -127,10 +131,11 @@ bật trong Settings nếu cần. [Hướng dẫn đầy đủ](docs/launcher-co
 
 Gallery mặc định lấy **yêu thích của Wallpaper Engine**, chỉ gồm ảnh đã tải về.
 Dùng **Lên/Xuống** để chọn, **Enter** đổi nền; bấm **Làm mới** hoặc **Ctrl+R**
-sau khi thêm/bỏ sao trong Wallpaper Engine. Màu giao diện tự lấy từ hình nền,
-giữ nguyên độ trong suốt và kính. Trong **Island và Launcher**, bạn có thể chọn
-giữ tông sáng/tối hiện tại, luôn sáng hoặc luôn tối. Chọn theme cố định sẽ tắt
-tự đổi màu.
+sau khi thêm/bỏ sao trong Wallpaper Engine. Khi đổi ảnh, ứng dụng tự chọn một
+trong **18 preset đã thiết kế sẵn**, giữ nguyên độ trong suốt và kính. Trong
+**Island và Launcher**, bật **Tự chọn preset khi đổi wallpaper** và chọn giữ
+tông sáng/tối hiện tại, luôn sáng hoặc luôn tối. Tên preset đang dùng được hiện
+trong Settings. Chọn theme thủ công sẽ tắt tự chọn preset.
 
 Bản tối ưu hiện giữ Python/Qt và C++, chưa chuyển sang Rust. Đã bỏ các texture
 toàn màn hình dư, giới hạn cache icon và ngừng kiểm tra kính liên tục khi Island

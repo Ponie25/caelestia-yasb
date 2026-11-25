@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import QApplication, QMenu
 
 from core.utils.win32.utils import apply_qmenu_style
 
-THEMES = {'light': 'Sáng', 'dark': 'Tối', 'catppuccin': 'Tím hồng', 'everforest': 'Xanh lá', 'red-white': 'Đỏ trắng', 'red-black': 'Đỏ đen','wallpaper':'Theo hình nền'}
+THEMES = {'light': 'Sáng', 'dark': 'Tối', 'catppuccin': 'Tím hồng', 'everforest': 'Xanh lá', 'red-white': 'Đỏ trắng', 'red-black': 'Đỏ đen','wallpaper':'Tự chọn preset'}
 
 
 class BarThemeController(QObject):

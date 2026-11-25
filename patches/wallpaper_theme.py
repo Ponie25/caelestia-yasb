@@ -1,4 +1,4 @@
-"""Wallpaper color synchronization using the existing three-second bar timer."""
+"""Pick and copy a curated preset; never generate a palette from wallpaper pixels."""
 import ctypes,importlib.util,json,logging,os,threading,time
 from pathlib import Path
 from PyQt6.QtCore import QObject,QSize,Qt,pyqtSignal
@@ -13,6 +13,9 @@ class WallpaperTheme(QObject):
         self.engine=None;self.engine_checked=0;self.force_pending=False
         spec=importlib.util.spec_from_file_location('caelestia_wallpaper_data',self.root/'dynamic-island/wallpaper_data.py')
         self.data=importlib.util.module_from_spec(spec);spec.loader.exec_module(self.data);self.ready.connect(self._ready)
+        self.catalog=self.data.load_presets(self.root);self.presets={entry['id']:entry for entry in self.catalog};self.selected_preset=None
+        try:self.selected_preset=json.loads((self.root/'dynamic-island/wallpaper-theme-state.json').read_text(encoding='utf-8')).get('preset')
+        except (OSError,ValueError,AttributeError):pass
     def refresh(self,force=False):
         if os.environ.get('YASB_SETTINGS_NO_EXTERNAL')=='1':return
         options=load_preferences(self.root)['launcher']
@@ -33,7 +36,7 @@ class WallpaperTheme(QObject):
                     reader.setScaledSize(size.scaled(QSize(64,64),Qt.AspectRatioMode.KeepAspectRatio));image=reader.read();del reader
                     if image.isNull():raise ValueError('Không đọc được màu hình nền.')
                     pixels=[image.pixelColor(x,y).getRgb()[:3] for y in range(image.height()) for x in range(image.width()) if image.pixelColor(x,y).alpha()>127]
-                    seed=self.data.dominant(pixels);result.update(palette=normalize_palette(self.data.make_palette(seed,dark)),seed=seed)
+                    seed=self.data.dominant(pixels);result.update(preset=self.data.choose_preset(seed,dark,self.catalog)['id'],seed=seed)
                 self._emit(result)
             except Exception:
                 logging.debug('Wallpaper color update unavailable',exc_info=True);self._emit({})
@@ -68,7 +71,7 @@ class WallpaperTheme(QObject):
     def _ready(self,result):
         self.busy=False
         options=load_preferences(self.root)['launcher']
-        if result.get('palette') and options['wallpaper_auto_theme'] and result.get('mode')==options['wallpaper_theme_mode']:
+        if result.get('preset') in self.presets and options['wallpaper_auto_theme'] and result.get('mode')==options['wallpaper_theme_mode']:
             if self._blocked():self.pending=result
             else:self.pending=None;self._apply(result)
         if self.force_pending:self.force_pending=False;self.refresh(force=True)
@@ -80,21 +83,22 @@ class WallpaperTheme(QObject):
         profile=self.root/'theme-profiles/wallpaper';previous={};previous_theme=self.controller.current;state=self.root/'dynamic-island/wallpaper-theme-state.json';previous_state=state.read_bytes() if state.exists() else None
         try:
             previous={name:(profile/name).read_bytes() if (profile/name).exists() else None for name in ('palette.json','styles.css')}
-            palette=result['palette'];template=(self.root/'theme-profiles/catppuccin/styles.css').read_text(encoding='utf-8');reference=json.loads((self.root/'theme-profiles/catppuccin/palette.json').read_text(encoding='utf-8'))
-            if not self.snapshot:create_snapshot(self.root,'Trước khi đồng bộ màu theo hình nền');self.snapshot=True
-            atomic_write(profile/'palette.json',json.dumps(palette,indent=2)+'\n');atomic_write(profile/'styles.css',self.data.render_css(template,palette,reference))
-            atomic_write(state,json.dumps({'path':result['signature'][0],'seed':result['seed']})+'\n')
-            if not self.controller.select('wallpaper'):raise RuntimeError('Không áp dụng được bảng màu hình nền.')
-            self.signature=result['signature']
+            entry=self.presets[result['preset']];source=self.root/'wallpaper-presets'/entry['id'];palette_bytes=(source/'palette.json').read_bytes();style_bytes=(source/'styles.css').read_bytes();palette=json.loads(palette_bytes)
+            if normalize_palette(palette)!=palette or not style_bytes:raise ValueError('Preset chưa qua kiểm tra độ tương phản.')
+            if not self.snapshot:create_snapshot(self.root,'Trước khi tự chọn preset cho wallpaper');self.snapshot=True
+            atomic_write(profile/'palette.json',palette_bytes);atomic_write(profile/'styles.css',style_bytes)
+            atomic_write(state,json.dumps({'path':result['signature'][0],'seed':result['seed'],'preset':entry['id'],'name':entry['name']},ensure_ascii=False)+'\n')
+            if not self.controller.select('wallpaper'):raise RuntimeError('Không áp dụng được preset đã chọn.')
+            self.signature=result['signature'];self.selected_preset=entry['id']
             dialog=self.controller.settings_dialog
             if dialog is not None and dialog.isVisible():
                 button=dialog.theme_buttons['wallpaper'];button._palette=palette;button.update()
-                dialog._immediate_rebase_preferences(load_preferences(self.root),'wallpaper');dialog._mark_saved();dialog._refresh_preview()
-            logging.info('Wallpaper palette updated: seed=%s',result['seed'])
+                dialog._immediate_rebase_preferences(load_preferences(self.root),'wallpaper');dialog._mark_saved();dialog._refresh_preview();dialog._refresh_curated_status()
+            logging.info('Wallpaper preset selected: %s (seed=%s)',entry['id'],result['seed'])
         except Exception:
             for name,value in previous.items():
                 if value is not None:atomic_write(profile/name,value)
             if previous_state is not None:atomic_write(state,previous_state)
             else:state.unlink(missing_ok=True)
             if self.controller.current!=previous_theme:self.controller.select(previous_theme)
-            logging.warning('Could not apply wallpaper palette',exc_info=True)
+            logging.warning('Could not select wallpaper preset',exc_info=True)

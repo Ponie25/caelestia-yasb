@@ -381,10 +381,12 @@ class BarSettingsDialog(ImmediateSettingsMixin,SettingsDraftMixin,QDialog):
         for index,(name,label) in enumerate(self.controller.theme_labels.items()):
             palette=json.loads((self.root/'theme-profiles'/name/'palette.json').read_text())
             button=ThemeCard(label,palette);button.setChecked(name==self.selected_theme)
-            button.setToolTip({'catppuccin':'Catppuccin · tím hồng','everforest':'Everforest · xanh lá','wallpaper':'Tự tạo bảng màu từ hình nền hiện tại; giữ tông sáng/tối bạn chọn.'}.get(name,label))
+            button.setToolTip({'catppuccin':'Catppuccin · tím hồng','everforest':'Everforest · xanh lá','wallpaper':'Chọn từ 18 preset thiết kế sẵn theo màu wallpaper, giữ tông sáng/tối bạn chọn.'}.get(name,label))
             button.clicked.connect(lambda checked=False,name=name:self._choose_theme(name))
             self.theme_group.addButton(button);self.theme_buttons[name]=button;grid.addWidget(button,index//3,index%3)
         layout.addLayout(grid)
+        self.curated_status_labels=[]
+        self.curated_status=QLabel();self.curated_status.setWordWrap(True);self.curated_status.setProperty('role','muted');layout.addWidget(self.curated_status);self.curated_status_labels.append(self.curated_status)
         form=self._section(layout,'Màu chữ và icon')
         self._bind(form,'Cách chọn màu','appearance','foreground','choice',choices=[
             ('Tự động theo nền thanh bar','auto'),('Theo bộ màu','theme'),
@@ -839,8 +841,10 @@ class BarSettingsDialog(ImmediateSettingsMixin,SettingsDraftMixin,QDialog):
         self._bind(form,'Lệnh tắt máy, khởi động lại và đăng xuất','launcher','dangerous_actions','bool')
         form=self._section(layout,'Hình nền và màu giao diện')
         self._bind(form,'Chỉ hiện yêu thích từ Wallpaper Engine','launcher','wallpaper_favorites_only','bool')
-        self._bind(form,'Tự đổi màu giao diện theo hình nền','launcher','wallpaper_auto_theme','bool')
-        self._bind(form,'Tông màu theo hình nền','launcher','wallpaper_theme_mode','choice',choices=[('Giữ sáng/tối đang dùng','current'),('Luôn sáng','light'),('Luôn tối','dark')])
+        self._bind(form,'Tự chọn preset khi đổi wallpaper','launcher','wallpaper_auto_theme','bool')
+        self._bind(form,'Tông của preset tự chọn','launcher','wallpaper_theme_mode','choice',choices=[('Giữ sáng/tối đang dùng','current'),('Luôn sáng','light'),('Luôn tối','dark')])
+        status=QLabel();status.setWordWrap(True);status.setProperty('role','muted');form.addRow(status);self.curated_status_labels.append(status)
+        hint=QLabel('18 preset cố định: Lavender, Rose, Ruby, Amber, Sage, Teal, Cyan, Blue và Graphite; mỗi bộ có bản sáng và tối. Màu wallpaper chỉ dùng để chọn bộ phù hợp.');hint.setWordWrap(True);hint.setProperty('role','muted');form.addRow(hint)
         self._bind(form,'Thư mục hình nền','launcher','wallpaper_directory','text')
         choose=QPushButton('Chọn thư mục hình nền…');choose.clicked.connect(self._choose_wallpaper_directory);form.addRow(choose)
         hint=QLabel('Gõ tên app, phép tính hoặc > để xem lệnh. Mũi tên để chọn, Enter để mở, Esc để đóng. Hiệu ứng dùng cùng cài đặt chuyển động của Island.');hint.setWordWrap(True);hint.setProperty('role','muted');form.addRow(hint)
@@ -976,6 +980,7 @@ class BarSettingsDialog(ImmediateSettingsMixin,SettingsDraftMixin,QDialog):
             else:self.material_poll.stop()
 
     def _refresh_material_status(self):
+        self._refresh_curated_status()
         saved=load_preferences(self.root)['island'];current=self._collect_preferences()['island']
         names={'liquid-soft':'Kính mềm','liquid-clear':'Kính trong','frosted':'Kính mờ','outline':'Chỉ đường viền'}
         text='Dynamic Island đang tắt.' if not saved['enabled'] else 'Đang dùng nền trong suốt.' if not saved['glass'] else 'Đang dùng: '+names.get(saved['material'],'Kính mềm')+'.'
@@ -991,6 +996,14 @@ class BarSettingsDialog(ImmediateSettingsMixin,SettingsDraftMixin,QDialog):
             customized=any(current[key]!=value for key,value in defaults.items())
             self.material_preset_hint.setText(('Đã tùy chỉnh từ ' if customized else 'Đang dùng preset ')+names[current['material']]+'.')
             self.material_reset.setVisible(customized)
+
+    def _refresh_curated_status(self):
+        service=getattr(self.controller,'wallpaper_theme',None)
+        entry=service.presets.get(service.selected_preset) if service is not None else None
+        control=self.controls.get(('launcher','wallpaper_auto_theme'))
+        enabled=control[0].isChecked() if control else load_preferences(self.root)['launcher']['wallpaper_auto_theme']
+        text=('Đang tự chọn: ' if enabled else 'Tự chọn đang tắt · Preset gần nhất: ')+entry['name'] if entry else '18 preset thiết kế sẵn · Chọn một trong các tông sáng/tối để tự ghép với wallpaper.'
+        for label in getattr(self,'curated_status_labels',[]):label.setText(text)
 
 
     def _consume_advanced_drafts_core(self):

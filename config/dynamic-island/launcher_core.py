@@ -128,7 +128,7 @@ DANGEROUS=frozenset(('shutdown','reboot','logout'))
 ALIASES={'theme':'scheme','themes':'scheme','schemes':'scheme','wallpapers':'wallpaper','background':'wallpaper',
          'restart':'reboot','signout':'logout','logoff':'logout','suspend':'sleep','poweroff':'shutdown'}
 SCHEMES=(('light','Sáng','Light'),('dark','Tối','Dark'),('catppuccin','Tím hồng','Catppuccin'),
-         ('everforest','Xanh lá','Everforest'),('red-white','Đỏ trắng','Red · White'),('red-black','Đỏ đen','Red · Black'),('wallpaper','Theo hình nền','Dynamic'))
+         ('everforest','Xanh lá','Everforest'),('red-white','Đỏ trắng','Red · White'),('red-black','Đỏ đen','Red · Black'),('wallpaper','Tự chọn preset','Auto · 18 preset có sẵn'))
 
 def _command_rows(command,rest,context):
     if command=='scheme':

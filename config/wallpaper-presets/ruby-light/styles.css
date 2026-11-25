@@ -1,0 +1,1052 @@
+* {
+    font-size: 12px;
+    color: #35212b;
+    font-weight: 600;
+    font-family: "JetBrainsMono NFP";
+    margin: 0;
+    padding: 0;
+}
+
+.yasb-bar {
+    padding: 0 8px;
+    margin: 0;
+    background-color: rgba(35, 35, 35, 0.01);
+}
+
+.widget {
+    padding: 0 10px;
+    margin: 0;
+}
+
+.widget .label {
+    padding: 2px 2px 1px 2px;
+}
+
+.widget .label.alt {
+    padding: 1px 8px 1px 8px;
+}
+
+.clock-widget .label {
+    padding-left: 8px;
+}
+
+/* POWER MENU WIDGET */
+.uptime {
+    /* UPTIME */
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: rgb(53,33,43);
+    font-weight: 600;
+    font-family: "JetBrains Mono";
+}
+
+.power-menu-widget .label {
+    color: #eba0ac;
+    font-size: 16px;
+}
+
+.power-menu-popup .button {
+    padding: 0;
+    width: 160px;
+    height: 240px;
+    border-radius: 4px;
+    background-color: rgba(41, 42, 58, 0.75);
+    font-family: "JetBrains Mono";
+    color: white;
+    border: 4px solid rgba(53,33,43,0);
+}
+
+.power-menu-popup .button.hover {
+    background-color: rgb(55, 56, 75);
+    border: 4px solid rgb(55, 56, 75);
+}
+
+.power-menu-popup .button .label {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(53,33,43,0.6);
+    font-family: "JetBrains Mono";
+}
+
+.power-menu-popup .button .icon {
+    font-size: 64px;
+    padding-top: 54px;
+    color: rgba(53,33,43,0.25);
+}
+
+.power-menu-popup .button.cancel .icon {
+    color: rgba(243, 139, 168, 0.55);
+}
+
+.power-menu-popup .button.cancel .label {
+    color: rgba(243, 139, 168, 0.95);
+}
+
+/* ICONS */
+.icon {
+    font-size: 16px;
+}
+
+.volume-widget .icon {
+    color: #89b4fa;
+    margin: 1px 2px 0 0;
+}
+
+/* WEATHER WIDGET */
+.weather-widget .icon {
+    font-size: 16px;
+    margin: 0 2px 0px 0;
+}
+
+.weather-widget .icon.sunnyDay {
+    color: rgb(221, 210, 107);
+}
+
+.weather-widget .icon.clearNight {
+    color: rgb(107, 189, 221);
+    font-size: 18px;
+    margin: -1px 2px 0px 0;
+}
+
+.weather-widget .icon.rainyNight {
+    font-size: 16px;
+}
+
+.weather-widget .icon.cloudyDay {
+    font-size: 18px;
+    color: rgb(221, 210, 107);
+}
+
+.weather-widget .icon.rainyDay {
+    color: rgb(133,72,83)
+}
+
+/* MEDIA */
+.media-widget {
+    padding: 0;
+    margin: 0;
+}
+
+.media-widget .label {
+    color: #35212b;
+    padding: 0px;
+    padding-left: 10px;
+    padding-right: 4px;
+}
+
+.media-menu .btn,
+.media-menu .title,
+.media-menu .artist {
+    padding-left: 10px;
+    font-family: 'JetBrains Mono';
+}
+
+.media-menu .btn.prev:hover,
+.media-menu .btn.next:hover {
+    color: #ffc400;
+}
+
+.media-menu .source {
+    font-size: 11px;
+    color: #000;
+    padding-left: 10px;
+    border-radius: 3px;
+    background-color: #bac2de;
+    padding: 2px 4px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono';
+    margin-bottom: 10px;
+}
+
+/* GITHUB */
+.github-widget {
+    color: #fff;
+}
+
+.github-widget .icon:hover {
+    color: #0091ff;
+}
+
+.github-menu {
+    background-color: rgba(255,250,251,0.2);
+    max-height: 500px;
+    min-height: 500px;
+    min-width: 420px;
+}
+
+.github-menu .header {
+    border-bottom: 1px solid rgba(53,33,43,0.1);
+    font-size: 15px;
+    font-weight: 400;
+    font-family: 'Segoe UI';
+    padding: 8px;
+    color: white;
+    background-color: rgba(255,250,251,0.75);
+}
+
+.github-menu .footer {
+    border-top: 1px solid rgba(53,33,43,0.1);
+    padding: 4px 8px 6px 8px;
+    background-color: rgba(255,250,251,0.75);
+}
+
+.github-menu .footer .label {
+    font-size: 12px;
+    font-family: 'Segoe UI';
+    color: #9399b2;
+}
+
+.github-menu .contents {
+    background-color: rgba(255,250,251,0.2);
+}
+
+.github-menu .contents .item {
+    min-height: 40px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(53,33,43,0.075);
+}
+
+.github-menu .contents .item:hover {
+    background-color: rgba(53,33,43,0.05);
+    border-bottom: 1px solid rgba(53,33,43,0);
+}
+
+.github-menu .contents .item .title,
+.github-menu .contents .item .description {
+    color: #9399b2;
+    font-family: Segoe UI;
+}
+
+.github-menu .contents .item .title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.github-menu .contents .item .description {
+    font-size: 12px;
+    font-weight: 500
+}
+
+.github-menu .contents .item.new .title,
+.github-menu .contents .item.new .description {
+    color: #35212b
+}
+
+.github-menu .contents .item .icon {
+    font-size: 16px;
+    padding-right: 0;
+    padding-left: 8px;
+    padding-right: 4px;
+    color: #9399b2;
+}
+
+.github-menu .contents .item.new .icon {
+    color: #3fb950;
+}
+
+/* KOMOREBI */
+.komorebi-control-widget .label {
+    font-size: 14px;
+    color: #35212b;
+    font-weight: 600;
+}
+
+.komorebi-control-menu {
+    background-color: rgba(255,250,251,0.2);
+}
+
+.komorebi-control-menu .button {
+    color: rgba(162, 177, 199, 0.4);
+    padding: 8px 16px;
+    font-size: 32px;
+    border-radius: 8px;
+    background-color: rgba(53,33,43,0.04);
+}
+
+.komorebi-control-menu .button.active {
+    color: rgb(228, 228, 228);
+    background-color: rgba(53,33,43,0.04);
+}
+
+.komorebi-control-menu .button:disabled,
+.komorebi-control-menu .button.active:disabled {
+    background-color: rgba(53,33,43,0.01);
+    color: rgba(53,33,43,0.2);
+}
+
+.komorebi-control-menu .footer .text {
+    font-size: 12px;
+    color: #916b7d;
+}
+
+/* SYSTEMINFO GROUPER */
+.grouped-widgets .container {
+    background-color: rgba(35, 35, 35, 0.1);
+    margin: 4px 0 4px 0;
+    border-radius: 12px;
+    border: 2px solid #e7d2dc;
+}
+
+/* CPU & MEMORY */
+.cpu-widget .icon {
+    color: #fab387;
+}
+
+.memory-widget .label,
+.cpu-widget .label {
+    padding-right: 8px;
+}
+
+/* HOME */
+.home-widget {
+    padding: 0 4px 0 0;
+}
+
+.home-widget .icon {
+    color: #79457f;
+}
+
+.home-widget .icon:hover {
+    color: #35212b;
+}
+
+.home-menu {
+    background-color: rgba(255,250,251,0.5);
+}
+
+.home-menu .menu-item {
+    padding: 6px 48px 7px 16px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono';
+    color: #35212b;
+    font-weight: 600;
+}
+
+.home-menu .menu-item:hover {
+    background-color: rgba(128, 130, 158, 0.15);
+    color: #fff;
+}
+
+.home-menu .separator {
+    max-height: 1px;
+    background-color: rgba(128, 130, 158, 0.3);
+}
+
+/* MUSIC SOURCES */
+.media-menu .source.aimp {
+    background-color: #6f42c1;
+    color: #35212b;
+}
+
+.media-menu .source.apple-music {
+    background-color: #fa2b56;
+    color: #35212b;
+}
+
+.media-menu .source.brave {
+    background-color: #fb542b;
+    color: #35212b;
+}
+
+.media-menu .source.chrome {
+    background-color: #4285f4;
+    color: #35212b;
+}
+
+.media-menu .source.edge {
+    background-color: #0078d4;
+    color: #35212b;
+}
+
+.media-menu .source.firefox {
+    background-color: #ff7139;
+    color: #35212b;
+}
+
+.media-menu .source.foobar2000 {
+    background-color: #444444;
+    color: #35212b;
+}
+
+.media-menu .source.media-player {
+    background-color: #0078d4;
+    color: #35212b;
+}
+
+.media-menu .source.murglar {
+    background-color: #8a8a8a;
+    color: #35212b;
+}
+
+.media-menu .source.musicbee {
+    background-color: #ffcc00;
+    color: #000000;
+}
+
+.media-menu .source.nsmusics {
+    background-color: #e64a19;
+    color: #35212b;
+}
+
+.media-menu .source.opera {
+    background-color: #ff1b2d;
+    color: #35212b;
+}
+
+.media-menu .source.qobuz {
+    background-color: #003a6f;
+    color: #35212b;
+}
+
+.media-menu .source.spotify {
+    background-color: #1db954;
+    color: #35212b;
+}
+
+.media-menu .source.tidal {
+    background-color: #000000;
+    color: #35212b;
+}
+
+.media-menu .source.winamp {
+    background-color: #f1a11b;
+    color: #000000;
+}
+
+.media-menu .source.youtube {
+    background-color: #ff0000;
+    color: #35212b;
+}
+
+.media-menu .source.youtube-music {
+    background-color: #c51f1f;
+    color: #35212b;
+}
+
+.media-menu .source.zen {
+    background-color: #2ecc71;
+    color: #000000;
+}
+
+/* Hide media widget buttons */
+.media-widget .btn {
+    padding: 0;
+    margin: 0 -6px;
+    padding-left: 4px;
+}
+
+/* WIFI WIDGET */
+.wifi-widget {
+    padding: 0 2px;
+}
+
+.wifi-widget .icon {
+    font-size: 16px;
+    color: #89b4fa;
+}
+
+.wifi-widget .label {
+    color: #35212b;
+}
+
+/* BATTERY WIDGET */
+.battery-widget {
+    padding: 0 2px;
+}
+
+.battery-widget .icon {
+    font-size: 16px;
+    color: #a6e3a1;
+}
+
+.battery-widget .icon.charging {
+    color: #f9e2af;
+}
+
+.battery-widget .icon.low {
+    color: #f38ba8;
+}
+
+.battery-widget .label {
+    color: #35212b;
+}
+
+/* Reduce volume padding to match */
+.volume-widget {
+    padding: 0 2px;
+}
+
+/* Windows Quick Settings for the existing three-line YASB button */
+.control-center-widget,
+.raycast-search { padding: 0 5px; }
+.control-center-widget .icon,
+.raycast-search .icon { color: #35212b; font-size: 14px; }
+.control-center-widget:hover .icon,
+.raycast-search:hover .icon { color: #a12f4b; }
+
+/* Kirakira popup styles; the existing bar retains its own styles. */
+.control-center-menu,
+.control-center-menu *,
+.komorebi-layout-menu,
+.komorebi-layout-menu * { font-family: "Segoe UI Variable", "Segoe UI"; font-size: 12px; font-weight: 600; color: rgba(24, 24, 27, 1); }
+.control-center-menu,
+.control-center-menu *,
+.komorebi-layout-menu,
+.komorebi-layout-menu * { color: rgba(53,33,43,1); }
+.komorebi-layout-menu {
+    background-color: rgba(53,33,43,0.6);
+    border-radius: 12;
+    border: 1px solid rgba(53,33,43,0.3);
+}
+.komorebi-layout-menu {
+    background-color: rgba(44, 44, 44, 0.4);
+    border: 1px solid rgba(53,33,43,0.0698);
+}
+.komorebi-layout-menu .menu-item {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 1 1px;
+}
+.komorebi-layout-menu .menu-item-icon {
+    color: rgba(24, 24, 27, 1);
+    font-size: 16px;
+}
+.komorebi-layout-menu .menu-item-icon {
+    color: rgba(53,33,43,1);
+}
+.komorebi-layout-menu .menu-item-text {
+    font-family: "Segoe UI Variable", "Segoe UI";
+    padding-left:4px;
+    font-size: 12px;
+}
+.komorebi-layout-menu .menu-item-text {
+    color: rgba(53,33,43,1);
+}
+.komorebi-layout-menu .menu-item:hover {
+    background-color: rgba(190, 190, 190, 0.4);
+    border-radius: 12;
+}
+.komorebi-layout-menu .menu-item:hover {
+    background-color: rgba(53,33,43,0.0837);
+}
+.komorebi-layout-menu .separator {
+    max-height: 0px;
+    background-color: rgba(53,33,43,0.3);
+}
+.control-center-menu {
+    background: rgba(53,33,43,0.6);
+    min-width: 360px;
+    border: 1px solid rgba(53,33,43,0.3);
+    border-radius: 12;
+}
+.control-center-menu {
+    background: rgba(44, 44, 44, 0.4);
+    border: 1px solid rgba(53,33,43,0.0698);
+}
+.control-center-menu .section {
+    background: transparent;
+    margin: 0;
+    padding: 16px 12px;
+    border: none;
+}
+.control-center-menu .section.system-controls {
+    padding: 12px 16px 0 16px;
+}
+.control-center-menu .section.sliders {
+    padding: 16px;
+}
+.control-center-menu .section.system-controls .button,
+.control-center-menu .section.quick-actions .button .icon,
+.control-center-menu .section.sliders .slider .icon,
+.control-center-menu .section.sliders .slider .source-selector,
+.control-center-menu .section.power .plan-name .icon,
+.control-center-menu .section.power .mode-name .icon,
+.control-center-menu .section.media .button {
+    font-family: "Segoe Fluent Icons";
+    font-weight: 400;
+}
+.control-center-menu .section.quick-actions .button .icon,
+.control-center-menu .section.system-controls .button,
+.control-center-menu .section.sliders .slider .source-selector,
+.control-center-menu .section.power .plan-name,
+.control-center-menu .section.power .mode-name,
+.control-center-menu .section.media .button {
+    transition: background-color 0.08s, opacity 0.08s;
+    opacity: 1;
+}
+.control-center-menu .section.system-controls .button:clicked,
+.control-center-menu .section.system-controls .button:pressed,
+.control-center-menu .section.quick-actions .button .icon:clicked,
+.control-center-menu .section.quick-actions .button .icon:pressed,
+.control-center-menu .section.sliders .slider .source-selector:clicked,
+.control-center-menu .section.sliders .slider .source-selector:pressed,
+.control-center-menu .section.power .plan-name:clicked,
+.control-center-menu .section.power .plan-name:pressed,
+.control-center-menu .section.power .mode-name:clicked,
+.control-center-menu .section.power .mode-name:pressed,
+.control-center-menu .section.media .button:clicked,
+.control-center-menu .section.media .button:pressed {
+    opacity: 0.5;
+}
+.control-center-menu .section.quick-actions .button.disabled .title,
+.control-center-menu .section.quick-actions .button.disabled .icon,
+.control-center-menu .section.sliders .slider.disabled,
+.control-center-menu .section.media .button.disabled,
+.control-center-menu .section.media .button.disabled:hover {
+    opacity: 0.5;
+}
+.control-center-menu .section.system-controls .button {
+    background-color: rgba(170, 170, 170, 0.5);
+    border-radius: 16px;
+    min-height: 32px;
+    max-height: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    font-size: 14px;
+    color: rgba(24, 24, 27, 1);
+    transition: background-color 0.08s, opacity 0.08s;
+    border-radius: 12;
+}
+.control-center-menu .section.system-controls .button {
+    background-color: rgba(53,33,43,0.0605);
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.system-controls .button.profile-image {
+    background-color: transparent;
+}
+.control-center-menu .section.system-controls .button:hover {
+    background-color: rgba(190, 190, 190, 0.4);
+}
+.control-center-menu .section.system-controls .button:hover {
+    background-color: rgba(53,33,43,0.0837);
+}
+.control-center-menu .section.quick-actions .button .icon {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.quick-actions .button {
+    margin: 0 4px;
+    cursor: pointer;
+}
+.control-center-menu .section.quick-actions .button .icon {
+    font-size: 16px;
+    background-color: rgba(170, 170, 170, 0.5);
+    min-height: 48px;
+    border-radius: 12;
+    color: rgba(24, 24, 27, 1);
+    border: 1px solid rgba(53,33,43,0.3);
+}
+.control-center-menu .section.quick-actions .button .icon {
+    background-color: rgba(53,33,43,0.0605);
+    border: 1px solid rgba(53,33,43,0.0698);
+}
+.control-center-menu .section.quick-actions .button .icon:hover {
+    background-color: rgba(190, 190, 190, 0.4);
+}
+.control-center-menu .section.quick-actions .button .icon:hover {
+    background-color: rgba(53,33,43,0.0837);
+}
+.control-center-menu .section.quick-actions .button.active .icon {
+    background-color: rgb(76, 76, 76);
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.quick-actions .button.active .icon {
+    background-color: rgb(51, 51, 51);
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.quick-actions .button.active .icon:hover {
+    background-color: rgb(63, 63, 63);
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.quick-actions .button.active .icon:hover {
+    background-color: rgb(63, 63, 63);
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.quick-actions .button.disabled .icon:hover {
+    background-color: rgba(190, 190, 190, 0.4);
+}
+.control-center-menu .section.quick-actions .button.disabled .icon:hover {
+    background-color: rgba(53,33,43,0.0837);
+}
+.control-center-menu .section.quick-actions .button.active .icon:pressed {
+    background-color: rgba(190, 190, 190, 0.4);
+}
+.control-center-menu .section.quick-actions .button.active .icon:pressed {
+    background-color: rgba(53,33,43,0.0837);
+}
+.control-center-menu .section.quick-actions .button .title {
+    font-size: 12px;
+    margin: 4px 0 8px 0;
+    padding: 0;
+    font-weight: 600;
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.quick-actions .button .title {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.sliders .slider {
+    background: transparent;
+    border: none;
+    min-height: 34px;
+    margin: 0 4px 0 4px;
+}
+.control-center-menu .section.sliders .slider .icon {
+    font-size: 16px;
+    color: rgba(24, 24, 27, 1);
+    min-width: 36px;
+}
+.control-center-menu .section.sliders .slider .icon {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.sliders .slider .value {
+    min-width: 36px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.sliders .slider .value {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.sliders .slider .source-selector {
+    font-size: 12px;
+    color: rgba(24, 24, 27, 1);
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background-color: rgba(53,33,43,0.6);
+    margin-left: 4px;
+}
+.control-center-menu .section.sliders .slider .source-selector {
+    color: rgba(53,33,43,1);
+    background-color: rgba(44, 44, 44, 0.4);
+}
+.control-center-menu .section.sliders .slider .source-selector:hover {
+    background-color: rgba(190, 190, 190, 0.4);
+}
+.control-center-menu .section.sliders .slider .source-selector:hover {
+    background-color: rgba(53,33,43,0.0837);
+}
+.control-center-menu .section.power .plan-name,
+.control-center-menu .section.power .mode-name {
+    background: rgb(76, 76, 76);
+    border: 1px solid rgba(53,33,43,0.3);
+    border-radius: 12;
+    min-height: 36px;
+    margin: 0 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+.control-center-menu .section.power .plan-name,
+.control-center-menu .section.power .mode-name {
+    background: rgb(51, 51, 51);
+    border: 1px solid rgba(53,33,43,0.0698);
+}
+.control-center-menu .section.power .plan-name:hover,
+.control-center-menu .section.power .mode-name:hover {
+    background: rgb(63, 63, 63);
+}
+.control-center-menu .section.power .plan-name:hover,
+.control-center-menu .section.power .mode-name:hover {
+    background: rgb(63, 63, 63);
+}
+.control-center-menu .section.power .mode-name.disabled,
+.control-center-menu .section.power .mode-name.disabled:hover {
+    opacity: 0.5;
+    background: rgba(190, 190, 190, 0.4);
+}
+.control-center-menu .section.power .mode-name.disabled,
+.control-center-menu .section.power .mode-name.disabled:hover {
+    background: rgba(53,33,43,0.0837);
+}
+.control-center-menu .section.power .plan-name .title,
+.control-center-menu .section.power .mode-name .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.power .plan-name .title,
+.control-center-menu .section.power .mode-name .title {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.power .plan-name .subtext,
+.control-center-menu .section.power .mode-name .subtext {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.power .plan-name .subtext,
+.control-center-menu .section.power .mode-name .subtext {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.power .plan-name.disabled .title,
+.control-center-menu .section.power .mode-name.disabled .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.power .plan-name.disabled .title,
+.control-center-menu .section.power .mode-name.disabled .title {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.power .plan-name.disabled .subtext,
+.control-center-menu .section.power .mode-name.disabled .subtext {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.power .plan-name.disabled .subtext,
+.control-center-menu .section.power .mode-name.disabled .subtext {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.power .plan-name .icon,
+.control-center-menu .section.power .mode-name .icon {
+    color: rgba(24, 24, 27, 1);
+    font-size: 16px;
+}
+.control-center-menu .section.power .plan-name .icon,
+.control-center-menu .section.power .mode-name .icon {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.power .plan-name.disabled .icon,
+.control-center-menu .section.power .mode-name.disabled .icon {
+    color: rgba(24, 24, 27, 1);
+    font-size: 16px;
+}
+.control-center-menu .section.power .plan-name.disabled .icon,
+.control-center-menu .section.power .mode-name.disabled .icon {
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.media {
+    background-color: transparent;
+    padding: 12px;
+}
+.control-center-menu .section.media .track-info {
+     padding-left: 8px;
+}
+.control-center-menu .section.media .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.media .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.media .subtext {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(90, 90, 90, 1);
+}
+.control-center-menu .section.media .subtext {
+    color: rgba(53,33,43,0.786);
+}
+.control-center-menu .section.media .button {
+    font-size: 16px;
+    background-color: rgb(76, 76, 76);
+    color: rgba(24, 24, 27, 1);
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    border-radius: 6px;
+    margin: 0 0 0 4px;
+    border-radius: 12;
+}
+.control-center-menu .section.media .button {
+    background-color: rgb(51, 51, 51);
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .section.media .button.prev {
+    color: rgba(24, 24, 27, 1);
+    background-color: rgb(76, 76, 76);
+}
+.control-center-menu .section.media .button.prev {
+    color: rgba(53,33,43,1);
+    background-color: rgb(51, 51, 51);
+}
+.control-center-menu .section.media .button.next {
+    color: rgba(24, 24, 27, 1);
+    background-color: rgb(51, 51, 51);
+}
+.control-center-menu .section.media .button.next {
+    color: rgba(53,33,43,1);
+    background-color: rgb(51, 51, 51);
+}
+.control-center-menu .section.media .button.prev.disabled {
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.media .button.prev.disabled {
+    color: rgba(53,33,43,1);
+    background-color: rgba(53,33,43,0.0605);
+}
+.control-center-menu .section.media .button.next.disabled {
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .section.media .button.next.disabled {
+    color: rgba(53,33,43,1);
+    background-color: rgba(53,33,43,0.0605);
+}
+.control-center-menu .section.media .button:hover {
+    background-color: rgb(63, 63, 63);
+}
+.control-center-menu .section.media .button:hover {
+    background-color: rgb(63, 63, 63);
+}
+.control-center-menu .section.media .button.disabled,
+.control-center-menu .section.media .button.disabled:hover {
+    background-color: rgba(170, 170, 170, 0.5);
+}
+.control-center-menu .context-menu {
+    padding: 4px 0px;
+    font-family: "Segoe UI Variable", "Segoe UI";
+    font-weight: 600;
+    font-size: 12px;
+    color: rgba(24, 24, 27, 1);
+    border-radius: 12;
+    border: 1px solid rgba(53,33,43,0.3);
+    background-color: transparent;
+}
+.control-center-menu .context-menu {
+    color: rgba(53,33,43,1);
+    border: 1px solid rgba(53,33,43,0.0698);
+}
+.control-center-menu .context-menu::item {
+    background-color: transparent;
+    padding: 6px 12px;
+    margin: 2px 6px;
+    border-radius: 8;
+    min-width: 100px;
+}
+.control-center-menu .context-menu::item:selected {
+    background-color: rgba(190, 190, 190, 0.4);
+    color: rgba(24, 24, 27, 1);
+}
+.control-center-menu .context-menu::item:selected {
+    background-color: rgba(53,33,43,0.0837);
+    color: rgba(53,33,43,1);
+}
+.control-center-menu .context-menu::separator {
+    height: 1px;
+    background-color: rgba(53,33,43,0.3);
+    margin: 4px 0;
+}
+.control-center-menu .context-menu::separator {
+    background-color: rgba(53,33,43,0.0698);
+}
+.control-center-menu .context-menu::indicator:unchecked {
+    width: 4px;
+    height: 12px;
+    margin-left: 0;
+    color: transparent;
+    background-color: transparent;
+}
+.control-center-menu .context-menu::indicator:checked {
+    width: 4px;
+    height: 12px;
+    background-color: rgb(76, 76, 76);
+    border-radius: 8;
+    margin-left: 0;
+}
+.control-center-menu .context-menu::indicator:checked {
+    background-color: rgb(51, 51, 51);
+}
+
+/* The layout symbols in the source theme are Nerd Font glyphs. */
+.komorebi-layout-menu .menu-item-icon { font-family: "JetBrainsMono NFP"; }
+/* Compact access to the new menu, next to the existing workspaces. */
+.komorebi-active-layout { padding: 0 4px; }
+.komorebi-active-layout .label { padding: 2px 2px 1px; }
+
+
+/* Requested bar order; popup and Island styles remain independent. */
+.yasb-bar .widget { padding: 0 6px; }
+.yasb-bar .komorebi-control-widget .label { font-size: 12px; padding: 2px 2px 1px; }
+.yasb-bar .bar-divider { padding: 0 4px; }
+.yasb-bar .bar-divider .label { color: #916b7d; padding: 2px 0 1px; }
+.yasb-bar .clock-widget .label { padding: 2px 2px 1px; }
+.yasb-bar .komorebi-workspaces { padding: 0 2px; }
+.yasb-bar .komorebi-workspaces .ws-btn,
+.yasb-bar .komorebi-workspaces .ws-btn.empty,
+.yasb-bar .komorebi-workspaces .ws-btn.populated,
+.yasb-bar .komorebi-workspaces .ws-btn.active {
+    background-color: transparent;
+    border: none;
+    font-family: "JetBrainsMono NFP", "Segoe UI Symbol";
+    font-size: 13px;
+    font-weight: 400;
+    min-width: 23px;
+    max-width: 23px;
+    min-height: 26px;
+    max-height: 26px;
+    padding: 0;
+    margin: 0 1px;
+    color: #9399b2;
+}
+.yasb-bar .komorebi-workspaces .ws-btn.populated { color: #35212b; }
+.yasb-bar .komorebi-workspaces .ws-btn.active { color: #a12f4b; }
+.yasb-bar .komorebi-workspaces .ws-btn.empty:hover { color: #35212b; }
+
+/* Bar theme selector */
+.bar-theme-menu {
+    background-color: #fcf2f4;
+    color: #35212b;
+    border: 1px solid #e7d2dc;
+    border-radius: 10px;
+    padding: 5px;
+    font-family: "Segoe UI Variable", "Segoe UI";
+    font-size: 12px;
+}
+.bar-theme-menu::item { padding: 8px 25px 8px 12px; margin: 1px; border-radius: 6px; }
+.bar-theme-menu::item:selected { background-color: #f0dde4; color: #35212b; }
+.bar-theme-menu::indicator { width: 4px; height: 12px; margin-left: 3px; border-radius: 2px; }
+.bar-theme-menu::indicator:checked { background-color: #a12f4b; }
+.bar-theme-menu::indicator:unchecked { background-color: transparent; }
+
+/* Readability and glass surfaces */
+.control-center-menu, .komorebi-layout-menu, .komorebi-control-menu, .clock-popup.calendar {
+    background-color:rgba(252,242,244,0.9); background:rgba(252,242,244,0.9); border:1px solid rgba(53,33,43,0.16);
+}
+.control-center-menu, .control-center-menu *, .komorebi-layout-menu, .komorebi-layout-menu * {color:#35212b;}
+.control-center-menu .section.system-controls .button {background-color:rgba(240,221,228,0.6);color:#35212b;}
+.control-center-menu .section.quick-actions .button .icon {background-color:rgba(240,221,228,0.6);color:#35212b;border:1px solid rgba(53,33,43,0.16);}
+.control-center-menu .section.quick-actions .button .title {color:#35212b;}
+.control-center-menu .section.quick-actions .button .icon:hover {background-color:#f0dde4;color:#35212b;}
+.control-center-menu .section.quick-actions .button.active .icon {background-color:#a12f4b;color:#111118;border:1px solid #a12f4b;}
+.control-center-menu .section.quick-actions .button.active .icon:hover {background-color:#914938;color:#111118;}
+.control-center-menu .section.sliders .slider .icon {color:#714d5c;}
+.control-center-menu .section.sliders .slider .value {color:#35212b;}
+.control-center-menu .section.sliders .slider .source-selector {background-color:rgba(240,221,228,0.6);color:#35212b;}
+.control-center-menu QSlider.slider-control::groove:horizontal,
+.control-center-menu QSlider.slider-control::add-page:horizontal {background-color:#686a79;height:4px;border:none;border-radius:2px;}
+.control-center-menu QSlider.slider-control::sub-page:horizontal {background-color:#a12f4b;height:4px;border:none;border-radius:2px;}
+.control-center-menu QSlider.slider-control::handle:horizontal {background-color:#35212b;border:3px solid #f7e8ed;}
+.control-center-menu .section.power .plan-name, .control-center-menu .section.power .mode-name {background-color:rgba(247,232,237,0.73);background:rgba(247,232,237,0.73);border:1px solid rgba(53,33,43,0.16);}
+.control-center-menu .section.power .plan-name .title, .control-center-menu .section.power .mode-name .title {color:#35212b;}
+.control-center-menu .section.power .plan-name .subtext, .control-center-menu .section.power .mode-name .subtext {color:#714d5c;}
+.control-center-menu .section.power .plan-name .icon, .control-center-menu .section.power .mode-name .icon {color:#714d5c;}
+.control-center-menu .section.media .title {color:#35212b;}
+.control-center-menu .section.media .subtext {color:#714d5c;}
+.control-center-menu .section.media .button.prev,
+.control-center-menu .section.media .button.play,
+.control-center-menu .section.media .button.pause,
+.control-center-menu .section.media .button.next {background-color:rgba(240,221,228,0.6);color:#35212b;}
+.control-center-menu .section.media .button:hover {background-color:#f0dde4;color:#35212b;}
+.control-center-menu .context-menu, .bar-theme-menu {background-color:rgba(252,242,244,0.96);color:#35212b;border:1px solid rgba(53,33,43,0.16);}
+.control-center-menu .context-menu::item:selected, .bar-theme-menu::item:selected {background-color:#f0dde4;color:#35212b;}
+.control-center-menu .context-menu::indicator:checked, .bar-theme-menu::indicator:checked {background-color:#a12f4b;}
+.komorebi-layout-menu .menu-item-text, .komorebi-layout-menu .menu-item-icon {color:#35212b;}
+.komorebi-layout-menu .menu-item:hover {background-color:#f0dde4;}
+.komorebi-control-menu .button.active {color:#35212b;background-color:rgba(240,221,228,0.6);}
+.komorebi-control-menu .footer .text {color:#714d5c;}
+.clock-popup.calendar .calendar-table {color:#35212b;selection-background-color:#f0dde4;selection-color:#35212b;}
+.clock-popup.calendar .day-label, .clock-popup.calendar .date-label {color:#35212b;}
+.clock-popup.calendar .month-label, .clock-popup.calendar .year-label, .clock-popup.calendar .holiday-label {color:#714d5c;}
+.yasb-bar .label {color:#35212b;}
+.yasb-bar .komorebi-workspaces .ws-btn.empty {color:#714d5c;}
+.yasb-bar .komorebi-workspaces .ws-btn.populated {color:#35212b;}
+.yasb-bar .komorebi-workspaces .ws-btn.active {color:#a12f4b;}
+
+/* Fixed preset: readable selected controls. */
+.control-center-menu .section.quick-actions .button.active .icon {color:#ffffff;}

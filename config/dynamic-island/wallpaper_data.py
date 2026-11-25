@@ -71,7 +71,6 @@ def steam_favorites(account,cached=None,force=False):
         return {**cached,'account':account,'ids':cached.get('ids',[]),'updated':time.time(),'error':str(error)[:180]}
 
 def _linear(v):return v/12.92 if v<=.04045 else ((v+.055)/1.055)**2.4
-def _encoded(v):return 12.92*v if v<=.0031308 else 1.055*v**(1/2.4)-.055
 
 def lab(rgb):
     r,g,b=(_linear(v/255) for v in rgb)
@@ -79,23 +78,6 @@ def lab(rgb):
     m=(.2119034982*r+.6806995451*g+.1073969566*b)**(1/3)
     s=(.0883024619*r+.2817188376*g+.6299787005*b)**(1/3)
     return .2104542553*l+.793617785*m-.0040720468*s,1.9779984951*l-2.428592205*m+.4505937099*s,.0259040371*l+.7827717662*m-.808675766*s
-
-def tonal(lightness,chroma,hue):
-    def rgb(c):
-        a,b=c*math.cos(hue),c*math.sin(hue)
-        l=(lightness+.3963377774*a+.2158037573*b)**3
-        m=(lightness-.1055613458*a-.0638541728*b)**3
-        s=(lightness-.0894841775*a-1.291485548*b)**3
-        return 4.0767416621*l-3.3077115913*m+.2309699292*s,-1.2684380046*l+2.6097574011*m-.3413193965*s,-.0041960863*l-.7034186147*m+1.707614701*s
-    values=rgb(chroma)
-    if min(values)<0 or max(values)>1:
-        low,high=0.,chroma
-        for _ in range(14):
-            mid=(low+high)/2;candidate=rgb(mid)
-            if min(candidate)>=0 and max(candidate)<=1:low=mid
-            else:high=mid
-        values=rgb(low)
-    return '#'+''.join(f'{round(max(0,min(1,_encoded(v)))*255):02x}' for v in values)
 
 def dominant(pixels):
     """Favor populous chromatic regions, rather than averaging an image to brown."""
@@ -114,32 +96,29 @@ def dominant(pixels):
     else:rgb=tuple(round(sum(v[i] for v in neutral)/len(neutral)) for i in range(3)) if neutral else (128,128,128)
     return '#'+''.join(f'{v:02x}' for v in rgb)
 
-def make_palette(seed,dark=True):
-    _,a,b=lab(tuple(int(seed[i:i+2],16) for i in (1,3,5)));c=math.hypot(a,b);h=math.atan2(b,a)
-    neutral=min(.025,c*.18);accent=min(.18,max(.07,c)) if c>.025 else 0.012
-    roles={'CRUST':(.11,.006),'MANTLE':(.15,.012),'BASE':(.19,.016),'SURFACE':(.25,.022),'SURFACE2':(.31,.025),
-           'OVERLAY':(.64,.02),'MUTED':(.80,.02),'TEXT':(.95,.012)} if dark else {
-           'CRUST':(.99,.004),'MANTLE':(.975,.008),'BASE':(.955,.012),'SURFACE':(.92,.018),'SURFACE2':(.87,.02),
-           'OVERLAY':(.48,.02),'MUTED':(.36,.02),'TEXT':(.20,.012)}
-    result={key:tonal(light,min(chroma,neutral),h) for key,(light,chroma) in roles.items()}
-    result.update(MAUVE=tonal(.80 if dark else .43,accent,h),LAVENDER=tonal(.81 if dark else .44,accent*.55,h),
-                  PINK=tonal(.83 if dark else .44,accent*.75,h+math.pi/3),ROSEWATER=tonal(.88 if dark else .42,accent*.35,h+math.pi/6))
-    return result
+def load_presets(root):
+    directory=Path(root)/'wallpaper-presets';path=directory/'catalog.json'
+    if path.stat().st_size>100_000:raise ValueError('Danh sách preset quá lớn.')
+    catalog=json.loads(path.read_text(encoding='utf-8'));seen=set()
+    if not isinstance(catalog,list) or not 2<=len(catalog)<=64:raise ValueError('Danh sách preset không hợp lệ.')
+    for entry in catalog:
+        if not isinstance(entry,dict) or not re.fullmatch(r'[a-z][a-z0-9-]{1,47}',entry.get('id','')):raise ValueError('Mã preset không hợp lệ.')
+        if entry['id'] in seen or entry.get('tone') not in ('light','dark') or not re.fullmatch(r'#[0-9a-fA-F]{6}',entry.get('match_color','')):raise ValueError('Thông tin preset không hợp lệ.')
+        if not isinstance(entry.get('family'),str) or not re.fullmatch(r'[a-z][a-z0-9-]{1,30}',entry['family']):raise ValueError('Nhóm preset không hợp lệ.')
+        if not isinstance(entry.get('name'),str) or not entry['name'] or len(entry['name'])>80:raise ValueError('Tên preset không hợp lệ.')
+        folder=(directory/entry['id']).resolve()
+        if not folder.is_relative_to(directory.resolve()) or not all((folder/name).is_file() for name in ('palette.json','styles.css')):raise ValueError('Thiếu file preset.')
+        seen.add(entry['id'])
+    return catalog
 
-def render_css(template,palette,reference):
-    aliases={'#11111b':'CRUST','#181825':'MANTLE','#1e1e2e':'BASE','#313244':'SURFACE','#45475a':'SURFACE2',
-             '#6c7086':'OVERLAY','#a6adc8':'MUTED','#cdd6f4':'TEXT','#ffffff':'TEXT','#b4befe':'LAVENDER',
-             '#cba6f7':'MAUVE','#f5c2e7':'PINK','#f5e0dc':'ROSEWATER'}
-    aliases.update({value.lower():key for key,value in reference.items()})
-    def mapped(color):
-        role=aliases.get(color.lower())
-        return palette[role] if role in palette else color
-    css=re.sub(r'#[0-9a-fA-F]{6}\b',lambda m:mapped(m[0]),template)
-    def rgb(match):
-        color='#'+''.join(f'{int(match[i]):02x}' for i in (2,3,4));new=mapped(color)
-        if new==color:return match[0]
-        values=','.join(str(int(new[i:i+2],16)) for i in (1,3,5))
-        return match[1]+'('+values+((','+match[5]) if match[5] is not None else '')+')'
-    css=re.sub(r'\b(rgb|rgba)\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*([0-9.]+)\s*)?\)',rgb,css)
-    ink='#111118' if sum(int(palette['MAUVE'][i:i+2],16) for i in (1,3,5))>420 else '#ffffff'
-    return css+'\n/* Wallpaper palette: preserve control contrast. */\n.control-center-menu .section.quick-actions .button.active .icon {color:'+ink+';}\n'
+def choose_preset(seed,dark,catalog):
+    """Select an existing ID. Wallpaper pixels never become interface colors."""
+    _,a,b=lab(tuple(int(seed[i:i+2],16) for i in (1,3,5)));chroma=math.hypot(a,b);hue=math.atan2(b,a)
+    candidates=[entry for entry in catalog if entry['tone']==('dark' if dark else 'light')]
+    if not candidates:raise ValueError('Không có preset cho tông sáng/tối này.')
+    if chroma<.028:return next((entry for entry in candidates if entry['family']=='graphite'),candidates[0])
+    def distance(entry):
+        if entry['family']=='graphite':return 4.,entry['id']
+        _,x,y=lab(tuple(int(entry['match_color'][i:i+2],16) for i in (1,3,5)))
+        return abs((hue-math.atan2(y,x)+math.pi)%(2*math.pi)-math.pi),entry['id']
+    return min(candidates,key=distance)

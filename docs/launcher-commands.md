@@ -10,7 +10,7 @@ Left/Right remain ordinary text-editing keys, including in the wallpaper carouse
 | Input | Result |
 | --- | --- |
 | `>calc sqrt(144)` | Calculate and press Enter to copy the result. Existing percentages and unit conversions remain available. |
-| `>scheme` | Choose one of six fixed presets or automatic wallpaper colors, with palette swatches and the current selection marked. Add a name, for example `>scheme cat`, to filter. |
+| `>scheme` | Choose one of six manual themes or automatic matching to designed presets, with palette swatches and the current selection marked. Add a name, for example `>scheme cat`, to filter. |
 | `>light`, `>dark` | Apply the Light or Dark preset. |
 | `>wallpaper` | Browse installed Wallpaper Engine favorites by default. Switch to All for your image folder and the full local library. Add part of the title to filter. |
 | `>wallpaper all`, `>wallpaper favorites` | Switch between the full library and Wallpaper Engine favorites. |
@@ -34,8 +34,8 @@ and glass overrides reset to that preset's original values. Bar layout, enabled
 widgets, wallpaper directory and activity options remain intact. Preset changes
 also use the existing Komorebi border synchronization settings.
 
-Choosing a fixed preset disables automatic wallpaper colors. Choosing **Theo
-hình nền** enables them. Subsequent automatic color changes preserve appearance,
+Choosing a manual theme disables automatic matching. Choosing **Tự chọn preset**
+enables it. Subsequent automatic preset changes preserve appearance,
 glass, layout, animation and widget preferences rather than reapplying a preset.
 
 ## Wallpaper library
@@ -95,27 +95,43 @@ indexed match is reachable by keyboard; there is no 24-result truncation. Only n
 request previews, decoded at up to 320×180 with a 32-image cache. There is no
 continuous wallpaper scan or new idle polling timer.
 
-### Automatic wallpaper colors
+### Automatic selection of designed presets
 
 This is enabled by default, with **Giữ sáng/tối đang dùng** as its tone. Settings
-also offers **Luôn sáng** and **Luôn tối**, and can disable automatic colors.
+also offers **Luôn sáng** and **Luôn tối**, and can disable automatic matching.
 The source is the current static picture or Wallpaper Engine project's local
-preview. The generated profile is **Theo hình nền** / `wallpaper`. Bar surfaces,
+preview. Its dominant hue selects an existing preset; neutral images select
+Graphite. The active slot is **Tự chọn preset** / `wallpaper`. Bar surfaces,
 Island, menus and configured Komorebi borders share it. A transparent bar's ink
 also samples that preview rather than the hidden Windows bitmap underneath an
 animated wallpaper.
 
-The extractor scores populous chromatic regions and generates tonal roles in
-OKLCH, then enforces text/accent contrast. It does not average the entire image
-to gray or change the theme on every animation frame. Preview decoding samples
+There are **18 fixed presets**, covering Lavender, Rose, Ruby, Amber, Sage, Teal,
+Cyan, Blue and Graphite in light and dark. Their full role colors and CSS are
+prepared, contrast-reviewed and checked in under `config/wallpaper-presets/`.
+The matcher selects a compatible tone and the closest hue family, then copies
+the exact preset files into the active slot. It never interpolates palette colors
+or creates a palette from pixels. The same image/tone yields the same preset.
+
+The extractor scores populous chromatic regions without changing the theme on
+every animation frame. Preview decoding samples
 up to 64×64 pixels, with a 24-megapixel source limit. The existing three-second
 bar timer detects identity/mtime changes; expensive decoding only runs when the
 source or tone changes. The pipeline never captures the desktop.
 
 Automatic updates wait while Settings has unsaved edits. Clean open Settings
-rebases to the generated palette; pending advanced drafts are not overwritten.
+rebases to the selected preset; pending advanced drafts are not overwritten.
 The color source and favorite cache are local ignored state files. The checked-in
-`theme-profiles/wallpaper` is a generic fallback, not a personal wallpaper palette.
+`theme-profiles/wallpaper` fallback is an exact copy of Lavender Dark.
+
+Settings shows the selected preset's name. A manual theme disables matching;
+automatic changes retain existing layout, opacity, motion and Liquid Glass.
+`tools/build_wallpaper_presets.py` is a developer-only builder from explicit
+role tables, with an offline contrast pass. Runtime code has no palette generator.
+`tools/render_wallpaper_presets.py` renders the reference board from those exact
+files without capturing the desktop.
+
+![All eighteen fixed presets](screenshots/wallpaper-presets.png)
 
 ## Session actions
 
@@ -139,12 +155,12 @@ inspired by its
 The search surface keeps this project's shared Island material and morph.
 
 Windows adaptations are explicit: Scheme selects this setup's six fixed presets
-or its own wallpaper-derived palette; Sleep uses Windows sleep,
+or automatic matching to 18 designed presets; Sleep uses Windows sleep,
 rather than Linux suspend-then-hibernate. Caelestia's Material 3 **Variant**
 command is not exposed because this project does not implement that generator.
 `>bar` opens shell Settings while the existing `>settings` keeps opening Windows
 Settings. Hovering wallpaper cards does not alter the desktop or regenerate
-theme colors. This palette generator is not Caelestia's Material 3 generator.
+theme colors. The setup does not implement Caelestia's Material 3 generator.
 
 Backend references: [Wallpaper Engine CLI](https://help.wallpaperengine.io/en/functionality/cli.html)
 and [Windows SetWallpaper](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-idesktopwallpaper-setwallpaper).

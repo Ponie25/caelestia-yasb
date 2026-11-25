@@ -1,0 +1,128 @@
+[
+  {
+    "id": "lavender-dark",
+    "name": "Lavender · Tối",
+    "family": "lavender",
+    "tone": "dark",
+    "match_color": "#9b7de0"
+  },
+  {
+    "id": "lavender-light",
+    "name": "Lavender · Sáng",
+    "family": "lavender",
+    "tone": "light",
+    "match_color": "#9b7de0"
+  },
+  {
+    "id": "rose-dark",
+    "name": "Rose · Tối",
+    "family": "rose",
+    "tone": "dark",
+    "match_color": "#ec74b1"
+  },
+  {
+    "id": "rose-light",
+    "name": "Rose · Sáng",
+    "family": "rose",
+    "tone": "light",
+    "match_color": "#ec74b1"
+  },
+  {
+    "id": "ruby-dark",
+    "name": "Ruby · Tối",
+    "family": "ruby",
+    "tone": "dark",
+    "match_color": "#ef535f"
+  },
+  {
+    "id": "ruby-light",
+    "name": "Ruby · Sáng",
+    "family": "ruby",
+    "tone": "light",
+    "match_color": "#ef535f"
+  },
+  {
+    "id": "amber-dark",
+    "name": "Amber · Tối",
+    "family": "amber",
+    "tone": "dark",
+    "match_color": "#e7a64a"
+  },
+  {
+    "id": "amber-light",
+    "name": "Amber · Sáng",
+    "family": "amber",
+    "tone": "light",
+    "match_color": "#e7a64a"
+  },
+  {
+    "id": "sage-dark",
+    "name": "Sage · Tối",
+    "family": "sage",
+    "tone": "dark",
+    "match_color": "#70ad6b"
+  },
+  {
+    "id": "sage-light",
+    "name": "Sage · Sáng",
+    "family": "sage",
+    "tone": "light",
+    "match_color": "#70ad6b"
+  },
+  {
+    "id": "teal-dark",
+    "name": "Teal · Tối",
+    "family": "teal",
+    "tone": "dark",
+    "match_color": "#48b8ad"
+  },
+  {
+    "id": "teal-light",
+    "name": "Teal · Sáng",
+    "family": "teal",
+    "tone": "light",
+    "match_color": "#48b8ad"
+  },
+  {
+    "id": "cyan-dark",
+    "name": "Cyan · Tối",
+    "family": "cyan",
+    "tone": "dark",
+    "match_color": "#52b7d1"
+  },
+  {
+    "id": "cyan-light",
+    "name": "Cyan · Sáng",
+    "family": "cyan",
+    "tone": "light",
+    "match_color": "#52b7d1"
+  },
+  {
+    "id": "blue-dark",
+    "name": "Blue · Tối",
+    "family": "blue",
+    "tone": "dark",
+    "match_color": "#6b9fe8"
+  },
+  {
+    "id": "blue-light",
+    "name": "Blue · Sáng",
+    "family": "blue",
+    "tone": "light",
+    "match_color": "#6b9fe8"
+  },
+  {
+    "id": "graphite-dark",
+    "name": "Graphite · Tối",
+    "family": "graphite",
+    "tone": "dark",
+    "match_color": "#9b9ba5"
+  },
+  {
+    "id": "graphite-light",
+    "name": "Graphite · Sáng",
+    "family": "graphite",
+    "tone": "light",
+    "match_color": "#9b9ba5"
+  }
+]

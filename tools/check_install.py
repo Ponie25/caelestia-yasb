@@ -113,24 +113,28 @@ for name in controller.theme_labels:
     assert load_preferences(root)['launcher']['wallpaper_directory']==wallpaper_directory
     assert load_preferences(root)['launcher']['wallpaper_auto_theme']==(name=='wallpaper')
 
-# Generated colors update the shared theme while keeping glass/layout preferences.
+# Wallpaper matching copies exact preset bytes and keeps glass/layout preferences.
 service=controller.wallpaper_theme;data=service.data
 from core.utils.theme_tokens import normalize_palette,contrast
 before=load_preferences(root);preferences_path=root/'bar-settings.json';saved_preferences=preferences_path.read_bytes()
-result={'mode':'current','signature':('fixture',1,False),'seed':'#ed2848','palette':normalize_palette(data.make_palette('#ed2848',False))}
+result={'mode':'current','signature':('fixture',1,False),'seed':'#ed2848','preset':'ruby-light'}
 service._ready(result);assert controller.current=='wallpaper' and service.signature==result['signature']
 assert preferences_path.read_bytes()==saved_preferences
 assert dialog._collect_preferences()==load_preferences(root) and not dialog._draft_dirty
 assert dialog._immediate_theme_baseline==(root/'theme.json').read_bytes()
 profile=root/'theme-profiles/wallpaper/palette.json';saved_palette=profile.read_bytes();custom=dialog.custom_css.toPlainText()
+assert saved_palette==(root/'wallpaper-presets/ruby-light/palette.json').read_bytes()
+assert (profile.parent/'styles.css').read_bytes()==(root/'wallpaper-presets/ruby-light/styles.css').read_bytes()
+assert 'Ruby' in dialog.curated_status.text()
 dialog.custom_css.setPlainText(custom+'\n/* own pending change */');app.processEvents()
-green={'mode':'current','signature':('fixture-green',2,False),'seed':'#20cf70','palette':normalize_palette(data.make_palette('#20cf70',False))}
+green={'mode':'current','signature':('fixture-green',2,False),'seed':'#20cf70','preset':'sage-light'}
 service._ready(green);assert profile.read_bytes()==saved_palette and service.pending==green
 assert 'own pending change' in dialog.custom_css.toPlainText()
 dialog.custom_css.setPlainText(custom);dialog.custom_css.document().setModified(False);dialog._refresh_draft_state()
 wait(400)
 assert not service._blocked(),(dialog._immediate_pending,dialog._immediate_busy,dialog._advanced_preferences_pending,dialog._draft_signature()==dialog._draft_saved_signature,dialog._disk_state()==dialog._disk_baseline)
 service.pending=None;service._ready(green);assert profile.read_bytes()!=saved_palette
+assert profile.read_bytes()==(root/'wallpaper-presets/sage-light/palette.json').read_bytes()
 assert load_preferences(root)==before,'Automatic colors must not reset opacity, motion, widgets or glass'
 
 dialog.hide();assert entry._dispatch({'action':'wallpaper_directory','path':''})
@@ -138,5 +142,5 @@ assert load_preferences(root)['launcher']['wallpaper_directory']==''
 dialog.reject();app.processEvents()
 assert not errors,errors
 controller.border_bridge.close()
-print('PASS: fonts/schemas/Settings, seven themes, wallpaper IPC, automatic colors, preserved glass/preferences and advanced-draft protection.')
+print('PASS: fonts/schemas/Settings, seven modes, wallpaper IPC, exact curated preset copies, preserved glass/preferences and advanced-draft protection.')
 temporary.cleanup()
