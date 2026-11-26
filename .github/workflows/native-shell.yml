@@ -1,0 +1,46 @@
+name: Native shell prototype
+on:
+  push:
+    branches: ["codex/native-shell-*"]
+    paths: ["native-shell/**", "native/liquid-glass/**", "config/**", ".github/workflows/native-shell.yml"]
+  pull_request:
+    paths: ["native-shell/**", "native/liquid-glass/**", "config/**", ".github/workflows/native-shell.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: native-shell-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  portable-core:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: cmake -S native-shell -B native-shell/build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build native-shell/build --parallel
+      - run: ctest --test-dir native-shell/build --output-on-failure
+  windows-x64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: cmake -S native-shell -B native-shell/build -G "Visual Studio 17 2022" -A x64
+      - run: cmake --build native-shell/build --config Release --parallel
+      - run: ctest --test-dir native-shell/build -C Release --output-on-failure
+      - name: Validate existing configuration without opening a window
+        shell: pwsh
+        run: |
+          & ./native-shell/build/Release/caelestia-shell.exe --config "$PWD/config" --validate-config
+          if ($LASTEXITCODE -ne 0) { throw "Configuration validation failed: $LASTEXITCODE" }
+      - name: Smoke-test process collector on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $collectorRoot = $PID
+          & ./native-shell/tools/Measure-ProcessTree.ps1 -RootProcessId $collectorRoot -DurationSeconds 2 -IntervalMs 250 -OutputPath "$env:RUNNER_TEMP/caelestia-collector"
+          $report = Get-Content "$env:RUNNER_TEMP/caelestia-collector/report.json" -Raw | ConvertFrom-Json
+          if ($report.sample_count -lt 1 -or $report.fatal_error) { throw "Collector smoke test failed" }
+      - run: cmake --install native-shell/build --config Release --prefix native-shell/out/windows-x64
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: caelestia-shell-windows-x64
+          path: native-shell/out/windows-x64/
+          retention-days: 14
