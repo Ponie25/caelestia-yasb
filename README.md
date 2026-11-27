@@ -1,10 +1,10 @@
 # Caelestia YASB
 
-A horizontal YASB setup for Windows 11 with a Caelestia-inspired Dynamic Island, an integrated Alt+Space launcher, Liquid Glass and matching Quick Settings. Six manual themes, automatic matching to 18 designed presets, and a native Settings window let you customize the bar. The clock stays on the right; clicking the Island always opens its menu.
+A horizontal YASB setup for Windows 11 with a Caelestia-inspired Dynamic Island, an integrated Alt+Space launcher, Liquid Glass and matching Quick Settings. Choose from 35 themes or let the bar match your wallpaper to one of 29 Caelestia presets. The clock sits on the right. Clicking the Island opens its menu.
 
 [Download current source and installer](https://github.com/Ponie25/caelestia-yasb/archive/refs/heads/main.zip) · [Tagged releases](https://github.com/Ponie25/caelestia-yasb/releases) · [Cài đặt tiếng Việt](#cài-đặt-tiếng-việt)
 
-The current Settings, launcher and shared-motion update is on **main**. Older tagged release bundles do not include these additions; use the source ZIP above for this version.
+Download **main** for the current catalog and menu fixes. The bundled default is Rosé Pine Dawn. Quick Settings repaints when a theme changes, and the Ponie menu shows Komorebi's controls on the first open.
 
 The latest resource update removes an unused graphics-capture backend, bounds the
 launcher icon cache and stops hidden glass polling. It keeps Python/Qt and the
@@ -39,7 +39,7 @@ The showcase uses sample media, notifications, and device data. The Windows acco
 Press **Alt+Space** or click Search. The Island grows into the launcher using Caelestia's spatial easing; the input is available while the opening animation runs. Search installed apps and Start-menu shortcuts, calculate expressions and unit conversions, or type `>` for commands. Use arrows, Enter and **Esc** to navigate, launch and close. Alt+Space belongs to this launcher while it is enabled; turn it off in Settings if another launcher needs the shortcut.
 
 The `>` menu now includes Caelestia's **Scheme, Wallpaper, Random, Light, Dark,
-Lock and Sleep** groups. `>scheme` previews the six manual themes and automatic
+Lock and Sleep** groups. `>scheme` previews the 35 themes and automatic
 preset selection; `>wallpaper` opens a
 thumbnail carousel of your folder and the local library of a running Wallpaper
 Engine. Type a name to filter, use Up/Down or the wheel to select, then Enter to
@@ -56,16 +56,12 @@ library, or refresh after adding/removing a star in Wallpaper Engine. Favorites
 are read from Steam's public list and cached locally, without cookies or login
 credentials; they are not a separate favorites list maintained by this launcher.
 
-**Automatic preset selection is enabled by default.** The wallpaper's dominant
-color chooses one of **18 fixed palettes**: Lavender, Rose, Ruby, Amber, Sage,
-Teal, Cyan, Blue and Graphite, each in light and dark. The full palette and CSS
-are copied from the chosen preset; wallpaper pixels never generate interface
-colors. The bar, Island, menus and synchronized Komorebi borders share the result.
-Settings offers **keep current light/dark, always light, or always dark** and shows
-the selected preset's name. Matching preserves layout, opacity and glass;
-selecting a manual theme disables it. Only image files/local previews are read.
-
-![Eighteen fixed light and dark presets](docs/screenshots/wallpaper-presets.png)
+Enable **Tự chọn theo hình nền** in `>scheme` or in Settings. Wallpaper colors
+select one of the **29 Caelestia presets**. Neutral images select Caelestia Default
+in the chosen tone. The bar, Island, menus and synchronized Komorebi borders
+use the saved preset colors. Settings offers **keep current light/dark, always
+light, or always dark**. Matching preserves layout, opacity and glass. Choosing
+a manual theme turns matching off. [Browse the catalog](config/theme-catalog/manifest.json).
 
 ![Launcher commands, rendered from an isolated UI fixture](docs/screenshots/launcher-commands.png)
 
@@ -84,7 +80,7 @@ The Codex timer counts the entire turn using read-only lifecycle fields in the d
 - **Search icon** opens the integrated Island launcher.
 - **Quick Settings** opens from the right-side control icon. It includes Do Not Disturb, mute, mic mute, region capture, keyboard, theme selection, brightness and audio device controls. The settings button also opens the bar's Settings.
 - **Region capture** uses Flameshot if Windows can find its executable. YASB's region capture is the default fallback.
-- **Komorebi** shows workspace stars, a BSP/Columns layout selector and the current app's icon/title when `komorebic.exe` is available on PATH during setup. Populated workspaces keep filled stars; the current workspace uses the theme accent. The installer omits Komorebi controls on a standard Windows desktop and never installs or replaces your window-manager configuration. Theme colors can synchronize with Komorebi borders.
+- **Komorebi** shows workspace stars, a BSP/Columns layout selector and the current app's icon/title when `komorebic.exe` is available on PATH during setup. Open **Ponie** for Start, Stop, Reload and the installed version. The current workspace uses the theme accent. The installer detects whether to show Komorebi controls and uses your existing window-manager configuration. Theme colors can synchronize with Komorebi borders.
 - **Power** actions are available inside Quick Settings; a separate shutdown widget is not placed on the bar.
 
 ![Quick Settings grid and volume control](docs/screenshots/quick-settings.png)
@@ -94,7 +90,7 @@ The bar follows YASB's monitor settings. The Island anchors to the bar on the pr
 ## Customize or remove
 
 - Open **Caelestia YASB Settings** from Start, the bar tray menu or Quick Settings. Search with **Ctrl+F**; ordinary settings save automatically. The window follows Windows light/dark mode or your own preference and supports a compact navigation rail.
-- Choose Light, Dark, Catppuccin pink/purple, Everforest green, Red/White or Red/Black. Choosing a full preset again resets its appearance and glass values; your bar layout stays intact. Text can follow the background, keep the theme color, use an adaptive custom hue or use an exact chosen color.
+- Browse Caelestia presets such as Rosé Pine, Gruvbox, Nord and Catppuccin, alongside the six original themes. Choosing a full preset restores its appearance and glass values while keeping your bar layout. Text can follow the background, keep the theme color, use an adaptive custom hue or use an exact chosen color.
 - Choose **Tự chọn preset**, or enable **Island và Launcher → Tự chọn preset khi đổi wallpaper**. That page also controls light/dark tone and favorite-only wallpaper browsing. The chosen preset's name appears in Settings.
 - Adjust full-width bar backgrounds, opacity, blur, gradients and borders independently from the Island's material. Island, menus and launcher share the same material preferences. **Giao diện → Hiệu ứng chuyển động** offers Fast/Balanced/Relaxed presets, a preview, custom timing and a shared Qt frame cap. Menus, dropdowns, Settings page transitions and expanders use the launcher curve family. Windows' disabled-animation preference is respected.
 - Layout/widget controls and code editing are under advanced settings. Config/CSS drafts require **Apply**; backups and external-change detection protect existing edits. Weather location, Island activities and launcher options are editable in Settings.
@@ -110,9 +106,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -InstallDi
 
 ### How the bundle is built
 
-`dependencies.json` pins YASB 2.0.8, Python 3.14.10, and the Island's Python wheels by SHA-256. Setup extracts the official MSI and compiles the 23 source modules listed in `patches/manifest.json` into that portable copy. The manifest verifies stock module hashes and distinguishes new modules. The patches supply Settings, themes, surface contrast, shared motion, Island lifetime/notifications and the capture integrations. Keep them paired with the pinned runtime. To smoke-test a prepared install, run its `python\python.exe tools\check_install.py <install-path>` from this repository. `tools/check_launcher_input.py <install-path>` checks early typing, Vietnamese IME and Esc in an isolated offscreen Island without registering a global shortcut. `tools/check_launcher_commands.py <install-path>` checks commands, gallery navigation, async local control and confirmation; all real session/wallpaper mutations are mocked. `tools/check_resources.py` checks bounded caching, media teardown and hidden polling; `tools/benchmark_glass.py` exercises native allocations and lifecycle in an owned scene. Rebuild the glass DLL from `native/liquid-glass/` using an x64 Visual Studio developer prompt. See the [performance report](docs/performance.md) for commands and limitations.
+`dependencies.json` pins YASB 2.0.8, Python 3.14.10 and the Island's Python wheels by SHA-256. Setup extracts the official MSI and applies [the patch manifest](patches/manifest.json). YASB imports source-built patches and a small set of verified Python 3.14 modules from the locally installed catalog and Settings build. The archive supplies the active modules wherever the manifest lists `precompiled_sha256`. The previous sources for those modules are kept for reference. The Quick Settings and Ponie fixes build from the checked-in Python sources.
 
-![Native Settings with search, six themes and text color controls](docs/screenshots/settings-appearance.png)
+Run `tools/check_install.py <install-path>` with the installed Python to check the bar and Settings. `tools/check_launcher_input.py` exercises typing, Vietnamese IME and Esc. `tools/check_launcher_commands.py` checks the catalog, gallery and mocked session actions. Rebuild the glass DLL from `native/liquid-glass/` using an x64 Visual Studio developer prompt. [Performance checks](docs/performance.md).
 
 ## Cài đặt tiếng Việt
 
@@ -120,7 +116,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -InstallDi
 2. Mở **install.cmd** trên Windows 11 x64. Bộ cài tự tải runtime, kiểm tra mã SHA-256 và chuẩn bị font.
 3. Nếu bạn đang chạy YASB, thoát từ biểu tượng ở khay hệ thống rồi mở **Start Caelestia YASB** trong Start menu.
 
-Bấm Island để mở Dashboard; **Alt+Space** mở launcher tích hợp và **Esc** đóng launcher. Tab **Media** có trình phát và bộ chỉnh âm lượng từng ứng dụng. Mở **Caelestia YASB Settings** trong Start để chọn sáu theme, chỉnh màu chữ, nền bar, Liquid Glass và nhịp chuyển động chung; **Ctrl+F** tìm cài đặt. Dự báo mặc định ở Hà Nội. Khi thiếu Flameshot, nút chụp vùng dùng công cụ của YASB. Bộ cài không thay cấu hình Komorebi sẵn có của bạn.
+Bấm Island để mở Dashboard. **Alt+Space** mở launcher và **Esc** đóng launcher. Tab **Media** có trình phát và bộ chỉnh âm lượng từng ứng dụng. Mở **Caelestia YASB Settings** trong Start để chọn 35 theme, chỉnh màu chữ, nền bar, Liquid Glass và nhịp chuyển động chung. Dùng **Ctrl+F** để tìm cài đặt. Dự báo mặc định ở Hà Nội. Khi thiếu Flameshot, nút chụp vùng dùng công cụ của YASB. Bộ cài dùng cấu hình Komorebi sẵn có của bạn.
 
 Gõ **`>`** trong launcher để xem lệnh. **`>scheme`** chọn theme, **`>wallpaper`**
 duyệt hình nền, **`>random`** đổi ảnh ngẫu nhiên; **`>light`**, **`>dark`**,
@@ -131,9 +127,9 @@ bật trong Settings nếu cần. [Hướng dẫn đầy đủ](docs/launcher-co
 
 Gallery mặc định lấy **yêu thích của Wallpaper Engine**, chỉ gồm ảnh đã tải về.
 Dùng **Lên/Xuống** để chọn, **Enter** đổi nền; bấm **Làm mới** hoặc **Ctrl+R**
-sau khi thêm/bỏ sao trong Wallpaper Engine. Khi đổi ảnh, ứng dụng tự chọn một
-trong **18 preset đã thiết kế sẵn**, giữ nguyên độ trong suốt và kính. Trong
-**Island và Launcher**, bật **Tự chọn preset khi đổi wallpaper** và chọn giữ
+sau khi thêm/bỏ sao trong Wallpaper Engine. Trong **Island và Launcher**, bật
+**Tự chọn preset khi đổi wallpaper** để ghép ảnh với một trong **29 preset Caelestia**.
+Ứng dụng giữ độ trong suốt và kính. Bạn có thể chọn giữ
 tông sáng/tối hiện tại, luôn sáng hoặc luôn tối. Tên preset đang dùng được hiện
 trong Settings. Chọn theme thủ công sẽ tắt tự chọn preset.
 
@@ -147,6 +143,6 @@ giảm tương ứng. [Báo cáo chi tiết và cách đo](docs/performance.md).
 - The status bar and patched upstream modules are based on [YASB 2.0.8 by amnweb](https://github.com/amnweb/yasb/tree/v2.0.8). See [the retained MIT notice](licenses/YASB-MIT.txt).
 - The dashboard takes inspiration from [Caelestia Shell](https://github.com/caelestia-dots/shell). Its original [Bongo Cat asset](https://github.com/caelestia-dots/shell/blob/5cbf60e7c6dbdd2b94faa5444435b8d9cac7bd46/assets/bongocat.gif) is included under [GPL-3.0](LICENSE).
 - The colors draw on [Catppuccin Mocha](https://github.com/catppuccin/catppuccin). The bundled fonts are [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono/tree/v2.304) and [JetBrainsMono Nerd Font Propo](https://github.com/ryanoasis/nerd-fonts/tree/v3.5.1), with [their OFL notices](licenses/).
-- The green palette retains Caelestia's Everforest reference and license in `config/theme-profiles/THIRD-PARTY/`. Lucide and Google Sans Flex retain their license files beside the bundled fonts.
+- The catalog adapts [Caelestia's original schemes](https://github.com/caelestia-dots/cli/tree/c4e1b09c2922ebe2f543f7298b91a10681160eec/src/caelestia/data/schemes). The bundled files retain [the GPL-3.0 license](config/theme-catalog/upstream/LICENSE). Lucide and Google Sans Flex retain their license files beside the bundled fonts.
 - Native Liquid Glass is based on [liquidglass](https://github.com/dilmurod3037729-max/liquidglass), pinned to commit `149a841ff9d8a852483dcb76d3b250d9ab427e6e`, with local modifications documented in `native/liquid-glass/UPSTREAM.md` and its retained MIT license.
 - Forecast data is provided by [Open-Meteo](https://open-meteo.com/).

@@ -29,23 +29,28 @@
   },
   "core/utils/bar_theme.pyc": {
     "source": "bar_theme.py",
-    "upstream_sha256": null
+    "upstream_sha256": null,
+    "precompiled_sha256": "aa5656c89ef018b4f1c9a011a229df2f63d32f8d13d0ea0579fa3faee19bd39b"
   },
   "core/utils/bar_preferences.pyc": {
     "source": "bar_preferences.py",
-    "upstream_sha256": null
+    "upstream_sha256": null,
+    "precompiled_sha256": "b7aeb5e735c5969ad83e06d970409ecde4f8fbfdc8d20277b830f40436ae6d0a"
   },
   "core/utils/bar_settings.pyc": {
     "source": "bar_settings.py",
-    "upstream_sha256": null
+    "upstream_sha256": null,
+    "precompiled_sha256": "671ee75e4ff624a59b453036808182698ba85cdb25200700b1611bead9b6d19e"
   },
   "core/utils/theme_tokens.pyc": {
     "source": "theme_tokens.py",
-    "upstream_sha256": null
+    "upstream_sha256": null,
+    "precompiled_sha256": "5a23cef0056573c86d7e33d4406523cd53006a0072527bf14d0e538d3cc8a5fc"
   },
   "core/utils/bar_surface.pyc": {
     "source": "bar_surface.py",
-    "upstream_sha256": null
+    "upstream_sha256": null,
+    "precompiled_sha256": "53602d824ae19e1110386860f66b8827c042685ea93e71641a92ec743b84788d"
   },
   "core/utils/komorebi_theme.pyc": {
     "source": "komorebi_theme.py",
@@ -65,15 +70,18 @@
   },
   "core/utils/settings_immediate.pyc": {
     "source": "settings_immediate.py",
-    "upstream_sha256": null
+    "upstream_sha256": null,
+    "precompiled_sha256": "e5929e95a7e1fc94981b09fd08388bd8735c91562f73bca33a9559738142b693"
   },
   "core/utils/settings_window.pyc": {
     "source": "settings_window.py",
-    "upstream_sha256": null
+    "upstream_sha256": null,
+    "precompiled_sha256": "146f6110e987b1a365bb7f9d3c0af31d66ebdfa8defe42750b32300c07360914"
   },
   "core/utils/settings_entry.pyc": {
     "source": "settings_entry.py",
-    "upstream_sha256": null
+    "upstream_sha256": null,
+    "precompiled_sha256": "00904dd181eba8d51ae9fb6dab713bc0c8b2191082b794f666399604eaf951ea"
   },
   "core/utils/ui_motion.pyc": {
     "source": "ui_motion.py",
@@ -85,10 +93,15 @@
   },
   "core/utils/wallpaper_theme.pyc": {
     "source": "wallpaper_theme.py",
-    "upstream_sha256": null
+    "upstream_sha256": null,
+    "precompiled_sha256": "f813b0b670589d40f3dd4f67aa0267238a5f79c2ebb1deb0beb25daed26203d8"
   },
   "core/utils/settings_navigation.pyc": {
     "source": "settings_navigation.py",
     "upstream_sha256": null
+  },
+  "core/widgets/komorebi/control.pyc": {
+    "source": "komorebi_control.py",
+    "upstream_sha256": "d39fffa21143247d49e52a2ca76771863f0425dc899f520f52f8ad586f8cb628"
   }
 }

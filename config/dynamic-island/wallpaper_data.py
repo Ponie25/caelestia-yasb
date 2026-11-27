@@ -79,46 +79,45 @@ def lab(rgb):
     s=(.0883024619*r+.2817188376*g+.6299787005*b)**(1/3)
     return .2104542553*l+.793617785*m-.0040720468*s,1.9779984951*l-2.428592205*m+.4505937099*s,.0259040371*l+.7827717662*m-.808675766*s
 
-def dominant(pixels):
-    """Favor populous chromatic regions, rather than averaging an image to brown."""
-    bins={};neutral=[]
+NEUTRAL_CHROMA=.035
+NEUTRAL_SHARE=.2
+
+def analyze(pixels):
+    """Summarize opaque pixels as weighted OKLab hue regions; None when no pixel is usable.
+
+    Regions are 10-degree hue bins weighted by pixel coverage times chroma. An image is
+    neutral when fewer than 20% of its valid pixels reach OKLab chroma 0.035.
+    """
+    total=colored=0;bins={}
     for r,g,b in pixels:
-        light,a,bb=lab((r,g,b));chroma=math.hypot(a,bb)
-        if .12<light<.94:neutral.append((r,g,b))
-        if chroma<.035 or not .18<light<.92:continue
-        hue=math.atan2(bb,a)%(2*math.pi);key=round(hue*36/(2*math.pi))%36
-        bucket=bins.setdefault(key,[0,0.,0.,0.]);weight=.3+min(.22,chroma)*4
-        bucket[0]+=weight;bucket[1]+=r*weight;bucket[2]+=g*weight;bucket[3]+=b*weight
-    if bins:
-        at=max(bins,key=lambda k:bins[k][0]+.5*bins.get((k-1)%36,[0])[0]+.5*bins.get((k+1)%36,[0])[0])
-        group=[bins[k] for k in ((at-1)%36,at,(at+1)%36) if k in bins];total=sum(v[0] for v in group)
-        rgb=tuple(round(sum(v[i] for v in group)/total) for i in (1,2,3))
-    else:rgb=tuple(round(sum(v[i] for v in neutral)/len(neutral)) for i in range(3)) if neutral else (128,128,128)
-    return '#'+''.join(f'{v:02x}' for v in rgb)
+        total+=1
+        _,a,bb=lab((r,g,b));chroma=math.hypot(a,bb)
+        if chroma<NEUTRAL_CHROMA:continue
+        colored+=1
+        key=round(math.atan2(bb,a)%(2*math.pi)*36/(2*math.pi))%36
+        item=bins.setdefault(key,[0,0.,0.,0.]);item[0]+=1;item[1]+=chroma;item[2]+=a;item[3]+=bb
+    if not total:return None
+    regions=[(math.atan2(item[3],item[2]),item[1]/item[0],item[1]) for _,item in sorted(bins.items())]
+    weight=sum(region[2] for region in regions)
+    regions=[(hue,chroma,share/weight) for hue,chroma,share in regions] if weight else []
+    return {'valid':total,'colored':colored,'neutral':not regions or colored<total*NEUTRAL_SHARE,'regions':regions}
 
-def load_presets(root):
-    directory=Path(root)/'wallpaper-presets';path=directory/'catalog.json'
-    if path.stat().st_size>100_000:raise ValueError('Danh sách preset quá lớn.')
-    catalog=json.loads(path.read_text(encoding='utf-8'));seen=set()
-    if not isinstance(catalog,list) or not 2<=len(catalog)<=64:raise ValueError('Danh sách preset không hợp lệ.')
-    for entry in catalog:
-        if not isinstance(entry,dict) or not re.fullmatch(r'[a-z][a-z0-9-]{1,47}',entry.get('id','')):raise ValueError('Mã preset không hợp lệ.')
-        if entry['id'] in seen or entry.get('tone') not in ('light','dark') or not re.fullmatch(r'#[0-9a-fA-F]{6}',entry.get('match_color','')):raise ValueError('Thông tin preset không hợp lệ.')
-        if not isinstance(entry.get('family'),str) or not re.fullmatch(r'[a-z][a-z0-9-]{1,30}',entry['family']):raise ValueError('Nhóm preset không hợp lệ.')
-        if not isinstance(entry.get('name'),str) or not entry['name'] or len(entry['name'])>80:raise ValueError('Tên preset không hợp lệ.')
-        folder=(directory/entry['id']).resolve()
-        if not folder.is_relative_to(directory.resolve()) or not all((folder/name).is_file() for name in ('palette.json','styles.css')):raise ValueError('Thiếu file preset.')
-        seen.add(entry['id'])
-    return catalog
+def _anchor(color):
+    _,a,b=lab(tuple(int(color[i:i+2],16) for i in (1,3,5)));return math.atan2(b,a),math.hypot(a,b)
 
-def choose_preset(seed,dark,catalog):
-    """Select an existing ID. Wallpaper pixels never become interface colors."""
-    _,a,b=lab(tuple(int(seed[i:i+2],16) for i in (1,3,5)));chroma=math.hypot(a,b);hue=math.atan2(b,a)
-    candidates=[entry for entry in catalog if entry['tone']==('dark' if dark else 'light')]
+def score(analysis,color):
+    """Lower is closer: weighted hue distance plus a smaller chroma distance."""
+    hue,chroma=_anchor(color);total=0.
+    for region_hue,region_chroma,weight in analysis['regions']:
+        turn=abs((region_hue-hue+math.pi)%(2*math.pi)-math.pi)/math.pi
+        total+=weight*(turn+.5*abs(region_chroma-chroma)/.3)
+    return round(total,9)
+
+def choose_preset(analysis,tone,entries,default_id):
+    """Return an existing original preset ID of the requested tone. Pixels never become colors."""
+    candidates=sorted((entry for entry in entries if entry['tone']==tone and entry['origin']=='caelestia'),key=lambda entry:entry['id'])
     if not candidates:raise ValueError('Không có preset cho tông sáng/tối này.')
-    if chroma<.028:return next((entry for entry in candidates if entry['family']=='graphite'),candidates[0])
-    def distance(entry):
-        if entry['family']=='graphite':return 4.,entry['id']
-        _,x,y=lab(tuple(int(entry['match_color'][i:i+2],16) for i in (1,3,5)))
-        return abs((hue-math.atan2(y,x)+math.pi)%(2*math.pi)-math.pi),entry['id']
-    return min(candidates,key=distance)
+    if analysis['neutral']:
+        if default_id not in {entry['id'] for entry in candidates}:raise ValueError('Thiếu preset Caelestia Default cho tông này.')
+        return default_id
+    return min(candidates,key=lambda entry:(score(analysis,entry['match_color']),entry['id']))['id']

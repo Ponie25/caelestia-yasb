@@ -1,6 +1,7 @@
 """Build the isolated installation from verified upstream artifacts."""
 
 from importlib.util import MAGIC_NUMBER
+from copy import copy
 from pathlib import Path, PurePosixPath
 import hashlib
 import json
@@ -38,7 +39,26 @@ def install_wheels(downloads, runtime):
                     shutil.copyfileobj(source, destination)
 
 
+def read_catalog_modules():
+    expected = {
+        entry: patch["precompiled_sha256"]
+        for entry, patch in PATCHES.items()
+        if "precompiled_sha256" in patch
+    }
+    with ZipFile(ROOT / "patches" / "catalog-runtime.zip") as bundle:
+        if sorted(bundle.namelist()) != sorted(expected):
+            raise ValueError("Unexpected theme catalog runtime entries")
+        prepared = {}
+        for entry, digest in expected.items():
+            payload = bundle.read(entry)
+            if payload[:4] != MAGIC_NUMBER or hashlib.sha256(payload).hexdigest() != digest:
+                raise ValueError(f"Unexpected theme catalog bytecode: {entry}")
+            prepared[entry] = payload
+    return prepared
+
+
 def patch_yasb(archive, build):
+    catalog_modules = read_catalog_modules()
     patched = archive.with_suffix(".new.zip")
     with ZipFile(archive) as original, ZipFile(patched, "w") as output:
         replacements = {}
@@ -54,6 +74,9 @@ def patch_yasb(archive, build):
                   original.read(entry)[:4] != MAGIC_NUMBER or
                   hashlib.sha256(original.read(entry)).hexdigest() != expected):
                 raise ValueError(f"Unexpected YASB bytecode: {entry}")
+            if entry in catalog_modules:
+                replacements[entry] = catalog_modules[entry]
+                continue
             compiled = build / (source + "c")
             py_compile.compile(
                 str(ROOT / "patches" / source),
@@ -65,7 +88,7 @@ def patch_yasb(archive, build):
             warnings.filterwarnings("ignore", message="Duplicate name:", category=UserWarning)
             for member in original.infolist():
                 content = replacements.get(member.filename)
-                output.writestr(member, original.read(member) if content is None else content)
+                output.writestr(copy(member), original.read(member) if content is None else content)
             for entry, content in replacements.items():
                 if entry not in original.namelist():
                     output.writestr(entry, content)

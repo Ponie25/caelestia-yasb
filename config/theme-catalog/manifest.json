@@ -1,0 +1,1022 @@
+{
+  "version": 1,
+  "source": {
+    "repository": "https://github.com/caelestia-dots/cli",
+    "commit": "c4e1b09c2922ebe2f543f7298b91a10681160eec",
+    "path": "src/caelestia/data/schemes",
+    "license": "config/theme-catalog/upstream/LICENSE",
+    "license_name": "GPL-3.0"
+  },
+  "presets": [
+    {
+      "id": "light",
+      "origin": "yasb",
+      "family": "light",
+      "family_name": "Sáng",
+      "flavour": "",
+      "flavour_name": "",
+      "name": "Sáng",
+      "tone": "light",
+      "match_color": null,
+      "swatch": {
+        "surface": "#f1f2f5",
+        "accent": "#20232d"
+      },
+      "source": null,
+      "adapted": {}
+    },
+    {
+      "id": "dark",
+      "origin": "yasb",
+      "family": "dark",
+      "family_name": "Tối",
+      "flavour": "",
+      "flavour_name": "",
+      "name": "Tối",
+      "tone": "dark",
+      "match_color": null,
+      "swatch": {
+        "surface": "#1c1c1c",
+        "accent": "#ffffff"
+      },
+      "source": null,
+      "adapted": {}
+    },
+    {
+      "id": "catppuccin",
+      "origin": "yasb",
+      "family": "catppuccin",
+      "family_name": "Tím hồng",
+      "flavour": "",
+      "flavour_name": "",
+      "name": "Tím hồng",
+      "tone": "dark",
+      "match_color": null,
+      "swatch": {
+        "surface": "#1e1e2e",
+        "accent": "#cca7f7"
+      },
+      "source": null,
+      "adapted": {}
+    },
+    {
+      "id": "everforest",
+      "origin": "yasb",
+      "family": "everforest",
+      "family_name": "Xanh lá",
+      "flavour": "",
+      "flavour_name": "",
+      "name": "Xanh lá",
+      "tone": "dark",
+      "match_color": null,
+      "swatch": {
+        "surface": "#2d353b",
+        "accent": "#a7c080"
+      },
+      "source": null,
+      "adapted": {}
+    },
+    {
+      "id": "red-white",
+      "origin": "yasb",
+      "family": "red-white",
+      "family_name": "Đỏ trắng",
+      "flavour": "",
+      "flavour_name": "",
+      "name": "Đỏ trắng",
+      "tone": "light",
+      "match_color": null,
+      "swatch": {
+        "surface": "#f1f2f5",
+        "accent": "#9e1c34"
+      },
+      "source": null,
+      "adapted": {}
+    },
+    {
+      "id": "red-black",
+      "origin": "yasb",
+      "family": "red-black",
+      "family_name": "Đỏ đen",
+      "flavour": "",
+      "flavour_name": "",
+      "name": "Đỏ đen",
+      "tone": "dark",
+      "match_color": null,
+      "swatch": {
+        "surface": "#1c1517",
+        "accent": "#ff747d"
+      },
+      "source": null,
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-caelestia-default-dark",
+      "origin": "caelestia",
+      "family": "caelestia",
+      "family_name": "Caelestia",
+      "flavour": "default",
+      "flavour_name": "Default",
+      "name": "Caelestia Default",
+      "tone": "dark",
+      "match_color": "#9bd0cc",
+      "swatch": {
+        "surface": "#131b1a",
+        "accent": "#9bd0cc"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/caelestia/default/dark.txt",
+        "git_blob_sha1": "26c30dcd8d8e1318d80ee04e88ff40522e6d3975",
+        "sha256": "7d3caea361fe814936f6253596f6cd6aeee9b18d0f69d0b35f5043631b11c802"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-caelestia-default-light",
+      "origin": "caelestia",
+      "family": "caelestia",
+      "family_name": "Caelestia",
+      "flavour": "default",
+      "flavour_name": "Default",
+      "name": "Caelestia Default",
+      "tone": "light",
+      "match_color": "#1c6a66",
+      "swatch": {
+        "surface": "#e7f0ee",
+        "accent": "#1c6a66"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/caelestia/default/light.txt",
+        "git_blob_sha1": "9e2a5b9d299fffb1052f829a3d5007e4f2bf47bd",
+        "sha256": "5af50994a4911658a5bf1ccbd5a7c04b582bef3e721f7b9cf76e0adc6fc07364"
+      },
+      "adapted": {
+        "LAVENDER": [
+          "#007e8b",
+          "#02707c"
+        ],
+        "PINK": [
+          "#0085c0",
+          "#046b9b"
+        ],
+        "ROSEWATER": [
+          "#6b8647",
+          "#566b3c"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-catppuccin-frappe-dark",
+      "origin": "caelestia",
+      "family": "catppuccin",
+      "family_name": "Catppuccin",
+      "flavour": "frappe",
+      "flavour_name": "Frappé",
+      "name": "Catppuccin Frappé",
+      "tone": "dark",
+      "match_color": "#b7c4ff",
+      "swatch": {
+        "surface": "#1f1f23",
+        "accent": "#b7c4ff"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/catppuccin/frappe/dark.txt",
+        "git_blob_sha1": "43d2d5d215fe66838f8fd51744d69b533f81f9b3",
+        "sha256": "1096988ae95b2851ca5a7f4dc13130ef04d8af42d723ab9c8ef3e53bd1fdf4d7"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-catppuccin-latte-light",
+      "origin": "caelestia",
+      "family": "catppuccin",
+      "family_name": "Catppuccin",
+      "flavour": "latte",
+      "flavour_name": "Latte",
+      "name": "Catppuccin Latte",
+      "tone": "light",
+      "match_color": "#3e7b9f",
+      "swatch": {
+        "surface": "#edeef1",
+        "accent": "#376a89"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/catppuccin/latte/light.txt",
+        "git_blob_sha1": "87b73536a91818ba218c28429bddb8e02ad16763",
+        "sha256": "fc49d79b71d33ea21fe40db2550a5f068533d39cedf1c22249b808da390449e2"
+      },
+      "adapted": {
+        "LAVENDER": [
+          "#0077b7",
+          "#026aa2"
+        ],
+        "MAUVE": [
+          "#3e7b9f",
+          "#376a89"
+        ],
+        "PINK": [
+          "#057ee6",
+          "#0865b7"
+        ],
+        "ROSEWATER": [
+          "#7d76b1",
+          "#645f8e"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-catppuccin-macchiato-dark",
+      "origin": "caelestia",
+      "family": "catppuccin",
+      "family_name": "Catppuccin",
+      "flavour": "macchiato",
+      "flavour_name": "Macchiato",
+      "name": "Catppuccin Macchiato",
+      "tone": "dark",
+      "match_color": "#bac3ff",
+      "swatch": {
+        "surface": "#1f1f23",
+        "accent": "#bac3ff"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/catppuccin/macchiato/dark.txt",
+        "git_blob_sha1": "cdc64d3135568ef6033f74e30768bf4baf0042af",
+        "sha256": "93b69120f77b08d7d0272d35f73d3a32a2185ff7cfc3f8af33d754fb42f49a71"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-catppuccin-mocha-dark",
+      "origin": "caelestia",
+      "family": "catppuccin",
+      "family_name": "Catppuccin",
+      "flavour": "mocha",
+      "flavour_name": "Mocha",
+      "name": "Catppuccin Mocha",
+      "tone": "dark",
+      "match_color": "#c2c1ff",
+      "swatch": {
+        "surface": "#201f23",
+        "accent": "#c2c1ff"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/catppuccin/mocha/dark.txt",
+        "git_blob_sha1": "089a739393ecb672727bd7917a67042884f5c8f6",
+        "sha256": "330b0311894108a7ac52789b5ae5eac5d4dc520785354ab8fdd17243ca8c44ea"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-darkgreen-hard-dark",
+      "origin": "caelestia",
+      "family": "darkgreen",
+      "family_name": "Dark Green",
+      "flavour": "hard",
+      "flavour_name": "Hard",
+      "name": "Dark Green Hard",
+      "tone": "dark",
+      "match_color": "#24bd5c",
+      "swatch": {
+        "surface": "#0a0a0b",
+        "accent": "#24bd5c"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/darkgreen/hard/dark.txt",
+        "git_blob_sha1": "dea54c486f274861496022e7f3ef8d1d14297a8d",
+        "sha256": "b67cb37a20047df9dea4e84076e0a087d99b02d6957b4bbe3c6bb602a6089e3d"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-darkgreen-medium-dark",
+      "origin": "caelestia",
+      "family": "darkgreen",
+      "family_name": "Dark Green",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Dark Green Medium",
+      "tone": "dark",
+      "match_color": "#24bd5c",
+      "swatch": {
+        "surface": "#23262c",
+        "accent": "#24bd5c"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/darkgreen/medium/dark.txt",
+        "git_blob_sha1": "1caff9e465082fe08ee282059f47b09d6f228cda",
+        "sha256": "632db88254aafc8964f38fecf16ae25bcbc804f10a4af0367399bdfa9613469b"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-dracula-medium-dark",
+      "origin": "caelestia",
+      "family": "dracula",
+      "family_name": "Dracula",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Dracula Medium",
+      "tone": "dark",
+      "match_color": "#bd93f9",
+      "swatch": {
+        "surface": "#3e4153",
+        "accent": "#dec9fc"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/dracula/medium/dark.txt",
+        "git_blob_sha1": "4195f4527851426eb54a36785dbd94ff7023e04e",
+        "sha256": "be8b909d1784e40c0d0139c035533fe5bcf2e294b4928b093e8686118a9dc03f"
+      },
+      "adapted": {
+        "SURFACE2": [
+          "#565970",
+          "#54576e"
+        ],
+        "OVERLAY": [
+          "#6272a4",
+          "#a2acc9"
+        ],
+        "TEXT": [
+          "#f8f8f2",
+          "#ffffff"
+        ],
+        "LAVENDER": [
+          "#bd93f9",
+          "#dec9fc"
+        ],
+        "MAUVE": [
+          "#bd93f9",
+          "#dec9fc"
+        ],
+        "PINK": [
+          "#ff79c6",
+          "#ffbfe4"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-everblush-medium-dark",
+      "origin": "caelestia",
+      "family": "everblush",
+      "family_name": "Everblush",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Everblush Medium",
+      "tone": "dark",
+      "match_color": "#8ccfb0",
+      "swatch": {
+        "surface": "#2e3538",
+        "accent": "#8ccfb0"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/everblush/medium/dark.txt",
+        "git_blob_sha1": "fefd5ac4342caace1350c8da08ace45c104c535a",
+        "sha256": "46cd80717fb37a9aa46fc0cefa35c10c73c444d77f8b58b6b1bdecaee81a67b3"
+      },
+      "adapted": {
+        "OVERLAY": [
+          "#8a8f94",
+          "#91969a"
+        ],
+        "MUTED": [
+          "#b3b9be",
+          "#b8bec3"
+        ],
+        "LAVENDER": [
+          "#67b0e8",
+          "#82beec"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-everforest-hard-dark",
+      "origin": "caelestia",
+      "family": "everforest",
+      "family_name": "Everforest",
+      "flavour": "hard",
+      "flavour_name": "Hard",
+      "name": "Everforest Hard",
+      "tone": "dark",
+      "match_color": "#7fbbb3",
+      "swatch": {
+        "surface": "#2e383c",
+        "accent": "#7fbbb3"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/everforest/hard/dark.txt",
+        "git_blob_sha1": "d482350428c484fa7e1c1bbe694c1d5c7b194c37",
+        "sha256": "8ac998c220465b550a1e828cf343ecd5e39230333f63626535957960ffc6a681"
+      },
+      "adapted": {
+        "MUTED": [
+          "#9da9a0",
+          "#adb7af"
+        ],
+        "TEXT": [
+          "#d3c6aa",
+          "#e1d8c4"
+        ],
+        "PINK": [
+          "#d699b6",
+          "#d89eba"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-everforest-medium-dark",
+      "origin": "caelestia",
+      "family": "everforest",
+      "family_name": "Everforest",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Everforest Medium",
+      "tone": "dark",
+      "match_color": "#7fbbb3",
+      "swatch": {
+        "surface": "#3d484d",
+        "accent": "#a0cdc7"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/everforest/medium/dark.txt",
+        "git_blob_sha1": "861674363514577c0b097ee33a8da4557ade1300",
+        "sha256": "bdf79cd39d828657357878ddedc2bd1606b08e50d52a4bd29f03a20239695492"
+      },
+      "adapted": {
+        "OVERLAY": [
+          "#859289",
+          "#99a39c"
+        ],
+        "MUTED": [
+          "#9da9a0",
+          "#c5ccc7"
+        ],
+        "TEXT": [
+          "#d3c6aa",
+          "#f4f1ea"
+        ],
+        "LAVENDER": [
+          "#7fbbb3",
+          "#a0cdc7"
+        ],
+        "MAUVE": [
+          "#7fbbb3",
+          "#a0cdc7"
+        ],
+        "PINK": [
+          "#d699b6",
+          "#e2b8cc"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-everforest-medium-light",
+      "origin": "caelestia",
+      "family": "everforest",
+      "family_name": "Everforest",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Everforest Medium",
+      "tone": "light",
+      "match_color": "#3a94c5",
+      "swatch": {
+        "surface": "#f3ead3",
+        "accent": "#2c6688"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/everforest/medium/light.txt",
+        "git_blob_sha1": "92fd1dc163be2ce2828b9dd40feb6385605d661e",
+        "sha256": "9c69dbcadb1e95149fa70128839825c9e3eec4fd0171d3b6f4db703375a76974"
+      },
+      "adapted": {
+        "OVERLAY": [
+          "#939f91",
+          "#757e75"
+        ],
+        "MUTED": [
+          "#6f7c84",
+          "#545d65"
+        ],
+        "TEXT": [
+          "#5c6a72",
+          "#3d454c"
+        ],
+        "LAVENDER": [
+          "#3a94c5",
+          "#2c6688"
+        ],
+        "MAUVE": [
+          "#3a94c5",
+          "#2c6688"
+        ],
+        "PINK": [
+          "#df69ba",
+          "#8f477b"
+        ],
+        "ROSEWATER": [
+          "#5c6a72",
+          "#55626a"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-everforest-soft-dark",
+      "origin": "caelestia",
+      "family": "everforest",
+      "family_name": "Everforest",
+      "flavour": "soft",
+      "flavour_name": "Soft",
+      "name": "Everforest Soft",
+      "tone": "dark",
+      "match_color": "#7fbbb3",
+      "swatch": {
+        "surface": "#434e53",
+        "accent": "#b7d9d4"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/everforest/soft/dark.txt",
+        "git_blob_sha1": "817425b6a13df0dd7b42b81e1647d68caa67c3f6",
+        "sha256": "0a2a44d022ac6b00ab36144450129ac921cdb5db9f669b5a1f28a48db98ecba6"
+      },
+      "adapted": {
+        "SURFACE2": [
+          "#525c61",
+          "#505a5f"
+        ],
+        "OVERLAY": [
+          "#859289",
+          "#a5aea8"
+        ],
+        "MUTED": [
+          "#9da9a0",
+          "#d5dad6"
+        ],
+        "TEXT": [
+          "#d3c6aa",
+          "#ffffff"
+        ],
+        "LAVENDER": [
+          "#7fbbb3",
+          "#b7d9d4"
+        ],
+        "MAUVE": [
+          "#7fbbb3",
+          "#b7d9d4"
+        ],
+        "PINK": [
+          "#d699b6",
+          "#e9c9d8"
+        ],
+        "ROSEWATER": [
+          "#d3c6aa",
+          "#dbd1ba"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-gruvbox-hard-dark",
+      "origin": "caelestia",
+      "family": "gruvbox",
+      "family_name": "Gruvbox",
+      "flavour": "hard",
+      "flavour_name": "Hard",
+      "name": "Gruvbox Hard",
+      "tone": "dark",
+      "match_color": "#85d2e7",
+      "swatch": {
+        "surface": "#1c2021",
+        "accent": "#85d2e7"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/gruvbox/hard/dark.txt",
+        "git_blob_sha1": "4b63ec9ec4dc8288d4f1741ec82d8728bd89eee6",
+        "sha256": "04e9f4506d3dc9782be1f68f65dc6568c579fa2175fbc4efb512062b4c47192f"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-gruvbox-hard-light",
+      "origin": "caelestia",
+      "family": "gruvbox",
+      "family_name": "Gruvbox",
+      "flavour": "hard",
+      "flavour_name": "Hard",
+      "name": "Gruvbox Hard",
+      "tone": "light",
+      "match_color": "#636116",
+      "swatch": {
+        "surface": "#f2eee4",
+        "accent": "#636116"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/gruvbox/hard/light.txt",
+        "git_blob_sha1": "3ca88658e7858ca460609d423188cb37666b5176",
+        "sha256": "723f915d7148bd83ff028c8bdd3add5928c35cecb9297d483129bae2d9c3eaeb"
+      },
+      "adapted": {
+        "LAVENDER": [
+          "#00816c",
+          "#027261"
+        ],
+        "PINK": [
+          "#a37500",
+          "#835f05"
+        ],
+        "ROSEWATER": [
+          "#937b2d",
+          "#756328"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-gruvbox-medium-dark",
+      "origin": "caelestia",
+      "family": "gruvbox",
+      "family_name": "Gruvbox",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Gruvbox Medium",
+      "tone": "dark",
+      "match_color": "#81d3e0",
+      "swatch": {
+        "surface": "#1c2021",
+        "accent": "#81d3e0"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/gruvbox/medium/dark.txt",
+        "git_blob_sha1": "65681fbe21b013079b80bf681a93acd7e3590f80",
+        "sha256": "d023d621c8e74c260b51c9dee63b0418ef52714de6004b757968653387dcc77f"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-gruvbox-medium-light",
+      "origin": "caelestia",
+      "family": "gruvbox",
+      "family_name": "Gruvbox",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Gruvbox Medium",
+      "tone": "light",
+      "match_color": "#6b5f10",
+      "swatch": {
+        "surface": "#f3ede3",
+        "accent": "#6b5f10"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/gruvbox/medium/light.txt",
+        "git_blob_sha1": "62a2878d7bc26b245235b90f2551bf944ed4d10a",
+        "sha256": "3445e13466ef4fd9722af33094a37e07767ccb64fff2a5d30c8682f30b3e6cee"
+      },
+      "adapted": {
+        "LAVENDER": [
+          "#00816c",
+          "#027261"
+        ],
+        "PINK": [
+          "#a87300",
+          "#875d05"
+        ],
+        "ROSEWATER": [
+          "#98792c",
+          "#7a6228"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-gruvbox-soft-dark",
+      "origin": "caelestia",
+      "family": "gruvbox",
+      "family_name": "Gruvbox",
+      "flavour": "soft",
+      "flavour_name": "Soft",
+      "name": "Gruvbox Soft",
+      "tone": "dark",
+      "match_color": "#ffb878",
+      "swatch": {
+        "surface": "#241e1a",
+        "accent": "#ffb878"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/gruvbox/soft/dark.txt",
+        "git_blob_sha1": "8c69979317c78101306f0f555ecfd69254c006b7",
+        "sha256": "2c4cc93f43b74966c3f930d731646dd4b8a205b38497c08af8e6434216ceae33"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-gruvbox-soft-light",
+      "origin": "caelestia",
+      "family": "gruvbox",
+      "family_name": "Gruvbox",
+      "flavour": "soft",
+      "flavour_name": "Soft",
+      "name": "Gruvbox Soft",
+      "tone": "light",
+      "match_color": "#867425",
+      "swatch": {
+        "surface": "#f3ede3",
+        "accent": "#736423"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/gruvbox/soft/light.txt",
+        "git_blob_sha1": "e57eb7da96e33970936caa750a7ab4fb60b64abf",
+        "sha256": "82dc1bed46a40139a1d98c7fe9aea07cd874e1578188bc4dddec5c174cb50628"
+      },
+      "adapted": {
+        "LAVENDER": [
+          "#c2484e",
+          "#ab4147"
+        ],
+        "MAUVE": [
+          "#867425",
+          "#736423"
+        ],
+        "PINK": [
+          "#ab7100",
+          "#895c05"
+        ],
+        "ROSEWATER": [
+          "#9b782c",
+          "#7d6128"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-nord-medium-dark",
+      "origin": "caelestia",
+      "family": "nord",
+      "family_name": "Nord",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Nord Medium",
+      "tone": "dark",
+      "match_color": "#88c0d0",
+      "swatch": {
+        "surface": "#434c5e",
+        "accent": "#c0dee6"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/nord/medium/dark.txt",
+        "git_blob_sha1": "9e0cc02dc98107b7dd8a1013b43031bde149699f",
+        "sha256": "9c123d41d7eff939d2553a37707d2417c73286821c871bf857573364bf0921ae"
+      },
+      "adapted": {
+        "SURFACE2": [
+          "#55606e",
+          "#505a67"
+        ],
+        "OVERLAY": [
+          "#616e88",
+          "#abb2c0"
+        ],
+        "MUTED": [
+          "#d8dee9",
+          "#dae0ea"
+        ],
+        "TEXT": [
+          "#eceff4",
+          "#ffffff"
+        ],
+        "LAVENDER": [
+          "#5e81ac",
+          "#d0dae7"
+        ],
+        "MAUVE": [
+          "#88c0d0",
+          "#c0dee6"
+        ],
+        "PINK": [
+          "#b48ead",
+          "#e3d5e1"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-oldworld-default-dark",
+      "origin": "caelestia",
+      "family": "oldworld",
+      "family_name": "Old World",
+      "flavour": "default",
+      "flavour_name": "Default",
+      "name": "Old World Default",
+      "tone": "dark",
+      "match_color": "#aac7ff",
+      "swatch": {
+        "surface": "#1e2023",
+        "accent": "#aac7ff"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/oldworld/default/dark.txt",
+        "git_blob_sha1": "9059dfce78498f231897f0e99b6820e7e7f1913f",
+        "sha256": "e7055327e7391b624789a9bd0d6cddd44e7f81cebd3a3b984afca3d7e6709c49"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-onedark-default-dark",
+      "origin": "caelestia",
+      "family": "onedark",
+      "family_name": "One Dark",
+      "flavour": "default",
+      "flavour_name": "Default",
+      "name": "One Dark Default",
+      "tone": "dark",
+      "match_color": "#a8c8ff",
+      "swatch": {
+        "surface": "#1e2023",
+        "accent": "#a8c8ff"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/onedark/default/dark.txt",
+        "git_blob_sha1": "f30019801cb8d9867477384005111bb23201c88e",
+        "sha256": "9f1d465ae05869f35b5cdc0dbf37e2490f8b65507c8f3af2448f6844dada7e0d"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-rosepine-dawn-light",
+      "origin": "caelestia",
+      "family": "rosepine",
+      "family_name": "Rosé Pine",
+      "flavour": "dawn",
+      "flavour_name": "Dawn",
+      "name": "Rosé Pine Dawn",
+      "tone": "light",
+      "match_color": "#897324",
+      "swatch": {
+        "surface": "#f4ede3",
+        "accent": "#766322"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/rosepine/dawn/light.txt",
+        "git_blob_sha1": "d564a5d5b1f670516065bbb741f250d26ef2546b",
+        "sha256": "07fd0b2f782d0da790de5bd1ebc58a1c343396db5188a6d80261f69da3e089cf"
+      },
+      "adapted": {
+        "LAVENDER": [
+          "#c2484e",
+          "#ab4147"
+        ],
+        "MAUVE": [
+          "#897324",
+          "#766322"
+        ],
+        "PINK": [
+          "#ae7000",
+          "#8b5b05"
+        ],
+        "ROSEWATER": [
+          "#9d772d",
+          "#7d6028"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-rosepine-main-dark",
+      "origin": "caelestia",
+      "family": "rosepine",
+      "family_name": "Rosé Pine",
+      "flavour": "main",
+      "flavour_name": "Main",
+      "name": "Rosé Pine Main",
+      "tone": "dark",
+      "match_color": "#c9bfff",
+      "swatch": {
+        "surface": "#201f23",
+        "accent": "#c9bfff"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/rosepine/main/dark.txt",
+        "git_blob_sha1": "e5e5adb6a77d461f9f868f9636881c4095fc2c34",
+        "sha256": "55526c9288495dd63703746e22d7bad52cbc9ee29103a1c4f794f0548f695c7a"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-rosepine-moon-dark",
+      "origin": "caelestia",
+      "family": "rosepine",
+      "family_name": "Rosé Pine",
+      "flavour": "moon",
+      "flavour_name": "Moon",
+      "name": "Rosé Pine Moon",
+      "tone": "dark",
+      "match_color": "#c6bfff",
+      "swatch": {
+        "surface": "#201f23",
+        "accent": "#c6bfff"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/rosepine/moon/dark.txt",
+        "git_blob_sha1": "4686ac92dde9dc5bc6a7871ccc3880485c40063d",
+        "sha256": "e8baa7b7aff8f593c5114a62a9801f78c52786a31b21a191be59bdb759a06e4e"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-shadotheme-default-dark",
+      "origin": "caelestia",
+      "family": "shadotheme",
+      "family_name": "Shado",
+      "flavour": "default",
+      "flavour_name": "Default",
+      "name": "Shado Default",
+      "tone": "dark",
+      "match_color": "#bfc1ff",
+      "swatch": {
+        "surface": "#1f1f23",
+        "accent": "#bfc1ff"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/shadotheme/default/dark.txt",
+        "git_blob_sha1": "a249d7b7f06e4c1c034c500813f3f784394dc1da",
+        "sha256": "19636f0ed6359e22e680fd59e13e3becad7ca8e69fba11f895e3960b209cfeed"
+      },
+      "adapted": {}
+    },
+    {
+      "id": "caelestia-solarized-medium-dark",
+      "origin": "caelestia",
+      "family": "solarized",
+      "family_name": "Solarized",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Solarized Medium",
+      "tone": "dark",
+      "match_color": "#268bd2",
+      "swatch": {
+        "surface": "#094b59",
+        "accent": "#85bee6"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/solarized/medium/dark.txt",
+        "git_blob_sha1": "7000788f42123e0944eabbe1fa03f3df24a4ab6b",
+        "sha256": "816dd8fd5099ee34baf1bbffcdb8e564f28284625fb4ad6c2b8d1f24753de1f3"
+      },
+      "adapted": {
+        "OVERLAY": [
+          "#586e75",
+          "#88989d"
+        ],
+        "MUTED": [
+          "#93a1a1",
+          "#b7c0c0"
+        ],
+        "LAVENDER": [
+          "#6c71c4",
+          "#b3b5e0"
+        ],
+        "MAUVE": [
+          "#268bd2",
+          "#85bee6"
+        ],
+        "PINK": [
+          "#d33682",
+          "#eba3c6"
+        ]
+      }
+    },
+    {
+      "id": "caelestia-tokyonight-medium-dark",
+      "origin": "caelestia",
+      "family": "tokyonight",
+      "family_name": "Tokyo Night",
+      "flavour": "medium",
+      "flavour_name": "Medium",
+      "name": "Tokyo Night Medium",
+      "tone": "dark",
+      "match_color": "#7aa2f7",
+      "swatch": {
+        "surface": "#2a2f41",
+        "accent": "#9ab8f9"
+      },
+      "source": {
+        "path": "src/caelestia/data/schemes/tokyonight/medium/dark.txt",
+        "git_blob_sha1": "0fbb87ac4aeb5a996bd134a3bde5505fb7722947",
+        "sha256": "e211c881a1606bd7e6d1a1b47f8f563b44725a6fcb4c449b660394a6b3014569"
+      },
+      "adapted": {
+        "OVERLAY": [
+          "#565f89",
+          "#8f95b1"
+        ],
+        "MUTED": [
+          "#a9b1d6",
+          "#b6bddc"
+        ],
+        "TEXT": [
+          "#c0caf5",
+          "#dee3fa"
+        ],
+        "MAUVE": [
+          "#7aa2f7",
+          "#9ab8f9"
+        ],
+        "PINK": [
+          "#f7768e",
+          "#f99fb0"
+        ]
+      }
+    }
+  ]
+}

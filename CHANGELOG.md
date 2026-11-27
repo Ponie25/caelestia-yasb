@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-27 — Caelestia catalog and menu fixes
+
+- Add 29 Caelestia palettes beside the six original themes in Settings and
+  `>scheme`. Ship Rosé Pine Dawn as the default.
+- Match wallpaper previews to the Caelestia catalog and select Caelestia Default
+  for neutral images. Keep the user's opacity, glass and layout preferences.
+- Repaint open Quick Settings after a theme change, rebuild a cached closed
+  panel on its next open and coalesce repeated stylesheet loads.
+- Read the Komorebi version on startup so Ponie can show the controls on the
+  first open. Button availability follows the connection and operation state.
+- Package the new catalog, attributed scheme files, updated Island sources and
+  the verified catalog/Settings modules for the pinned portable installer.
+
 ## 2026-11-26 — Designed wallpaper presets
 
 - Replace wallpaper-derived palette generation with deterministic selection from

@@ -127,19 +127,27 @@ COMMANDS=(
 DANGEROUS=frozenset(('shutdown','reboot','logout'))
 ALIASES={'theme':'scheme','themes':'scheme','schemes':'scheme','wallpapers':'wallpaper','background':'wallpaper',
          'restart':'reboot','signout':'logout','logoff':'logout','suspend':'sleep','poweroff':'shutdown'}
-SCHEMES=(('light','Sáng','Light'),('dark','Tối','Dark'),('catppuccin','Tím hồng','Catppuccin'),
-         ('everforest','Xanh lá','Everforest'),('red-white','Đỏ trắng','Red · White'),('red-black','Đỏ đen','Red · Black'),('wallpaper','Tự chọn preset','Auto · 18 preset có sẵn'))
+TONE_LABELS={'light':'Sáng','dark':'Tối'}
 
 def _command_rows(command,rest,context):
     if command=='scheme':
         rows=[]
-        for key,label,family in SCHEMES:
-            score=rank(rest,key+' '+label+' '+family)
-            if score is None:continue
+        # One row per catalog entry; the applied marker follows the committed preset, not Auto.
+        for entry in context.get('schemes',()):
+            key=entry['id'];origin='YASB' if entry['origin']=='yasb' else 'Caelestia'
+            fields=(key,entry['name'],entry['family_name'],entry.get('flavour_name',''),entry['tone'],TONE_LABELS[entry['tone']],origin)
+            # Fuzzy subsequence matching is only safe on one short field; on the joined text it matches unrelated presets.
+            joint=rank(rest,' '.join(fields))
+            scores=[s for s in [rank(rest,field) for field in fields if field]+[joint if joint is not None and joint>=500 else None] if s is not None]
+            if not scores:continue
+            score=max(scores)
             selected=context.get('theme')==key
-            rows.append((score,Result('scheme:'+key,label,family+' · '+('Đang dùng' if selected else 'Dùng lại các giá trị gốc của preset'),
-                'theme',key,'palette',tuple(context.get('palettes',{}).get(key,())),current=selected)))
-        return [row for _,row in sorted(rows,key=lambda item:item[0],reverse=True)] or [Result('scheme-empty','Không tìm thấy bảng màu','Thử Catppuccin, Everforest, Sáng hoặc Tối','hint')]
+            detail=origin+' · '+TONE_LABELS[entry['tone']]+(' · Đang dùng' if selected else '')
+            rows.append((score,Result('scheme:'+key,entry['name'],detail,'theme',key,'palette',tuple(context.get('palettes',{}).get(key,())),current=selected)))
+        rows=[row for _,row in sorted(rows,key=lambda item:item[0],reverse=True)]
+        auto=Result('scheme-auto','Tự chọn theo hình nền','Bật Auto · chỉ chọn trong 29 preset Caelestia · Enter để bật','theme_auto','','palette',current=bool(context.get('wallpaper_auto')))
+        if rank(rest,'auto tu chon theo hinh nen wallpaper match') is not None or not rest.strip():rows.append(auto)
+        return rows or [Result('scheme-empty','Không tìm thấy bảng màu','Thử Nord, Gruvbox, Catppuccin, Sáng hoặc Tối','hint')]
     if command in ('wallpaper','random'):
         images=context.get('wallpapers',());loading=context.get('wallpaper_loading',False)
         if command=='random':

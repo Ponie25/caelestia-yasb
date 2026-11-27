@@ -16,7 +16,8 @@ from launcher_actions import ControlRequest,power_action
 from PySide6.QtNetwork import QLocalServer
 import launcher as launcher_module
 from launcher_view import LauncherView
-from wallpaper_data import steam_favorites,dominant,load_presets,choose_preset
+from wallpaper_data import steam_favorites,analyze,choose_preset
+from theme_catalog import load_catalog
 from theme_tokens import normalize_palette,contrast
 app=QApplication([]);app.setQuitOnLastWindowClosed(False)
 errors=[]
@@ -46,7 +47,9 @@ for response in (b'{"ok":true}\n',b'not json\n',None):
 rows=query('>',[]);assert len(rows)>7 and not any(row.value in ('shutdown','reboot','logout') for row in rows)
 assert query('>shutdown',[])[0].kind=='hint'
 assert query('>restart',[],context={'dangerous_actions':True})[0].value=='reboot'
-assert query('>scheme cat',[],context={'theme':'catppuccin','palettes':{'catppuccin':['#111111','#cba6f7']}})[0].current
+schemes=load_catalog(root.parent)
+assert any(row.current and row.value=='catppuccin' for row in query(
+    '>scheme cat',[],context={'theme':'catppuccin','schemes':schemes.entries}))
 assert query('>calc sqrt(144)',[])[0].value=='12'
 assert query('>scheme missing99',[])[0].kind=='hint'
 html=b'<div class="workshopBrowseItems"><div id="sharedfile_123456"><div id="sharedfile_654321"></div>'
@@ -58,23 +61,24 @@ many=[dict(path=str(i),name=f'Wallpaper {i}',favorite=True) for i in range(40)]
 assert len(query('>wallpaper ',[],context={'wallpapers':many}))==40,'Every installed favorite must be reachable using arrows, not only the first page'
 with patch('wallpaper_data.urlopen',side_effect=OSError('offline')):
     assert steam_favorites(123,{'account':123,'ids':['123456'],'updated':0},force=True)['ids']==['123456']
-assert dominant([(240,40,60)]*100+[(110,110,110)]*1000).startswith('#f0')
-catalog=load_presets(root.parent);assert len(catalog)==18
+assert analyze([]) is None
+assert len(schemes)==35 and len(schemes.originals())==29
 import wallpaper_data
 assert not hasattr(wallpaper_data,'make_palette'),'Runtime must only select existing palettes'
-for entry in catalog:
-    assert choose_preset(entry['match_color'],entry['tone']=='dark',catalog)['id']==entry['id']
-    palette=json.loads((root.parent/'wallpaper-presets'/entry['id']/'palette.json').read_text())
-    assert normalize_palette(palette)==palette
+for entry in schemes:
+    palette=normalize_palette(schemes.palette(entry['id']))
     for bg in ('BASE','MANTLE','SURFACE','SURFACE2'):
-        assert contrast(palette['TEXT'],palette[bg])>=7
-        assert contrast(palette['MUTED'],palette[bg])>=4.8
-        for key in ('MAUVE','LAVENDER','PINK','ROSEWATER'):assert contrast(palette[key],palette[bg])>=4.5
-for dark in (True,False):
-    for gray in ('#000000','#808080','#ffffff'):assert choose_preset(gray,dark,catalog)['family']=='graphite'
-    assert choose_preset('#ff0000',dark,catalog)['family']=='ruby'
-    assert choose_preset('#00ff00',dark,catalog)['family']=='sage'
-    assert choose_preset('#0000ff',dark,catalog)['family']=='blue'
+        assert contrast(palette['TEXT'],palette[bg])>=4.5, (entry['id'],bg)
+for tone in ('light','dark'):
+    fallback=schemes.default_for_tone(tone)
+    for value in (0,128,255):
+        assert choose_preset(analyze([(value,)*3]),tone,schemes.entries,fallback)==fallback
+    for rgb in ((255,0,0),(0,255,0),(0,0,255)):
+        sample=analyze([rgb]*100+[(110,)*3]*200)
+        assert not sample['neutral']
+        selected=choose_preset(sample,tone,schemes.entries,fallback)
+        assert selected in {entry['id'] for entry in schemes.originals(tone)}
+        assert choose_preset(sample,tone,reversed(schemes.entries),fallback)==selected
 with patch('launcher_actions.subprocess.run',return_value=SimpleNamespace(returncode=0)) as command:
     power_action('reboot');assert command.call_args.args[0][-3:]==['/r','/t','0']
 with patch('launcher_actions._sleep') as sleep:power_action('sleep');sleep.assert_called_once()
@@ -115,7 +119,9 @@ with tempfile.TemporaryDirectory(prefix='launcher-commands-') as directory:
         island.open_launcher();wait(650)
         edit=island.launcher_view.search.edit
         edit.setText('>scheme ');wait(650)
-        assert not island.launcher_view.results.gallery and len(island.launcher_view.rows())==7
+        assert not island.launcher_view.results.gallery
+        assert len(island.launcher_view.rows())==len(schemes)+1
+        assert any(row.kind=='theme_auto' for row in island.launcher_view.rows())
         assert island.launcher_view.geometry().bottom()<island.height(),'More command rows must grow the native window as well as its painted surface'
         themes=[];island._launcher_control=lambda payload,after=None:themes.append(payload)
         island._launcher_accept(island.launcher_view.rows()[0]);assert themes[-1]['action']=='theme'

@@ -139,13 +139,69 @@ class BarManager(QObject):
 
     @pyqtSlot()
     def on_styles_modified(self):
+        self.apply_stylesheet()
+
+    def apply_stylesheet(self):
+        from PyQt6.QtCore import QTimer
+        from PyQt6.QtWidgets import QWidget
+        from core.utils.qobject import is_valid_qobject
+        from core.utils.utilities import refresh_widget_style
+        from core.widgets.yasb.control_center import ControlCenterWidget
+
         stylesheet = get_stylesheet(show_error_dialog=True)
-        if stylesheet and (stylesheet != self.stylesheet):
-            self.stylesheet, new_rules = extract_rules(stylesheet)
-            GlobalState.set_stylesheet(self.stylesheet)
+        if not stylesheet:
+            return False
+        if stylesheet == getattr(self, "_applied_stylesheet_source", self.stylesheet):
+            return True
+
+        new_sheet, new_rules = extract_rules(stylesheet)
+        visible_panels = []
+        for bar in self.bars:
+            for control_center in bar.findChildren(ControlCenterWidget):
+                dialog = control_center.dialog
+                if dialog is None or not is_valid_qobject(dialog):
+                    continue
+                if dialog.isVisible():
+                    visible_panels.append(dialog)
+                else:
+                    # A cached native popup should not carry old paint data into its next show.
+                    control_center.dialog = None
+                    control_center._section_widgets.clear()
+                    dialog.deleteLater()
+
+        paused_panels = [panel for panel in visible_panels if panel.updatesEnabled()]
+        for panel in paused_panels:
+            panel.setUpdatesEnabled(False)
+        try:
+            GlobalState.set_stylesheet(new_sheet)
             self.animation_engine.reload_rules(new_rules)
+            self.stylesheet = None
             for bar in self.bars:
-                bar.setStyleSheet(self.stylesheet)
+                bar.setStyleSheet(new_sheet)
+            self.stylesheet = new_sheet
+            for panel in visible_panels:
+                refresh_widget_style(panel, *panel.findChildren(QWidget))
+        finally:
+            for panel in paused_panels:
+                panel.setUpdatesEnabled(True)
+
+        self._applied_stylesheet_source = stylesheet
+        QTimer.singleShot(60, self._reevaluate_transitions)
+        return True
+
+    def _reevaluate_transitions(self):
+        """Snap engine-controlled styles to the new rules after Qt polishes the bars."""
+        from PyQt6.QtWidgets import QApplication
+        from qt_css_engine.engine.evaluation import EvaluationCause
+
+        engine = self.animation_engine
+        for widget in QApplication.allWidgets():
+            try:
+                if engine.should_evaluate(widget):
+                    engine.evaluate_widget_state(widget, EvaluationCause.RULE_RELOAD)
+            except RuntimeError:
+                # A popup can be deleted while the style of a parent is being refreshed.
+                continue
 
     @pyqtSlot()
     def on_config_modified(self):

@@ -26,11 +26,11 @@ class LauncherMixin:
         self.launcher_phase=(0.,0.);self.launcher_phase_origin=(1.,1.);self.launcher_origin_image=None
         self.wallpapers=Wallpapers(root);self.wallpapers.changed.connect(self._launcher_wallpapers_changed)
         self.launcher_confirmation=None;self.launcher_sequence=0;self.launcher_last_error='';self.launcher_palettes={};self.launcher_busy=False
-        for name in ('light','dark','catppuccin','everforest','red-white','red-black','wallpaper'):
-            try:
-                data=json.loads((Path(root).parent/'theme-profiles'/name/'palette.json').read_text(encoding='utf-8'))
-                self.launcher_palettes[name]=(data['BASE'],data['MAUVE'])
-            except (OSError,ValueError,KeyError):pass
+        try:
+            from theme_catalog import load_catalog
+            self.theme_catalog=load_catalog(Path(root).parent)
+            for entry in self.theme_catalog:self.launcher_palettes[entry['id']]=(entry['swatch']['surface'],entry['swatch']['accent'])
+        except (OSError,ValueError):self.theme_catalog=None
         self.catalog=Catalog(root);self.launcher_view=LauncherView(self,self.catalog)
         self.catalog.changed.connect(self._launcher_catalog)
         self.launcher_view.query_changed.connect(self._launcher_query)
@@ -67,13 +67,12 @@ class LauncherMixin:
         self.catalog.accept(apps)
         if self.launcher_active:self._launcher_query(self.launcher_view.search.edit.text(),preserve=True)
     def _launcher_query(self,text,preserve=False):
-        if palette.THEME=='wallpaper':self.launcher_palettes['wallpaper']=(palette.BASE,palette.MAUVE)
         self.launcher_sequence+=1;self.launcher_confirmation=None
         command=text.strip().split(' ',1)[0].casefold()
         if command in ('>wallpaper','>wallpapers','>background','>random'):self.wallpapers.ensure()
         favorite=self.launcher_options.get('wallpaper_favorites_only',True)
         self.launcher_view.set_wallpaper_mode(command in ('>wallpaper','>wallpapers','>background'),favorite,self.wallpapers.favorite_error)
-        context=dict(theme=palette.THEME,palettes=self.launcher_palettes,wallpapers=self.wallpapers.visible_items(favorite),wallpaper_favorites_only=favorite,wallpaper_error=self.wallpapers.favorite_error,
+        context=dict(theme=palette.THEME,palettes=self.launcher_palettes,schemes=tuple(self.theme_catalog) if self.theme_catalog else (),wallpaper_auto=self.launcher_options.get('wallpaper_auto_theme',True) is True,wallpapers=self.wallpapers.visible_items(favorite),wallpaper_favorites_only=favorite,wallpaper_error=self.wallpapers.favorite_error,
                      wallpaper_loading=self.wallpapers.loading,wallpaper=self.wallpapers.current,
                      dangerous_actions=self.launcher_options.get('dangerous_actions') is True)
         rows=query(text,self.catalog.apps,self.catalog.history,context)
@@ -238,7 +237,7 @@ class LauncherMixin:
         self.launcher_view.set_results([Result('error',message,'Hãy thử tìm lại hoặc chọn một mục khác','hint','', 'search')])
     def _launcher_accept(self,result):
         try:
-            if self.launcher_busy and result.kind in ('theme','power','power_confirm','wallpaper','random','wallpaper_folder'):return
+            if self.launcher_busy and result.kind in ('theme','theme_auto','power','power_confirm','wallpaper','random','wallpaper_folder'):return
             if self._launcher_command_result(result):return
             if result.kind=='complete':
                 self.launcher_view.search.edit.setText(result.value);self.launcher_view.search.edit.setFocus();return
@@ -301,6 +300,9 @@ class LauncherMixin:
         if result.kind=='theme':
             if result.value not in self.launcher_palettes:raise ValueError('Bảng màu không hợp lệ.')
             self._launcher_control(dict(action='theme',name=result.value));return True
+        if result.kind=='theme_auto':
+            # Distinct from picking a preset: only turns matching on; the controller starts a fresh match.
+            self._launcher_control(dict(action='theme_auto'));return True
         if result.kind in ('power','power_confirm','power_cancel'):
             if result.kind=='power_cancel':self._launcher_query(self.launcher_view.search.edit.text());return True
             action=result.value

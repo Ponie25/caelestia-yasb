@@ -50,7 +50,8 @@ def normalize_palette(palette):
 
 def effective_palette(root,profile):
     root=Path(root)
-    palette=json.loads((root/'theme-profiles'/profile/'palette.json').read_text(encoding='utf-8'))
+    from theme_catalog import load_catalog
+    palette=json.loads((load_catalog(root).profile_dir(profile)/'palette.json').read_text(encoding='utf-8'))
     try:
         custom=json.loads((root/'bar-settings.json').read_text(encoding='utf-8')).get('palette',{})
         palette.update({key:value for key,value in custom.items() if key in palette})

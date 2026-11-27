@@ -21,7 +21,7 @@
     "background_opacity2": 0.72,
     "gradient_direction": "vertical",
     "foreground": "auto",
-    "text_color": "#1c1f28",
+    "text_color": "#000000",
     "border_color_source": "theme",
     "border_opacity": 0.5,
     "border_width": 1.0,
@@ -38,7 +38,7 @@
     "dangerous_actions": false,
     "wallpaper_directory": "",
     "wallpaper_favorites_only": true,
-    "wallpaper_auto_theme": true,
+    "wallpaper_auto_theme": false,
     "wallpaper_theme_mode": "current"
   },
   "island": {

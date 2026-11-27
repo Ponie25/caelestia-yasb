@@ -10,7 +10,7 @@ Left/Right remain ordinary text-editing keys, including in the wallpaper carouse
 | Input | Result |
 | --- | --- |
 | `>calc sqrt(144)` | Calculate and press Enter to copy the result. Existing percentages and unit conversions remain available. |
-| `>scheme` | Choose one of six manual themes or automatic matching to designed presets, with palette swatches and the current selection marked. Add a name, for example `>scheme cat`, to filter. |
+| `>scheme` | Choose any of 35 themes or enable wallpaper matching. Use a name such as `>scheme cat` to filter. Swatches mark the current theme. |
 | `>light`, `>dark` | Apply the Light or Dark preset. |
 | `>wallpaper` | Browse installed Wallpaper Engine favorites by default. Switch to All for your image folder and the full local library. Add part of the title to filter. |
 | `>wallpaper all`, `>wallpaper favorites` | Switch between the full library and Wallpaper Engine favorites. |
@@ -97,41 +97,17 @@ continuous wallpaper scan or new idle polling timer.
 
 ### Automatic selection of designed presets
 
-This is enabled by default, with **Giữ sáng/tối đang dùng** as its tone. Settings
-also offers **Luôn sáng** and **Luôn tối**, and can disable automatic matching.
-The source is the current static picture or Wallpaper Engine project's local
-preview. Its dominant hue selects an existing preset; neutral images select
-Graphite. The active slot is **Tự chọn preset** / `wallpaper`. Bar surfaces,
-Island, menus and configured Komorebi borders share it. A transparent bar's ink
-also samples that preview rather than the hidden Windows bitmap underneath an
-animated wallpaper.
+Enable **Tự chọn theo hình nền** in `>scheme` or Settings. Settings offers
+**Giữ sáng/tối đang dùng**, **Luôn sáng** and **Luôn tối**. The matcher uses the
+static image or a local Wallpaper Engine preview and scores its color regions
+against the 29 Caelestia presets of compatible tone. Neutral images use
+Caelestia Default in that tone. The bar, Island, menus and configured Komorebi
+borders share the selected profile. [Theme catalog](../config/theme-catalog/manifest.json).
 
-There are **18 fixed presets**, covering Lavender, Rose, Ruby, Amber, Sage, Teal,
-Cyan, Blue and Graphite in light and dark. Their full role colors and CSS are
-prepared, contrast-reviewed and checked in under `config/wallpaper-presets/`.
-The matcher selects a compatible tone and the closest hue family, then copies
-the exact preset files into the active slot. It never interpolates palette colors
-or creates a palette from pixels. The same image/tone yields the same preset.
-
-The extractor scores populous chromatic regions without changing the theme on
-every animation frame. Preview decoding samples
-up to 64×64 pixels, with a 24-megapixel source limit. The existing three-second
-bar timer detects identity/mtime changes; expensive decoding only runs when the
-source or tone changes. The pipeline never captures the desktop.
-
-Automatic updates wait while Settings has unsaved edits. Clean open Settings
-rebases to the selected preset; pending advanced drafts are not overwritten.
-The color source and favorite cache are local ignored state files. The checked-in
-`theme-profiles/wallpaper` fallback is an exact copy of Lavender Dark.
-
-Settings shows the selected preset's name. A manual theme disables matching;
-automatic changes retain existing layout, opacity, motion and Liquid Glass.
-`tools/build_wallpaper_presets.py` is a developer-only builder from explicit
-role tables, with an offline contrast pass. Runtime code has no palette generator.
-`tools/render_wallpaper_presets.py` renders the reference board from those exact
-files without capturing the desktop.
-
-![All eighteen fixed presets](screenshots/wallpaper-presets.png)
+Settings shows the selected preset's name. Automatic matching waits for
+advanced drafts to be saved or discarded and retains opacity, layout, motion
+and Liquid Glass. Picking a theme by hand turns matching off. The color
+source and favorite cache are kept in local state files.
 
 ## Session actions
 
@@ -154,8 +130,7 @@ inspired by its
 [WallpaperList](https://github.com/caelestia-dots/shell/blob/5cbf60e7c6dbdd2b94faa5444435b8d9cac7bd46/modules/launcher/WallpaperList.qml).
 The search surface keeps this project's shared Island material and morph.
 
-Windows adaptations are explicit: Scheme selects this setup's six fixed presets
-or automatic matching to 18 designed presets; Sleep uses Windows sleep,
+Scheme chooses from 35 themes or enables wallpaper matching. Sleep uses Windows sleep,
 rather than Linux suspend-then-hibernate. Caelestia's Material 3 **Variant**
 command is not exposed because this project does not implement that generator.
 `>bar` opens shell Settings while the existing `>settings` keeps opening Windows

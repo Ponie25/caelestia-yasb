@@ -14,10 +14,10 @@ THEME = 'catppuccin'
 
 def load_theme(name):
     global THEME
-    if name not in ('light', 'dark', 'catppuccin', 'everforest', 'red-white', 'red-black','wallpaper'):
-        return False
     try:
-        data = json.loads((ROOT / 'theme-profiles' / name / 'palette.json').read_text(encoding='utf-8'))
+        # Only manifest IDs reach a path; unknown and legacy values are rejected.
+        from theme_catalog import load_catalog
+        data = json.loads((load_catalog(ROOT).profile_dir(name) / 'palette.json').read_text(encoding='utf-8'))
         if not all(isinstance(data.get(key), str) and len(data[key]) == 7
                    and data[key][0] == '#' and int(data[key][1:], 16) >= 0 for key in NAMES):
             return False

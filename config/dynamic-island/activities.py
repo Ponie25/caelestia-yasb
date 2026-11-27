@@ -128,6 +128,7 @@ class NotificationReceiver(QObject):
 
     def __init__(self, root):
         super().__init__()
+        self.config_root = root.parent
         self.server = QLocalServer(self)
         self.server.setSocketOptions(QLocalServer.SocketOption.UserAccessOption)
         self.server.newConnection.connect(self._connect)
@@ -180,7 +181,8 @@ class NotificationReceiver(QObject):
                     self.settings_changed.emit()
                 elif message.get('kind') == 'theme':
                     name = message.get('name')
-                    if name in ('light', 'dark', 'catppuccin', 'everforest', 'red-white', 'red-black','wallpaper'):
+                    from theme_catalog import is_known
+                    if isinstance(name, str) and is_known(self.config_root, name):
                         self.theme_changed.emit(name)
                 elif message.get('kind') == 'snapshot':
                     self._snapshot(message.get('items'))
