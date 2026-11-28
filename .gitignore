@@ -19,6 +19,7 @@ config/initial-settings-backup.json
 config/komorebi-runtime.json
 config/komorebi-original-colors.json
 config/reopen-bar-settings.json
+config/settings-window-reopen.json
 *.obj
 *.exp
 *.lib

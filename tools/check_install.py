@@ -91,12 +91,17 @@ wallpaper_directory=str(root.parent/'Pictures')
 assert entry._dispatch({'action':'wallpaper_directory','path':wallpaper_directory})
 updated=load_preferences(root);assert updated['launcher']['wallpaper_directory']==wallpaper_directory
 assert updated['launcher']['dangerous_actions'] is False
-old_text=dialog.controls[('launcher','wallpaper_directory')][0].text()
-dialog._advanced_preferences_pending=True;before=(root/'bar-settings.json').read_bytes()
-assert not entry._dispatch({'action':'wallpaper_directory','path':str(root.parent/'Other')})
-assert dialog.controls[('launcher','wallpaper_directory')][0].text()==old_text
-assert (root/'bar-settings.json').read_bytes()==before
-dialog._advanced_preferences_pending=False
+draft='{"appearance":'
+dialog.raw_preferences.setPlainText(draft)
+dialog.raw_preferences.document().setModified(True)
+other_directory=str(root.parent/'Other')
+assert entry._dispatch({'action':'wallpaper_directory','path':other_directory})
+assert load_preferences(root)['launcher']['wallpaper_directory']==other_directory
+assert dialog.raw_preferences.toPlainText()==draft
+assert dialog.raw_preferences.document().isModified()
+dialog.raw_preferences.setPlainText(json.dumps(load_preferences(root),ensure_ascii=False,indent=2))
+dialog.raw_preferences.document().setModified(False)
+assert entry._dispatch({'action':'wallpaper_directory','path':wallpaper_directory})
 for value in ('relative/path',42,'bad\npath'):
     try:entry._dispatch({'action':'wallpaper_directory','path':value})
     except (ValueError,TypeError):pass

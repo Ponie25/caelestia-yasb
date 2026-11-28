@@ -358,10 +358,10 @@ class SettingsRow(QWidget):
         return max(64, 32 + content)
 
     def sizeHint(self):
-        return QSize(600, self.heightForWidth(max(480, self.width())))
+        return QSize(600, self.heightForWidth(max(40, self.width())))
 
     def minimumSizeHint(self):
-        return QSize(0, 64)
+        return QSize(0, self.heightForWidth(max(40, self.width())))
 
     def resizeEvent(self, event):
         self._set_stacked(event.size().width() < 480)

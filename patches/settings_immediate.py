@@ -55,6 +55,9 @@ class ImmediateSettingsMixin:
         self.nav.currentRowChanged.connect(self._immediate_navigation)
         self._immediate_ready = True
         self._refresh_draft_state()
+        from core.utils.settings_experience import install_settings_experience
+
+        install_settings_experience(self)
 
     def _refresh_draft_state(self,preserve_status=False):
         super()._refresh_draft_state(preserve_status=preserve_status)
@@ -89,7 +92,6 @@ class ImmediateSettingsMixin:
     def _queue_immediate_preferences(self, *_):
         if not getattr(self, '_immediate_ready', False):return
         if self._immediate_busy or self._immediate_loading or self._committing:return
-        if self._advanced_preferences_pending or self.raw_preferences.document().isModified():return
         if getattr(self, '_active_page', self.nav.currentRow()) == 7:return
         self._immediate_pending = True
         self._immediate_timer.start()
@@ -164,7 +166,6 @@ class ImmediateSettingsMixin:
         if not getattr(self, '_immediate_ready', False):return True
         self._immediate_timer.stop()
         if self._immediate_busy or self._immediate_loading or self._committing:return False
-        if self._advanced_preferences_pending or self.raw_preferences.document().isModified():return False
         if self.nav.currentRow() == 7 and not allow_advanced:return False
         if any(getattr(control, 'slider', None) is not None and control.slider.isSliderDown()
                for control, _kind in self.controls.values()):
@@ -193,24 +194,37 @@ class ImmediateSettingsMixin:
                 atomic_write(self.root/'bar-settings.json', json.dumps(preferences, ensure_ascii=False, indent=2)+'\n')
                 if not self.controller.select(theme):raise RuntimeError('Không áp dụng được tùy chọn. Cấu hình cũ đã được khôi phục.')
                 self.controller.reload_preferences()
-            except Exception:
-                self._immediate_rollback(previous, previous_theme, theme)
+            except Exception as original:
+                failed = self._immediate_rollback(previous, previous_theme, theme)
+                if failed:
+                    raise RuntimeError('Không khôi phục hoàn toàn cấu hình cũ (' + ', '.join(failed) + ').') from original
                 raise
             self.preferences = deepcopy(preferences)
-            self._immediate_rebase_preferences(preferences, theme)
-            if not self.raw_preferences.document().isModified():
-                self.raw_preferences.setPlainText(json.dumps(preferences, ensure_ascii=False, indent=2))
-                self.raw_preferences.document().setModified(False)
+            try:
+                self._immediate_rebase_preferences(preferences, theme)
+            except Exception:
+                logging.error('Settings baseline refresh after a committed save failed', exc_info=True)
+                self.status.setText('Đã lưu. Mở lại Settings để tải trạng thái vừa lưu.')
+                return True
             self._immediate_pending = False
-            self._refresh_draft_state(preserve_status=True)
-            if not prior_status.startswith('Chưa lưu:') or prior_status == self._immediate_own_error:
-                self.status.setToolTip('')
-                self.status.setText('Đã lưu tùy chọn. Các thay đổi nâng cao vẫn chưa áp dụng.' if self._draft_dirty
-                                    else 'Đã lưu và áp dụng.')
-            self._immediate_own_error = None
-            if hasattr(self, '_refresh_material_status'):self._refresh_material_status()
-            if hasattr(self, '_refresh_backups'):self._refresh_backups()
-            self._refresh_draft_state(preserve_status=True)
+            try:
+                if not self.raw_preferences.document().isModified():
+                    self.raw_preferences.setPlainText(json.dumps(preferences, ensure_ascii=False, indent=2))
+                    self.raw_preferences.document().setModified(False)
+                self._refresh_draft_state(preserve_status=True)
+                code_error = prior_status.removeprefix('Đã lưu tùy chọn. Mã còn lỗi. ')
+                if self._draft_dirty and code_error.startswith('Chưa lưu: Nội dung chưa hợp lệ'):
+                    self.status.setText('Đã lưu tùy chọn. Mã còn lỗi. ' + code_error)
+                elif not prior_status.startswith('Chưa lưu:') or prior_status == self._immediate_own_error:
+                    self.status.setToolTip('')
+                    self.status.setText('Đã lưu. Phần chỉnh bằng mã vẫn đang chờ.' if self._draft_dirty
+                                        else 'Đã lưu và áp dụng.')
+                self._immediate_own_error = None
+                self._refresh_material_status()
+                self._refresh_backups()
+                self._refresh_draft_state(preserve_status=True)
+            except Exception:
+                logging.warning('Settings feedback after a committed save failed', exc_info=True)
             return True
         except Exception as error:
             self._immediate_report_error(error)
@@ -235,6 +249,16 @@ class ImmediateSettingsMixin:
 
     def _request_close(self):
         self._flush_immediate_preferences()
+        experience = getattr(self, '_settings_experience', None)
+        if experience is not None:
+            experience.flush_draft()
+            if self._committing:
+                # The structural update is already scheduled. Close without reopening Settings.
+                for name in ('reopen-bar-settings.json', 'settings-window-reopen.json'):
+                    try:
+                        (self.root / name).unlink(missing_ok=True)
+                    except OSError:
+                        logging.debug('Could not remove Settings reopen state', exc_info=True)
         return super()._request_close()
 
     def reject(self):

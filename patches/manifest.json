@@ -71,7 +71,7 @@
   "core/utils/settings_immediate.pyc": {
     "source": "settings_immediate.py",
     "upstream_sha256": null,
-    "precompiled_sha256": "e5929e95a7e1fc94981b09fd08388bd8735c91562f73bca33a9559738142b693"
+    "precompiled_sha256": "e4b068ce091d393f184026b81433f163776f6cbd9dc44fe8dfd96b51ff8b1317"
   },
   "core/utils/settings_window.pyc": {
     "source": "settings_window.py",
@@ -103,5 +103,9 @@
   "core/widgets/komorebi/control.pyc": {
     "source": "komorebi_control.py",
     "upstream_sha256": "d39fffa21143247d49e52a2ca76771863f0425dc899f520f52f8ad586f8cb628"
+  },
+  "core/utils/settings_experience.pyc": {
+    "source": "settings_experience.py",
+    "upstream_sha256": null
   }
 }
